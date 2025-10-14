@@ -5,8 +5,6 @@ execute:
   echo: false
   warning: false
   message: false
-type: website
-output-dir: docs
 ---
 
 
