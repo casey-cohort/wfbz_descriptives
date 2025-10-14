@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data/raw/
+.vscode
+rsconnect/
+*cache
+report_files
+/.quarto/
