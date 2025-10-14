@@ -1,5 +1,13 @@
 project:
-  title: "wfbz_viz"
+  type: website
+  render:
+    - report.qmd
+website:
+  title: "WFBZ Descriptives"
 
-
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
 
