@@ -1,3 +1,3 @@
-# wfbz_viz
+# WFBZ Descriptives
 
-visuals for wfbz comparison
+See: https://lpiep.github.io/wfbz_descriptives/

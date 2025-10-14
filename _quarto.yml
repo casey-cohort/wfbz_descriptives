@@ -5,7 +5,7 @@ project:
     - report.qmd
 website:
   title: "WFBZ Descriptives"
-
+  site-path: "wfbz_descriptives/"
 format:
   html:
     theme: cosmo
