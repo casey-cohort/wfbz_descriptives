@@ -246,24 +246,35 @@ plotme <- function(dat, var, rel = FALSE, unit = NA, stack = TRUE){
 wfbz %>%
   st_drop_geometry() %>%
   mutate(usfs_region = wfbz_region) %>%
-  bind_rows(`All` = ., `Community-Impacting` = filter(.,wildfire_community_intersect), .id = 'agg') %>%
-  group_by(agg) %>% mutate(N = n()) %>%
+  bind_rows(`All Fires` = ., `Community-Impacting Fires` = filter(.,wildfire_community_intersect), .id = 'agg') %>%
   bind_rows(., mutate(., usfs_region = 'Nationwide')) %>%
+  group_by(agg) %>%
+	mutate(N = n()/2) %>%
   group_by(agg, usfs_region, N) %>%
   summarize(
-    n = n(),
-    wui_interface = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
-    wui_intermix = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
-    wui_interface_intermix = sum(str_detect(wildfire_wui, 'interface') & str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
-    wui_missing = 0,
-    ignition_date_missing = sum(is.na(wildfire_ignition_date)),
-    containment_date_missing = sum(is.na(wildfire_containment_date_max)),
-    civil_fatalities_missing = sum(is.na(wildfire_civil_fatalities)),
-    civil_evacs_missing = sum(is.na(wildfire_civil_evacuation)),
-    struct_destroyed_missing = sum(is.na(wildfire_struct_destroyed))
+    `Count` = n(),
+    `WUI Interface Fires` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
+    `WUI Intermix Fires` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
+    `WUI Any Fires` = sum(str_detect(wildfire_wui, 'interface') & str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
+    `Missing WUI` = 0,
+    `Missing Ignition Date` = sum(is.na(wildfire_ignition_date)),
+    `Missing Containment Date` = sum(is.na(wildfire_containment_date_max)),
+    `Missing Civilian Fatalities` = sum(is.na(wildfire_civil_fatalities)),
+    `Missing Evacuations` = sum(is.na(wildfire_civil_evacuation)),
+    `Missing Structures Destroyed` = sum(is.na(wildfire_struct_destroyed)),
+		.groups = 'drop'
   ) %>%
-  pivot_wider(names_from = agg, values_from = c(-agg, -usfs_region, -N)) %>%
-  gt()
+	pivot_longer(c(-agg, -usfs_region, -N)) %>%
+	mutate(value = glue('{format(value)} ({format(100 * value / N, digits = 1)}%)')) %>%
+	select(-N) %>%
+  pivot_wider(names_from = c(usfs_region), values_from = c(value)) %>%
+	select(order(colnames(.))) %>%
+	relocate(Nationwide) %>%
+	relocate(name) %>%
+	rename(` ` = name) %>%
+  gt(groupname_col = 'agg') %>%
+	tab_options(table.width = px(1800))
+
 ```
 
 ## Variables over Time
