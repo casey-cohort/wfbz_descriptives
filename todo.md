@@ -34,11 +34,20 @@
 - [ ] Keep figure for reference, plan to write summary sentence
 
 ### Ignition Dates of Disaster Fires by Year
-- [ ] Remove outline of boxes
-- [ ] Make whiskers thinner
-- [ ] Remove vertical space between boxes (blend them together)
-- [ ] Remove uncertainty band around loess/line of best fit
-- [ ] Order by median start date in 2000
-- [ ] Change median line in boxes to a dot
+- [x] Remove outline of boxes
+- [x] Make whiskers thinner
+- [x] Remove vertical space between boxes (blend them together)
+- [x] Remove uncertainty band around loess/line of best fit
+- [x] Order by median start date in 2000
+- [x] Change median line in boxes to a dot
 - [ ] After above fixes: Try geofaceting by state (color state plots by region)
-- [ ] Remove x-axis label
+- [x] Remove x-axis label
+
+#### After meeting
+
+- [x] percents in table are wrogn
+- [x] fatalities per 100k seem wrong in table
+- [ ] 2011 and 2012 seem to be missing from fatalities over time (missingness the problem???)
+- [x] find average acrage of a disaster fire by region instead of this tihng about total area
+- [x] remove "new" wui impacting plots
+- [x] remove "all" columns from wui plots -- make it not just one column

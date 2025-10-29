@@ -183,6 +183,7 @@ wfbz_crit <- wfbz %>%
     `WUI-Interface Percent` = 100 *
       sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE) /
       n(),
+   `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
     .groups = 'drop'
   )
 
@@ -212,6 +213,7 @@ wfbz_crit_all <- wfbz %>%
     `WUI-Interface Percent` = 100 *
       sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE) /
       n(),
+    `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
     .groups = 'drop'
   )
 
@@ -264,6 +266,8 @@ plotme <- function(
 
   # Assign colors to regions consistently
   region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
+  region_colors[region_colors == '#dddddd'] <- '#757575' # lil darker
+
   attr(region_colors, "missing") <- NA
   names(region_colors) <- sort(region_label)
 
@@ -272,6 +276,7 @@ plotme <- function(
     levels = region_order,
     labels = region_label
   )
+
 
   # Summarize and Plot
   if (!stack) {
@@ -408,30 +413,32 @@ plotme <- function(
 ## Summary Statistics
 
 ```{r}
-wfbz %>%
+wfbz_by_region_agg <- wfbz %>%
   st_drop_geometry() %>%
   mutate(
     usfs_region = wfbz_region,
     usfs_region_area = wfbz_region_area,
     usfs_region_pop = wfbz_region_pop
-  ) %>%
+  )
+wfbz_by_region_agg <-
   bind_rows(
-    `All Fires` = .,
-    `Community-Impacting Fires` = filter(., wildfire_community_intersect),
+    `All Fires` = wfbz_by_region_agg,
+    `Community-Impacting Fires` = filter(wfbz_by_region_agg, wildfire_community_intersect),
     .id = 'agg'
-  ) %>%
+  )
+wfbz_by_region_agg <-
   bind_rows(
-    .,
+    wfbz_by_region_agg,
     mutate(
-      .,
+      wfbz_by_region_agg,
       usfs_region = 'Nationwide',
-      usfs_region_area = sum(regions$usfs_region_area),
-      usfs_region_pop = sum(as.numeric(st_area(regions)) / 1000 / 1000)
+      usfs_region_area = sum(as.numeric(st_area(regions)) / 1000 / 1000),
+      usfs_region_pop = sum(regions$usfs_region_pop)
     )
-  ) %>%
-  group_by(agg) %>%
-  mutate(N = n() / 2) %>%
-  group_by(agg, usfs_region, N) %>%
+  )
+
+wfbz_by_region_agg %>%
+  group_by(agg, usfs_region, usfs_region_area, usfs_region_pop) %>%
   summarize(
     `Count` = n(),
     `WUI Interface Fires` = sum(
@@ -454,19 +461,20 @@ wfbz %>%
     `Missing Evacuations` = sum(is.na(wildfire_civil_evacuation)),
     `Missing Structures Destroyed` = sum(is.na(wildfire_struct_destroyed)),
     `Fatalities per 100K` = 100000 *
-      sum(wildfire_max_civil_fatalities / usfs_region_pop, na.rm = TRUE),
-    `Burned Area Percent` = 100 *
-      sum(wildfire_area / usfs_region_area, na.rm = TRUE),
+      sum(wildfire_max_civil_fatalities, na.rm = TRUE) / first(usfs_region_pop),
+    `Mean Fire Size (km^2)` = mean(wildfire_area, na.rm = TRUE),
+    #`Burned Area Percent` = 100 *
+     # sum(wildfire_area, na.rm = TRUE) / first(usfs_region_area),
+    N = n(),
     .groups = 'drop'
   ) %>%
+  select(-usfs_region_area, -usfs_region_pop) %>%
   pivot_longer(c(-agg, -usfs_region, -N)) %>%
   mutate(
-    value = if_else(
-      name %in% c('Fatalities per 100K', 'Burned Area Percent'),
-      format(value, digits = 1),
-      glue(
-        '{round(value)} ({format(100 * value / N, digits = 1, nsmall = 1)}%)'
-      )
+    value = case_when(
+      name == 'Fatalities per 100K' ~ glue('{format(value, digits = 2)}'),
+      name == 'Mean Fire Size (km^2)' ~ glue('{format(value, digits = 2)}'),
+      TRUE ~ glue('{round(value)} ({format(round(100 * value / N, 2), nsmall = 2)}%)')
     )
   ) %>%
   select(-N) %>%
@@ -745,59 +753,42 @@ plotme(wfbz_crit, 'FEMA Declaration', rel = FALSE) +
   plot_layout(ncol = 2, heights = c(5, 1, 5))
 ```
 
+### Average Fire Size over Time
+
+```{r, fig.height = 4, fig.width = 12}
+(plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'sq. km') +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0)),
+    labels = scales::scientific
+  ) +
+  ggtitle('Community-Impacting\nDisasters')) +
+  (plotme(wfbz_crit_all, 'Mean Fire Size', rel = FALSE, unit = 'sq. km') +
+    #scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::scientific) +
+    ggtitle('All Disasters')) +
+  plot_layout(ncol = 2)
+```
+
+
 ## Share of WUI Fires over Time
 
 ### Share of Fires in Wildland-Urban Interface over Time
-
-#### New
-
-```{r}
-(plotme(wfbz_crit, 'WUI-Interface Percent', line = TRUE) +
-  ggtitle('Community-Impacting\nDisasters')) +
-  plot_spacer() +
-  (plotme(wfbz_crit_all, 'WUI-Interface Percent', line = TRUE) +
-    ggtitle('All Disasters') +
-    ylab('')) +
-  plot_layout(ncol = 1)
-```
-
-#### Old
 
 ```{r, fig.height = 16, fig.width = 12}
 plot_spacer() +
   (plotme(wfbz_crit, 'WUI-Interface Percent', stack = FALSE) +
     ggtitle('Community-Impacting\nDisasters')) +
-  (plotme(wfbz_crit_all, 'WUI-Interface Percent', stack = FALSE) +
-    ggtitle('All Disasters') +
-    ylab('')) +
-  plot_layout(ncol = 4) +
-  plot_spacer()
+  plot_spacer() +
+  plot_layout(ncol = 3)
 ```
 
 ### Share of Fires in Wildland-Urban Intermix over Time
 
-#### New
-
-```{r}
-(plotme(wfbz_crit, 'WUI-Intermix Percent', line = TRUE) +
-  ggtitle('Community-Impacting\nDisasters')) +
-  plot_spacer() +
-  (plotme(wfbz_crit_all, 'WUI-Intermix Percent', line = TRUE) +
-    ggtitle('All Disasters') +
-    ylab('')) +
-  plot_layout(ncol = 1)
-```
-
-#### Old
 ```{r, fig.height = 16, fig.width = 12}
 plot_spacer() +
   (plotme(wfbz_crit, 'WUI-Intermix Percent', stack = FALSE) +
     ggtitle('Community-Impacting\nDisasters')) +
-  (plotme(wfbz_crit_all, 'WUI-Intermix Percent', stack = FALSE) +
-    ggtitle('All Disasters') +
-    ylab('')) +
   plot_spacer() +
-  plot_layout(ncol = 4)
+  plot_layout(ncol = 3)
 ```
 
 ## Correlations
@@ -952,12 +943,36 @@ wfbz_lab %>% select(WUI, `FEMA Declaration`) %>%
 ## Fire Season Timing
 
 ```{r, fig.height = 18, fig.width = 6}
+
+# Determine order to plot in
+region_summary <- wfbz %>%
+  st_drop_geometry() %>%
+ 	mutate(usfs_region = wfbz_region) %>%
+  ungroup() %>%
+  filter(wildfire_year < 2003) %>%
+  group_by(usfs_region) %>%
+  summarize(medstart = yday(median(wildfire_ignition_date_max, na.rm = TRUE)), .groups = 'drop') %>%
+  arrange(medstart)
+
+region_order <- as.character(region_summary$usfs_region)
+region_label <- region_summary$usfs_region
+
+# Assign colors to regions consistently
 region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
+region_colors[region_colors == '#dddddd'] <- '#757575' # lil darker
+
 attr(region_colors, "missing") <- NA
-names(region_colors) <- sort(unique(regions$usfs_region))
+names(region_colors) <- region_label
 
 wfbz %>%
-	mutate(usfs_region = wfbz_region) %>%
+  mutate(usfs_region = wfbz_region) %>%
+	mutate(
+    usfs_region = factor(
+      wfbz_region,
+      levels = region_order,
+      labels = region_label
+    )
+  ) %>%
 	st_drop_geometry() %>%
 	filter(wildfire_community_intersect) %>%
 	filter(between(wildfire_year, 2000, 2024)) %>%
@@ -972,21 +987,44 @@ wfbz %>%
 		wildfire_fema_dec_date
 	) %>%
 	ggplot() +
+    # Two boxplots are layered to get a custom look -- whiskers belong to the bottom plot
 		geom_boxplot(
 			aes(x =  as.Date('2099-01-01') + yday(wildfire_ignition_date_max), group = wildfire_year, y = wildfire_year, fill = usfs_region),
 			orientation = 'y',
+      lwd = .1,
+      color = 'black',
 			outliers = FALSE
 		) +
+    # Top Boxplot
+		geom_boxplot(
+			aes(x =  as.Date('2099-01-01') + yday(wildfire_ignition_date_max), group = wildfire_year, y = wildfire_year, fill = usfs_region, color = usfs_region),
+      outlier.shape = NA, coef = 0, # hide all but the box body on top layer
+			orientation = 'y',
+			outliers = FALSE
+		) +
+    geom_point( # replace hidden median bar with a dot
+      aes(x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max), y = wildfire_year),
+      stat = 'summary',
+      fun = 'median',
+      orientation = 'y',
+      size = .25
+    ) +
 		geom_smooth(
 			aes(x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max), y = wildfire_year),
 			orientation = 'y',
 			method = 'lm',
 			linetype = 'longdash',
 			color = 'grey15',
-			fill = 'grey90',linewidth = .5
+			fill = 'grey90',
+      linewidth = .5,
+      se = FALSE
 		) +
 		facet_wrap(~usfs_region, ncol = 1, scales = 'free_x') +
 		scale_fill_manual(
+	  	values = region_colors,
+	  	guide = 'none'
+	  ) +
+    scale_color_manual(
 	  	values = region_colors,
 	  	guide = 'none'
 	  ) +
@@ -994,7 +1032,7 @@ wfbz %>%
 	  scale_x_date(date_breaks = "1 month", date_labels = "%b", limits = as.Date(c('2099-01-01', '2099-12-31')), expand = c(0,0)) +
 	  scale_y_continuous(transform = 'reverse') +
 	  ylab("Year") +
-	  xlab("Month of Year") +
+	  xlab("") + #xlab("Month of Year") +
 		ggtitle("Ignition Dates of Disaster Fires by Year") +
 	  theme(
 	  	panel.border = element_rect(color = "grey25", fill = NA, size = .25),
@@ -1037,27 +1075,3 @@ ggplot(regions_cart) +
     axis.text = element_blank()
   )
 ```
-
-### To Do
-
-Not Done:
-
-* Why is 2024 missing for fatalities?
-* DURATION
-   * Forest plot or similar chart Y axis is calendar months, x axis is year, faceted by region or state. Showing first and last states or actually density plot?
-* Spaghetti plot by state with percentage of residents affected by fires (Lauren to provide)
-* WUI Figures:
-  * Map of distance from wuis for whole US (Binned)
-  * plots showing how many fires fall in each bin over time
-* Add USFS region to data set (Separate out Hawaii from California. Rename Northern -> Northern Rockies) **done in plots, not in data set**
-
-Done:
-
-* Correlation plot of each of these variables (by region???) for ONLY community affected area
-* Add acreage, WUI, as plots
-* Show plots WITH non-community intersecting fires DONE
-* Label major fires in fatalities plot, structures plot DONE
-* Put community intersect side by side with overall
-* Align axis ticks with years better
-* Add share of total events that affect WUI
-
