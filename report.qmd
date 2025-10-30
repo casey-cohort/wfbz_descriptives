@@ -923,12 +923,15 @@ p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & 
 
 ```{r, fig.height = 4, fig.width = 4}
 
-wfbz_lab %>% select(WUI, `FEMA Declaration`) %>%
-	table(useNA = 'ifany') %>%
-	as_tibble() %>%
+wfbz_lab %>%
+  group_by(WUI = str_to_title(WUI), `FEMA Declaration`, .drop = FALSE) %>%
+  summarize(
+    n = n(),
+    lab = paste0(format(n, big.mark = ','), ' (', format(100*n()/nrow(wfbz_lab), digits = 2), '%)')
+  ) %>%
 	ggplot() +
 	geom_tile(aes(x = WUI, y = `FEMA Declaration`, fill = n)) +
-	geom_text(aes(x = WUI, y = `FEMA Declaration`, label = n, color = n)) +
+	geom_text(aes(x = WUI, y = `FEMA Declaration`, label = lab, color = n)) +
 	khroma::scale_fill_lapaz(name = '# Wildfire\nDisasters') +
 	khroma::scale_color_lapaz(reverse = TRUE, guide = 'none') +
 	theme(
