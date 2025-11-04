@@ -30,8 +30,8 @@
 - [X] Flip FEMA declaration order (TRUE first) so gradient matches in top and bottom panels
 
 ### Categorical Values Compared Heat Plot
-- [ ] Add column percentages to cells (format: n=119 (33%))
-- [ ] Keep figure for reference, plan to write summary sentence
+- [X] Add column percentages to cells (format: n=119 (33%))
+- [X] Keep figure for reference, plan to write summary sentence
 
 ### Ignition Dates of Disaster Fires by Year
 - [x] Remove outline of boxes
@@ -51,3 +51,18 @@
 - [x] find average acrage of a disaster fire by region instead of this tihng about total area
 - [x] remove "new" wui impacting plots
 - [x] remove "all" columns from wui plots -- make it not just one column
+
+### Next Meeting
+
+- [x] move missingness to bottom of table
+- [x] what's going on with that really big avg fire size in 04 in alaska?
+- [x] wui plots -- make 3x5 or whatever
+- [z] fix text formatting in cat variables compared
+- [x] cat variables compared, do percentages as row percent not total
+- [x]  seasonal timing make 2x5 and make em a little narrower
+- [x] in stacked plots change order so ca always on bottom, then be consistent with order throughout
+
+### Still to do
+
+- [ ] figure out fatalities
+- [ ] make sure yarnell hill fire label doesn't need to move

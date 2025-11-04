@@ -17,7 +17,7 @@ library(glue)
 library(showtext)
 library(tidycensus)
 
-options(scipen = 999)
+options(scipen = 9999)
 set.seed(charToRaw('frolic')) # Webster's Word of the Day : October 22, 2025!
 ```
 
@@ -25,7 +25,7 @@ set.seed(charToRaw('frolic')) # Webster's Word of the Day : October 22, 2025!
 # Set Font Arial
 showtext_auto()
 font_add("Arial", regular = "LiberationSans-Regular.ttf")
-base_size = 14
+base_size = 16
 theme_set(
   ggplot2::theme_minimal(
     base_family = 'Arial',
@@ -134,6 +134,19 @@ regions$usfs_region_pop <- aggregate(
   FUN = sum
 )$population # centroid more or less ensures counties only end up in one region
 
+# Order regions consistently
+REGION_ORDER <- tibble(
+  usfs_region = c("California", "Southern", "Alaska", "Southern Rockies", "Southwestern",
+"Northern Rockies", "Intermountain", "Pacific Northwest", "Eastern",
+"Hawaii"),
+  plot_order = 10:1
+)
+
+# Palette
+region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
+region_colors[region_colors == '#dddddd'] <- '#757575' # lil darker
+attr(region_colors, "missing") <- NA
+names(region_colors) <- sort(REGION_ORDER$usfs_region)
 ```
 
 
@@ -237,7 +250,9 @@ plotme <- function(
     group_by(usfs_region) %>%
     summarize(tot = sum(get(var), na.rm = TRUE), .groups = 'drop') %>%
     mutate(pcttot = tot / sum(tot)) %>%
-    arrange(desc(pcttot))
+    #arrange(desc(pcttot))
+    inner_join(REGION_ORDER, by = 'usfs_region') %>%
+    arrange(plot_order)
 
   region_order <- as.character(region_summary$usfs_region)
 
@@ -264,12 +279,9 @@ plotme <- function(
     )
   }
 
-  # Assign colors to regions consistently
-  region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
-  region_colors[region_colors == '#dddddd'] <- '#757575' # lil darker
-
-  attr(region_colors, "missing") <- NA
+  # Reassign colors to regions now that they have been updated
   names(region_colors) <- sort(region_label)
+
 
   dat$usfs_region <- factor(
     dat$usfs_region,
@@ -292,7 +304,7 @@ plotme <- function(
         values = region_colors,
         guide = 'none'
       ) +
-      facet_wrap(~usfs_region, ncol = 1, drop = TRUE, scales = 'free') +
+      facet_wrap(facets = ~fct_rev(usfs_region), ncol = 2, drop = TRUE, scales = 'free') +
       scale_x_continuous(
         expand = expansion(mult = c(0, 0)),
         limits = c(1999.5, 2024.5),
@@ -396,7 +408,7 @@ plotme <- function(
         limits = c(1999.5, 2024.5),
         breaks = seq(2000, 2024, by = 2)
       ) +
-      scale_y_continuous(expand = expansion(mult = c(0, 0))) +
+      scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::label_comma()) +
       xlab("Year") +
       ylab(glue("{var}{if_else(is.na(unit), '', paste0(' (', unit, ')'))}")) +
       theme(
@@ -488,12 +500,13 @@ tbl <- wfbz_by_region_agg %>%
 ### Community-Impacting Fires
 ```{r}
 tbl %>%
-  filter(agg == 'All Fires') %>%
+  filter(agg == "Community-Impacting Fires") %>%
   gt(rowname_col = 'name') %>%
   tab_options(table.width = px(1800)) %>%
   tab_row_group(label = 'Missingness',rows =  matches('Missing')) %>%
   tab_row_group(label = 'WUI',rows =  matches('WUI')) %>%
-  row_group_order(groups = c(NA, "WUI", "Missingness"))
+  row_group_order(groups = c(NA, "WUI", "Missingness")) %>%
+  cols_hide(agg)
 ```
 
 ### All Fires
@@ -504,7 +517,8 @@ tbl %>%
   tab_options(table.width = px(1800)) %>%
   tab_row_group(label = 'Missingness',rows =  matches('Missing')) %>%
   tab_row_group(label = 'WUI',rows =  matches('WUI')) %>%
-  row_group_order(groups = c(NA, "WUI", "Missingness"))
+  row_group_order(groups = c(NA, "WUI", "Missingness")) %>%
+  cols_hide(agg)
 ```
 
 ## Variables over Time
@@ -641,7 +655,7 @@ The five fires in our data set with the most destroyed structures are labeled.
   annotate(
     "text",
     x = 2018,
-    y = 150 * 100,
+    y = 154 * 100,
     size = 2,
     angle = -45,
     hjust = 'right',
@@ -659,7 +673,7 @@ The five fires in our data set with the most destroyed structures are labeled.
   annotate(
     "text",
     x = 2023,
-    y = 35 * 100,
+    y = 22 * 100,
     size = 2,
     angle = -45,
     hjust = 'right',
@@ -668,7 +682,7 @@ The five fires in our data set with the most destroyed structures are labeled.
   annotate(
     "text",
     x = 2015,
-    y = 45 * 100,
+    y = 38 * 100,
     size = 2,
     angle = -45,
     hjust = 'right',
@@ -687,13 +701,13 @@ The five fires in our data set with the most destroyed structures are labeled.
   (plotme(wfbz_crit_all, 'Structures Destroyed', rel = FALSE) +
     ggtitle('All Disasters') +
     annotate(
-      "text",
-      x = 2018,
-      y = 150 * 100,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Camp Fire (CA) ———"
+    "text",
+    x = 2018,
+    y = 154 * 100,
+    size = 2,
+    angle = -45,
+    hjust = 'right',
+    label = "Camp Fire (CA) ———"
     ) +
     annotate(
       "text",
@@ -707,7 +721,7 @@ The five fires in our data set with the most destroyed structures are labeled.
     annotate(
       "text",
       x = 2023,
-      y = 35 * 100,
+      y = 22 * 100,
       size = 2,
       angle = -45,
       hjust = 'right',
@@ -716,7 +730,7 @@ The five fires in our data set with the most destroyed structures are labeled.
     annotate(
       "text",
       x = 2015,
-      y = 45 * 100,
+      y = 38 * 100,
       size = 2,
       angle = -45,
       hjust = 'right',
@@ -788,26 +802,22 @@ plotme(wfbz_crit, 'FEMA Declaration', rel = FALSE) +
 ```
 
 
+Alaska has quite an outlier for community-intersecting fires in 2004. This was the year of the Boundary Fire NE of Fairbanks, which reached 912 km<sup>2</sup>. While that's not the largest fire in our data set, it was the _only_ community-intersecting fire in our data set that year.
+
 ## Share of WUI Fires over Time
 
 ### Share of Fires in Wildland-Urban Interface over Time
 
-```{r, fig.height = 16, fig.width = 12}
-plot_spacer() +
-  (plotme(wfbz_crit, 'WUI-Interface Percent', stack = FALSE) +
-    ggtitle('Community-Impacting\nDisasters')) +
-  plot_spacer() +
-  plot_layout(ncol = 3)
+```{r, fig.height = 10, fig.width = 12}
+plotme(wfbz_crit, 'WUI-Interface Percent', stack = FALSE) +
+  ggtitle('Community-Impacting\nDisasters')
 ```
 
 ### Share of Fires in Wildland-Urban Intermix over Time
 
-```{r, fig.height = 16, fig.width = 12}
-plot_spacer() +
-  (plotme(wfbz_crit, 'WUI-Intermix Percent', stack = FALSE) +
-    ggtitle('Community-Impacting\nDisasters')) +
-  plot_spacer() +
-  plot_layout(ncol = 3)
+```{r, fig.height = 10, fig.width = 12}
+plotme(wfbz_crit, 'WUI-Intermix Percent', stack = FALSE) +
+  ggtitle('Community-Impacting\nDisasters')
 ```
 
 ## Correlations
@@ -940,13 +950,15 @@ p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & 
 
 ### Categorical Values Compared
 
-```{r, fig.height = 4, fig.width = 4}
+```{r, fig.height = 6, fig.width = 6}
 
 wfbz_lab %>%
+  group_by(`FEMA Declaration`) %>%
+  mutate(n_dec = n()) %>%
   group_by(WUI = str_to_title(WUI), `FEMA Declaration`, .drop = FALSE) %>%
   summarize(
     n = n(),
-    lab = paste0(format(n, big.mark = ','), ' (', format(100*n()/nrow(wfbz_lab), digits = 2), '%)')
+    lab = glue('{format(n, big.mark = \',\')}\n({format(100*n()/first(n_dec), digits = 3)}%)')
   ) %>%
 	ggplot() +
 	geom_tile(aes(x = WUI, y = `FEMA Declaration`, fill = n)) +
@@ -955,36 +967,29 @@ wfbz_lab %>%
 	khroma::scale_color_lapaz(reverse = TRUE, guide = 'none') +
 	theme(
   	plot.title = element_text(size = 14),
-  	axis.text.x = element_text(angle = 90, vjust = +.5, hjust = 1),
+  	axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
   	axis.ticks = element_line(),
   	plot.margin = unit(c(0,0,0,0), "pt")
-	)
+	) + coord_equal()
 
 ```
 
 ## Fire Season Timing
 
-```{r, fig.height = 18, fig.width = 6}
+```{r, fig.height = 7, fig.width = 14}
 
 # Determine order to plot in
-region_summary <- wfbz %>%
-  st_drop_geometry() %>%
- 	mutate(usfs_region = wfbz_region) %>%
-  ungroup() %>%
-  filter(wildfire_year < 2003) %>%
-  group_by(usfs_region) %>%
-  summarize(medstart = yday(median(wildfire_ignition_date_max, na.rm = TRUE)), .groups = 'drop') %>%
-  arrange(medstart)
+#region_summary <- wfbz %>%
+  #st_drop_geometry() %>%
+ 	#mutate(usfs_region = wfbz_region) %>%
+  #ungroup() %>%
+  #filter(wildfire_year < 2003) %>%
+  #group_by(usfs_region) %>%
+  #summarize(medstart = yday(median(wildfire_ignition_date_max, na.rm = TRUE)), .groups = 'drop') %>%
+  #arrange(medstart)
 
-region_order <- as.character(region_summary$usfs_region)
-region_label <- region_summary$usfs_region
-
-# Assign colors to regions consistently
-region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
-region_colors[region_colors == '#dddddd'] <- '#757575' # lil darker
-
-attr(region_colors, "missing") <- NA
-names(region_colors) <- region_label
+region_order <- as.character(REGION_ORDER$usfs_region)
+region_label <- REGION_ORDER$usfs_region
 
 wfbz %>%
   mutate(usfs_region = wfbz_region) %>%
@@ -1041,7 +1046,7 @@ wfbz %>%
       linewidth = .5,
       se = FALSE
 		) +
-		facet_wrap(~usfs_region, ncol = 1, scales = 'free_x') +
+		facet_wrap(~usfs_region, ncol = 5, scales = 'free_x') +
 		scale_fill_manual(
 	  	values = region_colors,
 	  	guide = 'none'
@@ -1058,9 +1063,10 @@ wfbz %>%
 		ggtitle("Ignition Dates of Disaster Fires by Year") +
 	  theme(
 	  	panel.border = element_rect(color = "grey25", fill = NA, size = .25),
-	  	plot.title = element_text(size = 14),
+	  	plot.title = element_text(size = 18),
 			axis.text.x = element_text(angle = 90, vjust = +.5),
-	  	axis.ticks = element_line()
+	  	axis.ticks = element_line(),
+      panel.spacing = unit(0, 'in')
 		)
 ```
 ## Reference
@@ -1072,9 +1078,14 @@ regions_cart <- regions %>%
   st_cast('POLYGON') %>%
   tigris::shift_geometry()
 
-region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
-attr(region_colors, "missing") <- NA
-names(region_colors) <- sort(unique(regions$usfs_region))
+region_order <- REGION_ORDER$usfs_region
+region_label <- REGION_ORDER$usfs_region
+
+regions_cart$usfs_region <- factor(
+  regions_cart$usfs_region,
+  levels = region_order,
+  labels = region_label
+)
 
 ggplot(regions_cart) +
   geom_sf(aes(fill = usfs_region), color = "grey25", size = .05) +
