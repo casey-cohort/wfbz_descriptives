@@ -412,7 +412,7 @@ plotme <- function(
 
 ## Summary Statistics
 
-```{r}
+```{r table}
 wfbz_by_region_agg <- wfbz %>%
   st_drop_geometry() %>%
   mutate(
@@ -437,10 +437,13 @@ wfbz_by_region_agg <-
     )
   )
 
-wfbz_by_region_agg %>%
+tbl <- wfbz_by_region_agg %>%
   group_by(agg, usfs_region, usfs_region_area, usfs_region_pop) %>%
   summarize(
     `Count` = n(),
+    `Fatalities per 100K` = 100000 *
+    sum(wildfire_max_civil_fatalities, na.rm = TRUE) / first(usfs_region_pop),
+    `Mean Fire Size (km^2)` = mean(wildfire_area, na.rm = TRUE),
     `WUI Interface Fires` = sum(
       str_detect(wildfire_wui, 'interface'),
       na.rm = TRUE
@@ -460,9 +463,6 @@ wfbz_by_region_agg %>%
     `Missing Civilian Fatalities` = sum(is.na(wildfire_civil_fatalities)),
     `Missing Evacuations` = sum(is.na(wildfire_civil_evacuation)),
     `Missing Structures Destroyed` = sum(is.na(wildfire_struct_destroyed)),
-    `Fatalities per 100K` = 100000 *
-      sum(wildfire_max_civil_fatalities, na.rm = TRUE) / first(usfs_region_pop),
-    `Mean Fire Size (km^2)` = mean(wildfire_area, na.rm = TRUE),
     #`Burned Area Percent` = 100 *
      # sum(wildfire_area, na.rm = TRUE) / first(usfs_region_area),
     N = n(),
@@ -472,6 +472,7 @@ wfbz_by_region_agg %>%
   pivot_longer(c(-agg, -usfs_region, -N)) %>%
   mutate(
     value = case_when(
+      name == 'Count' ~ glue('{format(as.integer(value), big.mark = \',\')}'),
       name == 'Fatalities per 100K' ~ glue('{format(value, digits = 2)}'),
       name == 'Mean Fire Size (km^2)' ~ glue('{format(value, digits = 2)}'),
       TRUE ~ glue('{round(value)} ({format(round(100 * value / N, 2), nsmall = 2)}%)')
@@ -481,11 +482,29 @@ wfbz_by_region_agg %>%
   pivot_wider(names_from = c(usfs_region), values_from = c(value)) %>%
   select(order(colnames(.))) %>%
   relocate(Nationwide) %>%
-  relocate(name) %>%
-  rename(` ` = name) %>%
-  gt(groupname_col = 'agg') %>%
-  tab_options(table.width = px(1800))
+  relocate(name)
+```
 
+### Community-Impacting Fires
+```{r}
+tbl %>%
+  filter(agg == 'All Fires') %>%
+  gt(rowname_col = 'name') %>%
+  tab_options(table.width = px(1800)) %>%
+  tab_row_group(label = 'Missingness',rows =  matches('Missing')) %>%
+  tab_row_group(label = 'WUI',rows =  matches('WUI')) %>%
+  row_group_order(groups = c(NA, "WUI", "Missingness"))
+```
+
+### All Fires
+```{r}
+tbl %>%
+  filter(agg == 'All Fires') %>%
+  gt(rowname_col = 'name') %>%
+  tab_options(table.width = px(1800)) %>%
+  tab_row_group(label = 'Missingness',rows =  matches('Missing')) %>%
+  tab_row_group(label = 'WUI',rows =  matches('WUI')) %>%
+  row_group_order(groups = c(NA, "WUI", "Missingness"))
 ```
 
 ## Variables over Time
