@@ -1014,6 +1014,7 @@ wfbz %>%
 		wildfire_fema_dec_date
 	) %>%
 	ggplot() +
+    annotate('rect', xmin = ymd('2099-05-01'), xmax = ymd('2099-11-30'), ymin = -Inf, ymax = Inf, color = '#fa0000', fill = '#fce3e3',  alpha = .5) +
     # Two boxplots are layered to get a custom look -- whiskers belong to the bottom plot
 		geom_boxplot(
 			aes(x =  as.Date('2099-01-01') + yday(wildfire_ignition_date_max), group = wildfire_year, y = wildfire_year, fill = usfs_region),
@@ -1046,7 +1047,7 @@ wfbz %>%
       linewidth = .5,
       se = FALSE
 		) +
-		facet_wrap(~usfs_region, ncol = 5, scales = 'free_x') +
+		facet_wrap(~usfs_region, ncol = 5) +
 		scale_fill_manual(
 	  	values = region_colors,
 	  	guide = 'none'
@@ -1066,7 +1067,8 @@ wfbz %>%
 	  	plot.title = element_text(size = 18),
 			axis.text.x = element_text(angle = 90, vjust = +.5),
 	  	axis.ticks = element_line(),
-      panel.spacing = unit(0, 'in')
+      panel.spacing = unit(0, 'in'),
+      axis.title.y = element_blank()
 		)
 ```
 ## Reference
