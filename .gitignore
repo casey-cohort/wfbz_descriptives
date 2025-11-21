@@ -9,3 +9,5 @@ rsconnect/
 report_files
 /.quarto/
 docs/
+
+**/*.quarto_ipynb

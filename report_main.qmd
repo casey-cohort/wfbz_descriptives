@@ -16,9 +16,10 @@ library(gt)
 library(glue)
 library(showtext)
 library(tidycensus)
+library(ggh4x)
 
 options(scipen = 9999)
-set.seed(charToRaw('frolic')) # Webster's Word of the Day : October 22, 2025!
+set.seed(708)
 ```
 
 ```{r theme}
@@ -127,6 +128,19 @@ counties_pop <- get_decennial(
 ) %>%
   rename(population = P1_001N) %>%
   select(population, geometry)
+
+states_pop <- get_decennial(
+  geography = "state",
+  variables = "P1_001N", # Total population variable in 2020 Census
+  year = 2020,
+  geometry = TRUE,
+  output = "wide",
+  progress_bar = FALSE
+) %>%
+  rename(population = P1_001N) %>%
+  select(NAME, population, geometry) %>%
+  left_join(tidycensus::fips_codes %>% select(state_abb = state, NAME = state_name) %>% distinct()) %>%
+  rename(state_name = NAME)
 
 regions$usfs_region_pop <- aggregate(
   st_centroid(counties_pop),
