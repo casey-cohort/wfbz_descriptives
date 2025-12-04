@@ -78,4 +78,5 @@
 - [ ] Scatter # of fema dec vs # of fires and other measures (total by state)
 - [ ] bivariate map of fema vs (whatever) e.g. https://giscarta.com/blog/bivariate-choropleth-maps-a-comprehensive-guide. County or sub-state-sized grid
 - [ ] do a version of the variables over time plot for fema but as a line plot not stacked
-
+- [ ] add area burned
+- [ ] stack rank percentage of fema decs by state

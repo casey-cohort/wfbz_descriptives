@@ -207,12 +207,23 @@ by_state <- wfbz %>%
     `Fatalities per 100K` = 100000 * sum(wildfire_max_civil_fatalities / population, na.rm = TRUE),
     `Structures Destroyed` = sum(wildfire_struct_destroyed, na.rm = TRUE),
     `FEMA Declarations` = sum(wildfire_fema_dec, na.rm = TRUE),
+    `FEMA Declaration Percent` = `FEMA Declarations`/`Events`,
     `Burned Area` = sum(wildfire_area, na.rm = TRUE),
     `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
     `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
     .groups = 'drop'
   )
+by_state <- by_state %>% 
+  arrange(desc(`FEMA Declaration Percent`)) %>%
+  mutate(state_abb = factor(row_number(), levels = row_number(), labels = state_abb))
+```
 
+### Fema Declaration Liklihood by State
+
+```{r}
+ggplot() +
+  geom_point(data = by_state, aes(x = state_abb, y = `FEMA Declaration Percent`)) + 
+  scale_y_continuous(labels = ~format(round(100*.x)))
 ```
 
 ### Events vs. FEMA Declarations
@@ -221,20 +232,25 @@ Natural Scale
 
 ```{r}
 ggplot() +
+  geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') + 
   geom_point(data = by_state, aes(x = Events, y = `FEMA Declarations`)) + 
   ggrepel::geom_label_repel(data = by_state, aes(x = Events, y = `FEMA Declarations`, label = state_abb)) + 
   scale_x_continuous(labels = ~format(round(.x), big.mark = ',')) + 
-  scale_y_continuous(labels = ~format(round(.x), big.mark = ',')) 
+  scale_y_continuous(labels = ~format(round(.x), big.mark = ',')) +
+  coord_equal()
 ```
 
 Log Scale
 
 ```{r}
 ggplot() +
+  geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') + 
   geom_point(data = by_state, aes(x = Events, y = `FEMA Declarations`)) + 
   ggrepel::geom_label_repel(data = by_state, aes(x = Events, y = `FEMA Declarations`, label = state_abb)) + 
   scale_x_continuous(transform = 'pseudo_log', labels = ~format(round(.x), big.mark = ',')) + 
-  scale_y_continuous(transform = 'pseudo_log', labels = ~format(round(.x), big.mark = ',')) 
+  scale_y_continuous(transform = 'pseudo_log', labels = ~format(round(.x), big.mark = ',')) +
+  coord_equal(ratio = 1)
+
 ```
 
 
