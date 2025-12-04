@@ -5,9 +5,9 @@
 data/raw/
 .vscode
 rsconnect/
-*cache
-report_files
+*cache/
+*_files/
 /.quarto/
 docs/
-
 **/*.quarto_ipynb
+*.html
