@@ -64,18 +64,20 @@
 
 ### Still to do
 
-- [ ] figure out fatalities
-- [ ] make sure yarnell hill fire label doesn't need to move
-- [ ] rm x axis label, word "percent" in y axis label in WUI plots, change background to white
-- [ ] remover fire season box, make it two by five
-- [ ] rm year x axis label from variables over time
-- [ ] variables over time fema plot , y axis to "fema declarations, n"
+- [x] figure out fatalities
+- [x] make sure yarnell hill fire label doesn't need to move
+- [x] rm x axis label, word "percent" in y axis label in WUI plots, change background to white
+- [x] remove fire season box, make it two by five
+- [x] rm year x axis label from variables over time
+- [x] variables over time fema plot , y axis to "fema declarations, n"
 
 
 ### FEMA
 
+in maps: make states unfilled and bring lines to front
+
 - [ ] Some figure showing FEMA declarations over time by region or state, maybe total
 - [ ] Scatter # of fema dec vs # of fires and other measures (total by state)
-- [ ] bivariate map of fema vs (whatever) e.g. https://giscarta.com/blog/bivariate-choropleth-maps-a-comprehensive-guide. County or sub-state-sized grid
+- [ ] bivariate map of fema vs (whatever) e.g. https://giscarta.com/blog/bivariate-choropleth-maps-a-comprehensive-guide. County or sub-state-sized grid *** NOTE: try state instead, try to fix quartile ***
 - [ ] do a version of the variables over time plot for fema but as a line plot not stacked
 
