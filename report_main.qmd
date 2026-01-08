@@ -486,7 +486,7 @@ tbl <- wfbz_by_region_agg %>%
     `Count` = n(),
     `Fatalities per 100K` = 100000 *
     sum(wildfire_max_civil_fatalities, na.rm = TRUE) / first(usfs_region_pop),
-    `Mean Fire Size (km^2)` = mean(wildfire_area, na.rm = TRUE),
+    `Mean Fire Size (km²)` = mean(wildfire_area, na.rm = TRUE),
     `WUI Interface Fires` = sum(
       str_detect(wildfire_wui, 'interface'),
       na.rm = TRUE
@@ -517,7 +517,7 @@ tbl <- wfbz_by_region_agg %>%
     value = case_when(
       name == 'Count' ~ glue('{format(as.integer(value), big.mark = \',\')}'),
       name == 'Fatalities per 100K' ~ glue('{format(value, digits = 2)}'),
-      name == 'Mean Fire Size (km^2)' ~ glue('{format(value, digits = 2)}'),
+      name == 'Mean Fire Size (km²)' ~ glue('{format(value, digits = 2)}'),
       TRUE ~ glue('{round(value)} ({format(round(100 * value / N, 2), nsmall = 2)}%)')
     )
   ) %>%
@@ -558,7 +558,7 @@ tbl %>%
 
 ```{r, fig.height = 8, fig.width = 16}
 plotme(wfbz_crit, 'Events', rel = FALSE) +
-  ggtitle('Community-Impacting\nDisasters') +
+  ggtitle('Community-Impacting Disasters') +
   plotme(wfbz_crit_all, 'Events', rel = FALSE) +
   ggtitle('All Disasters') +
   plot_spacer() +
@@ -621,7 +621,7 @@ The five deadliest fires in our data set are labeled.
     hjust = 'right',
     label = "North Complex Fire (CA) ———"
   ) +
-  ggtitle('Community-Impacting\nDisasters')) +
+  ggtitle('Community-Impacting Disasters')) +
   (plotme(wfbz_crit_all, 'Fatalities', rel = FALSE) +
     ggtitle('All Disasters') +
     annotate(
@@ -728,7 +728,7 @@ The five fires in our data set with the most destroyed structures are labeled.
     hjust = 'right',
     label = "Woolsey (CA) ———"
   ) +
-  ggtitle('Community-Impacting\nDisasters')) +
+  ggtitle('Community-Impacting Disasters')) +
   (plotme(wfbz_crit_all, 'Structures Destroyed', rel = FALSE) +
     ggtitle('All Disasters') +
     annotate(
@@ -788,7 +788,7 @@ The five fires in our data set with the most destroyed structures are labeled.
 
 ```{r, fig.height = 8, fig.width = 16}
 plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
-  ggtitle('Community-Impacting\nDisasters') +
+  ggtitle('Community-Impacting Disasters') +
   plotme(wfbz_crit_all, 'FEMA Declarations (n)', rel = FALSE) +
   ggtitle('All Disasters') +
   plot_spacer() +
@@ -801,12 +801,12 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
 ### Burned Area over Time
 
 ```{r, fig.height = 8, fig.width = 16}
-(plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'sq. km') +
+(plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)), labels = scales::comma
   ) +
-  ggtitle('Community-Impacting\nDisasters')) +
-  (plotme(wfbz_crit_all, 'Burned Area', rel = FALSE, unit = 'sq. km') +
+  ggtitle('Community-Impacting Disasters')) +
+  (plotme(wfbz_crit_all, 'Burned Area', rel = FALSE, unit = 'km²') +
     #scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::scientific) +
     ggtitle('All Disasters')) +
   plot_spacer() +
@@ -819,13 +819,13 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
 ### Average Fire Size over Time
 
 ```{r, fig.height = 4, fig.width = 16}
-(plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'sq. km') +
+(plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
     labels = scales::comma
   ) +
-  ggtitle('Community-Impacting\nDisasters')) +
-  (plotme(wfbz_crit_all, 'Mean Fire Size', rel = FALSE, unit = 'sq. km') +
+  ggtitle('Community-Impacting Disasters')) +
+  (plotme(wfbz_crit_all, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
     #scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::scientific) +
     ggtitle('All Disasters')) +
   plot_layout(ncol = 2)
@@ -861,7 +861,7 @@ wfbz_lab <- wfbz %>%
   filter(wildfire_community_intersect) %>%
   transmute(
     wildfire_id,
-    `Area (sq. km)` = wildfire_area,
+    `Area (km²)` = wildfire_area,
     `Fatalities` = wildfire_max_civil_fatalities,
     `Structures Destroyed` = wildfire_struct_destroyed,
     `WUI` = if_else(
@@ -870,7 +870,7 @@ wfbz_lab <- wfbz %>%
       str_replace(wildfire_wui, '\\|', ' & ')
     ),
     `FEMA Declarations (n)` = as.character(wildfire_fema_dec),
-    `Population Density (unitless)` = wildfire_max_pop_den
+    `Population Density (unitless)` = wildfire_buffered_avg_pop_den
   )
 ```
 
@@ -938,21 +938,21 @@ p1 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'WUI')) +
     y = val_num,
     fill = val_cat
   )) +
-  facet_grid2(name_cat ~ name_num, scales = 'free', independent = 'all') +
+  facet_wrap(~ name_num, scales = 'free', nrow = 1) +
   scale_y_continuous(
     trans = 'log',
-    labels = ~ format(.x, digits = 3, scientific = 0)
+    labels = ~scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
   ) +
 	khroma::scale_fill_bright(guide = 'none') +
   theme(
     panel.border = element_rect(color = "grey25", fill = NA, size = .25),
     plot.title = element_text(size = 14),
-    axis.text.x = element_text(angle = 90, vjust = +.5, hjust = 1),
+    axis.text.x = element_text(angle = 45, vjust = +1, hjust = 1),
     axis.ticks = element_line(),
     plot.margin = unit(c(0, 0, 0, 0), "pt"),
   ) +
-  xlab('') +
-  ylab('')
+  #ylab('') +
+  xlab("Wilderness-urban interface and intermix")
 
 p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
   geom_boxplot(aes(
@@ -960,21 +960,21 @@ p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
     y = val_num,
     fill = val_cat
   )) +
-  facet_grid2(name_cat ~ name_num, scales = 'free', independent = 'all') +
+  facet_wrap(~ name_num, scales = 'free', nrow = 1) +
   scale_y_continuous(
     trans = 'log',
-    labels = ~ format(.x, digits = 3, scientific = 0)
+    labels = ~scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
   ) +
 	khroma::scale_fill_bright(guide = 'none', reverse = TRUE) +
   theme(
     panel.border = element_rect(color = "grey25", fill = NA, size = .25),
     plot.title = element_text(size = 14),
-    axis.text.x = element_text(angle = 90, vjust = +.5, hjust = 1),
+    axis.text.x = element_text(angle = 45, vjust = +1, hjust = 1),
     axis.ticks = element_line(),
-    plot.margin = unit(c(0, 0, 0, 0), "pt"),
+    plot.margin = unit(c(0, 0, 0, 0), "pt")
   ) +
-  xlab('') +
-  ylab('')
+  #ylab('') +
+  xlab("FEMA disaster declaration")
 
 p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & Categorical Variables Compared (log-scale)")
 ```
