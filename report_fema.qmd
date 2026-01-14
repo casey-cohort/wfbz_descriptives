@@ -305,7 +305,7 @@ ggplot() +
 
 ### Variables vs. FEMA Declarations
 
-```{r, fig.height = 30, fig.width = 8}
+```{r, fig.height = 30, fig.width = 4}
 by_state_long <- by_state %>%
   select(-`FEMA Declaration Percent`) %>% 
   pivot_longer(-c(usfs_region, state_abb, state_name, `FEMA Declarations`)) 
@@ -349,27 +349,28 @@ scatters <- by_state_long %>%
     p_log = map(
       p_natural, 
       ~ .x +  
-        scale_x_continuous(name = name, labels = scales::comma, transform = 'pseudo_log') +
-        scale_y_continuous(labels = scales::comma, transform = 'pseudo_log') 
+        scale_x_continuous(name = name, labels = scales::comma, transform = 'pseudo_log') + #, breaks = scales::breaks_extended(n = 5)) +
+        scale_y_continuous(labels = scales::comma, transform = 'pseudo_log') #, breaks = scales::breaks_extended(n = 6)) 
     )
   )
 
 # Create text grobs for headers
 header_natural <- wrap_elements(grid::textGrob("Natural scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
-header_log <- wrap_elements(grid::textGrob("Log scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
+#header_log <- wrap_elements(grid::textGrob("Log scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
 
 # Put all plots together with headers
 n_plots <- nrow(scatters)
 all_plots <- c(
-  list(header_natural), scatters$p_natural,
-  list(header_log), scatters$p_log
+  #list(header_natural), 
+  scatters$p_natural#,
+  #list(header_log), scatters$p_log
 )
 
 wrap_plots(
   all_plots, 
-  ncol = 2, 
+  ncol = 1, 
   byrow = FALSE, 
-  heights = c(0.1, rep(1, n_plots)), 
+  #heights = c(0.1, rep(1, n_plots)), 
   guides = 'collect'
 ) & 
   theme(legend.position = 'bottom', plot.margin = unit(c(0, 5, 50, 5), 'pt'))
