@@ -7,7 +7,6 @@ execute:
   message: false
 ---
 
-
 ```{r packages}
 library(tidyverse)
 library(sf)
@@ -17,6 +16,7 @@ library(glue)
 library(showtext)
 library(tidycensus)
 library(ggh4x)
+library(lemon)
 library(tigris)
 
 options(scipen = 9999)
@@ -53,8 +53,6 @@ theme_set(
     )
 )
 ```
-
-
 
 ```{r data}
 #| echo: false
@@ -200,7 +198,6 @@ if (!file.exists('data/processed/regions.geojson')) {
 }
 ```
 
-
 ```{r}
 # Find Nearest Region
 wfbz_region <- regions$usfs_region[st_nearest_feature(
@@ -222,15 +219,16 @@ wfbz_region_pop <- regions$usfs_region_pop[st_nearest_feature(
 by_state <- wfbz %>%
   st_drop_geometry() %>%
   mutate(
-    usfs_region = wfbz_region,
-    usfs_region_area = wfbz_region_area,
-    usfs_region_pop = wfbz_region_pop,
     state_abb = str_split(wildfire_states, '\\|')
   ) %>%
   unnest(state_abb) %>%
   left_join(st_drop_geometry(states_pop)) %>%
+  left_join(
+    st_centroid(states_sf, of_largest_polygon = TRUE) %>% st_join(regions) %>% st_drop_geometry() %>% select(STUSPS, usfs_region),
+    by = join_by(state_abb == STUSPS)
+  ) %>%
   filter(wildfire_community_intersect) %>%
-  group_by(state_abb, state_name) %>%
+  group_by(usfs_region, state_abb, state_name) %>%
   summarize(
     `Events` = n(),
     `Fatalities` = sum(wildfire_max_civil_fatalities, na.rm = TRUE),
@@ -259,178 +257,135 @@ by_state <- by_state %>%
 ### Fema Declaration Likelihood by State
 
 ```{r, fig.height = 9, fig.width = 9}
-cols <- khroma::color('light', reverse = FALSE)(1)
 ggplot() +
   geom_col(
     data = by_state,
     aes(y = state_name, x = `FEMA Declaration Percent`),
-    fill = cols,
-    color = 'white'
+    fill =  khroma::color('light', reverse = FALSE)(1),
+    color = 'white',
   ) +
   geom_text(
     data = by_state,
     aes(
       y = state_name,
       x = `FEMA Declaration Percent`,
-      label = case_when(
-        between(`FEMA Declaration Percent`, .001, .02) ~ paste0(
-          sprintf('%.1f', 100 * `FEMA Declaration Percent`),
-          '%'
+      label = paste0(
+        case_when(
+          between(`FEMA Declaration Percent`, .001, .02) ~ paste0(
+            sprintf('%.1f', 100 * `FEMA Declaration Percent`),
+            '%'
+          ),
+          `FEMA Declaration Percent` < .001 ~ '',
+          TRUE ~ paste0(sprintf('%.0f', 100 * `FEMA Declaration Percent`), '%'),
         ),
-        `FEMA Declaration Percent` < .001 ~ '',
-        TRUE ~ paste0(sprintf('%.0f', 100 * `FEMA Declaration Percent`), '%'),
+        if_else(
+          `FEMA Declarations` == 0,
+          '0',
+          glue(' ({`FEMA Declarations`})')
+        )
       ),
-      hjust = 0
+      hjust = -.1
     ),
     color = 'grey10'
   ) +
   scale_x_continuous(
-    labels = ~ paste0(format(round(100 * .x)), '%'),
+    labels = scales::percent,
     name = 'Events declared disaster',
-    expand = c(0, 0, 0, .15)
+    expand = c(0, 0, 0, .17)
   ) +
   scale_y_discrete(name = '', limits = rev, expand = c(.01, .01)) +
   theme(
     panel.margin = unit(0, 'cm'),
     axis.ticks = element_blank(),
     axis.text.y = element_text(hjust = 1),
-    panel.grid.major.x = element_line(linewidth = .25, color = 'grey10'),
+    panel.grid.major.x = element_line(linewidth = .25, color = 'grey25'),
     panel.grid.minor.x = element_line(linewidth = .25, color = 'grey75')
   )
 ```
 
-### Events vs. FEMA Declarations
+### Variables vs. FEMA Declarations
 
-Natural Scale
+```{r, fig.height = 30, fig.width = 8}
+by_state_long <- by_state %>%
+  select(-`FEMA Declaration Percent`) %>% 
+  pivot_longer(-c(usfs_region, state_abb, state_name, `FEMA Declarations`)) 
 
-```{r}
-ggplot() +
-  geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') +
-  geom_point(data = by_state, aes(x = Events, y = `FEMA Declarations`)) +
-  ggrepel::geom_label_repel(
-    data = by_state,
-    aes(x = Events, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(labels = ~ format(round(.x), big.mark = ',')) +
-  scale_y_continuous(labels = ~ format(round(.x), big.mark = ',')) +
-  coord_equal()
-```
-
-Log Scale
-
-```{r}
-ggplot() +
-  geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') +
-  geom_point(data = by_state, aes(x = Events, y = `FEMA Declarations`)) +
-  ggrepel::geom_label_repel(
-    data = by_state,
-    aes(x = Events, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(
-    transform = 'pseudo_log',
-    labels = ~ format(round(.x), big.mark = ',')
-  ) +
-  scale_y_continuous(
-    transform = 'pseudo_log',
-    labels = ~ format(round(.x), big.mark = ',')
-  ) +
-  coord_equal(ratio = 1)
-
-```
+plotme <- function(by_state_long, name){
+  ggplot(by_state_long) +
+    #geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') +
+    geom_point(aes(x = value, y = `FEMA Declarations`, color = usfs_region)) +
+    ggrepel::geom_label_repel(
+      aes(x = value, y = `FEMA Declarations`, label = state_abb, fill = usfs_region),
+      max.overlaps = 5
+    ) +
+    scale_x_continuous(name = name, labels = scales::comma) +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(
+      values = region_colors
+    ) +
+    scale_color_manual(
+      values = region_colors
+    ) + 
+    #facet_wrap(~name, ncol = 1, scales = 'free', strip.position = 'bottom') +
+    theme(
+      plot.margin = margin(r = 25, l = 25, unit = "pt"),
+      panel.grid.major = element_line(linewidth = .25, color = 'grey75'), 
+      axis.ticks = element_blank(),
+      legend.position = 'bottom'#, 
+      #panel.spacing.y = unit(100, 'pt')
+    ) + 
+    guides(
+      color = 'none',
+      fill = guide_legend(ncol = 2, title = NULL, override.aes = list(label = '  '))
+    )
+}
 
 
-### Deaths vs. FEMA Declarations
-
-Natural Scale
-
-```{r}
-ggplot() +
-  geom_point(data = by_state, aes(x = Fatalities, y = `FEMA Declarations`)) +
-  ggrepel::geom_label_repel(
-    data = by_state,
-    aes(x = Fatalities, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(labels = ~ format(round(.x), big.mark = ',')) +
-  scale_y_continuous(labels = ~ format(round(.x), big.mark = ','))
-```
-
-Log Scale
-
-```{r}
-ggplot() +
-  geom_point(data = by_state, aes(x = Fatalities, y = `FEMA Declarations`)) +
-  ggrepel::geom_label_repel(
-    data = by_state,
-    aes(x = Fatalities, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(
-    transform = 'pseudo_log',
-    labels = ~ format(round(.x), big.mark = ',')
-  ) +
-  scale_y_continuous(
-    transform = 'pseudo_log',
-    labels = ~ format(round(.x), big.mark = ',')
+scatters <- by_state_long %>%
+  group_by(name) %>%
+  nest() %>%
+  mutate(
+    p_natural = map(data, plotme, name = name),
+    p_log = map(
+      p_natural, 
+      ~ .x +  
+        scale_x_continuous(name = name, labels = scales::comma, transform = 'pseudo_log') +
+        scale_y_continuous(labels = scales::comma, transform = 'pseudo_log') 
+    )
   )
+
+# Create text grobs for headers
+header_natural <- wrap_elements(grid::textGrob("Natural scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
+header_log <- wrap_elements(grid::textGrob("Log scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
+
+# Put all plots together with headers
+n_plots <- nrow(scatters)
+all_plots <- c(
+  list(header_natural), scatters$p_natural,
+  list(header_log), scatters$p_log
+)
+
+wrap_plots(
+  all_plots, 
+  ncol = 2, 
+  byrow = FALSE, 
+  heights = c(0.1, rep(1, n_plots)), 
+  guides = 'collect'
+) & 
+  theme(legend.position = 'bottom', plot.margin = unit(c(0, 5, 50, 5), 'pt'))
+
+# 
+# wrap_plots(
+#   wrap_plots(scatters$p_natural, ncol = 1, guides = 'collect'),
+#   wrap_plots(scatters$p_log, ncol = 1, guides = 'collect'),
+#   ncol = 2,
+#   guides = 'collect'
+# )# +
+#   plot_annotation(theme = theme(legend.position = 'bottom'))
 ```
 
-
-### Structures Destroyed vs. FEMA Declarations
-
-Natural Scale
-
-```{r}
-ggplot() +
-  geom_point(
-    data = by_state,
-    aes(x = `Structures Destroyed`, y = `FEMA Declarations`)
-  ) +
-  ggrepel::geom_label_repel(
-    data = by_state,
-    aes(x = `Structures Destroyed`, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(labels = ~ format(round(.x), big.mark = ',')) +
-  scale_y_continuous(labels = ~ format(round(.x), big.mark = ','))
-```
-
-Log Scale
-
-```{r}
-ggplot() +
-  geom_point(
-    data = by_state,
-    aes(x = `Structures Destroyed`, y = `FEMA Declarations`)
-  ) +
-  ggrepel::geom_label_repel(
-    data = by_state,
-    aes(x = `Structures Destroyed`, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(
-    transform = 'pseudo_log',
-    labels = ~ format(round(.x), big.mark = ',')
-  ) +
-  scale_y_continuous(
-    transform = 'pseudo_log',
-    labels = ~ format(round(.x), big.mark = ',')
-  )
-```
-
-Natural Scale, no California
-
-
-```{r}
-ggplot() +
-  geom_point(
-    data = by_state %>% filter(state_abb != 'CA'),
-    aes(x = `Structures Destroyed`, y = `FEMA Declarations`)
-  ) +
-  ggrepel::geom_label_repel(
-    data = by_state %>% filter(state_abb != 'CA'),
-    aes(x = `Structures Destroyed`, y = `FEMA Declarations`, label = state_abb)
-  ) +
-  scale_x_continuous(labels = ~ format(round(.x), big.mark = ',')) +
-  scale_y_continuous(labels = ~ format(round(.x), big.mark = ','))
-```
-
+_Note: to show y axis label at each plot will require custom coding -- need to jitter y axis values
+or else create each plot without facet_
 
 ```{r}
 hexgrid <- st_make_grid(states_pop, square = FALSE, n = c(500, 500)) %>%
@@ -494,7 +449,7 @@ ggplot() +
 
 Declarations per Event
 
-_How to disentangle that FEMA Declarations makes an event?_
+*How to disentangle that FEMA Declarations makes an event?*
 
 ```{r}
 ggplot() +
@@ -504,10 +459,11 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(palette = 'Spectral', name = '')
+  scale_fill_distiller(palette = 'Spectral', name = '', labels = scales::percent)
 ```
 
 Declarations per Event (Scale Shifted)
+
 ```{r}
 #| include: false
 ggplot() +

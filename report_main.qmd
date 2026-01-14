@@ -456,6 +456,7 @@ plotme <- function(
 ## Summary Statistics
 
 ```{r table}
+format_tot_percent <- function(value, N) glue('{format(round(value), big.mark = ",")} ({format(round(100 * value / N, 1), nsmall = 1)}%)')
 wfbz_by_region_agg <- wfbz %>%
   st_drop_geometry() %>%
   mutate(
@@ -480,10 +481,49 @@ wfbz_by_region_agg <-
     )
   )
 
-tbl <- wfbz_by_region_agg %>%
+tbl_summaries <- wfbz_by_region_agg %>%
+  group_by(agg) %>%
+  mutate(
+    across(
+      c(wildfire_struct_destroyed, wildfire_struct_threatened, wildfire_max_civil_fatalities, wildfire_total_fatalities,
+        wildfire_civil_injuries, wildfire_total_injuries, wildfire_civil_evacuation, wildfire_total_evacuation),
+      ~ sum(.x, na.rm = TRUE)/2, .names = '{.col}_total' # div by 2 since we have both nationwide and regions included
+    )
+  ) %>%
+  group_by(agg, usfs_region, usfs_region_area, usfs_region_pop) %>%
+  summarize(
+    across(
+      c(wildfire_struct_destroyed, wildfire_struct_threatened, wildfire_max_civil_fatalities, wildfire_total_fatalities,
+        wildfire_civil_injuries, wildfire_total_injuries, wildfire_civil_evacuation, wildfire_total_evacuation),
+      ~ format_tot_percent(
+        sum(.x, na.rm = TRUE),
+        first(get(paste0(cur_column(), '_total')))
+      )
+    ),
+    .groups = 'drop'
+  ) %>%
+  rename(
+    `Structures destroyed` = wildfire_struct_destroyed,
+    `Structures threatened` = wildfire_struct_threatened,
+    `Civilian fatalities (best)` = wildfire_max_civil_fatalities,
+    `Total fatalities` = wildfire_total_fatalities,
+    `Civilian injuries` = wildfire_civil_injuries,
+    `Total injuries` = wildfire_total_injuries,
+    `Civilian evacuations` = wildfire_civil_evacuation,
+    `Total evacuations` = wildfire_total_evacuation
+  ) %>%
+  select(-usfs_region_area, -usfs_region_pop) %>%
+  pivot_longer(c(-agg, -usfs_region)) %>%
+  pivot_wider(names_from = c(usfs_region), values_from = c(value)) %>%
+  select(order(colnames(.))) %>%
+  relocate(Nationwide) %>%
+  relocate(name)
+
+tbl_counts <- wfbz_by_region_agg %>%
   group_by(agg, usfs_region, usfs_region_area, usfs_region_pop) %>%
   summarize(
     `Count` = n(),
+    `Declared Emergency` = sum(wildfire_fema_dec, na.rm = TRUE),
     `Fatalities per 100K` = 100000 *
     sum(wildfire_max_civil_fatalities, na.rm = TRUE) / first(usfs_region_pop),
     `Mean Fire Size (km²)` = mean(wildfire_area, na.rm = TRUE),
@@ -506,6 +546,7 @@ tbl <- wfbz_by_region_agg %>%
     `Missing Civilian Fatalities` = sum(is.na(wildfire_civil_fatalities)),
     `Missing Evacuations` = sum(is.na(wildfire_civil_evacuation)),
     `Missing Structures Destroyed` = sum(is.na(wildfire_struct_destroyed)),
+
     #`Burned Area Percent` = 100 *
      # sum(wildfire_area, na.rm = TRUE) / first(usfs_region_area),
     N = n(),
@@ -518,7 +559,8 @@ tbl <- wfbz_by_region_agg %>%
       name == 'Count' ~ glue('{format(as.integer(value), big.mark = \',\')}'),
       name == 'Fatalities per 100K' ~ glue('{format(value, digits = 2)}'),
       name == 'Mean Fire Size (km²)' ~ glue('{format(value, digits = 2)}'),
-      TRUE ~ glue('{round(value)} ({format(round(100 * value / N, 2), nsmall = 2)}%)')
+      name == 'Mean Projected Cost' ~ glue('${format(round(value), big.mark = \',\')}'),
+      TRUE ~ format_tot_percent(value, N)
     )
   ) %>%
   select(-N) %>%
@@ -530,26 +572,49 @@ tbl <- wfbz_by_region_agg %>%
 
 ### Community-Impacting Fires
 ```{r}
-tbl %>%
+tbl_counts %>%
   filter(agg == "Community-Impacting Fires") %>%
   gt(rowname_col = 'name') %>%
   tab_options(table.width = px(1800)) %>%
   tab_row_group(label = 'Missingness',rows =  matches('Missing')) %>%
   tab_row_group(label = 'WUI',rows =  matches('WUI')) %>%
   row_group_order(groups = c(NA, "WUI", "Missingness")) %>%
-  cols_hide(agg)
+  cols_hide(agg) %>%
+  tab_header("Column counts", subtitle = "N (Percent of total in region)")
+
+```
+
+```{r}
+tbl_summaries %>%
+  filter(agg == "Community-Impacting Fires") %>%
+  gt(rowname_col = 'name') %>%
+  tab_options(table.width = px(1800)) %>%
+  cols_hide(agg) %>%
+  tab_header("Column sums", subtitle = "N (Percent of nationwide)")
+
 ```
 
 ### All Fires
 ```{r}
-tbl %>%
+tbl_counts %>%
   filter(agg == 'All Fires') %>%
   gt(rowname_col = 'name') %>%
   tab_options(table.width = px(1800)) %>%
   tab_row_group(label = 'Missingness',rows =  matches('Missing')) %>%
   tab_row_group(label = 'WUI',rows =  matches('WUI')) %>%
   row_group_order(groups = c(NA, "WUI", "Missingness")) %>%
-  cols_hide(agg)
+  cols_hide(agg) %>%
+  tab_header("Column counts", subtitle = "N (Percent of total in region)")
+```
+
+```{r}
+tbl_summaries %>%
+  filter(agg == 'All Fires') %>%
+  gt(rowname_col = 'name') %>%
+  tab_options(table.width = px(1800)) %>%
+  cols_hide(agg) %>%
+  tab_header("Column sums", subtitle = "N (Percent of nationwide)")
+
 ```
 
 ## Variables over Time
