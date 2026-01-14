@@ -90,12 +90,11 @@ ul.task-list li input[type="checkbox"] {
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="./report_main.html"> 
-<span class="menu-text">report_fema.qmd</span></a>
+<span class="menu-text">WFBZ Summaries</span></a>
   </li>  
   <li class="nav-item">
-    <span class="nav-link">
-<span class="menu-text">about.qmd</span>
-    </span>
+    <a class="nav-link active" href="./report_fema.html" aria-current="page"> 
+<span class="menu-text">WFBZ Summaries - FEMA</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -277,7 +276,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/casey-cohort\.github\.io\/wfbz_descriptives\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
