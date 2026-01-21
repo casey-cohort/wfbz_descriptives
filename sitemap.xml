@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://casey-cohort.github.io/wfbz_descriptives/report_fema.html</loc>
-    <lastmod>2026-01-14T23:18:56.097Z</lastmod>
+    <loc>https://casey-cohort.github.io/wfbz_descriptives/reports/fema.html</loc>
+    <lastmod>2026-01-21T20:11:45.723Z</lastmod>
   </url>
   <url>
-    <loc>https://casey-cohort.github.io/wfbz_descriptives/report_main.html</loc>
-    <lastmod>2026-01-12T21:05:35.573Z</lastmod>
+    <loc>https://casey-cohort.github.io/wfbz_descriptives/reports/population.html</loc>
+    <lastmod>2026-01-21T20:15:35.760Z</lastmod>
+  </url>
+  <url>
+    <loc>https://casey-cohort.github.io/wfbz_descriptives/reports/main.html</loc>
+    <lastmod>2026-01-21T20:11:39.741Z</lastmod>
   </url>
 </urlset>

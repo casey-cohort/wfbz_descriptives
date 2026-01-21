@@ -1,1 +1,2 @@
-Sitemap: https://casey-cohort.github.io/wfbz_descriptives/sitemap.xml
+User-agent: *
+Disallow: /
