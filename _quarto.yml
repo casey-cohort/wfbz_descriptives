@@ -1,13 +1,18 @@
 project:
-  output-dir: docs
+  output-dir: rendered
   type: website
   render:
-    - report.qmd
+    - reports
 website:
   title: "WFBZ Descriptives"
   site-path: "wfbz_descriptives/"
+  navbar: 
+    left:
+      - reports/main.qmd
+      - reports/fema.qmd
+      - reports/population.qmd
 format:
   html:
     theme: cosmo
     toc: true
-
+    

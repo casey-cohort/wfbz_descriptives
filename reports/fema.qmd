@@ -1,0 +1,237 @@
+---
+title: "FEMA Declaration Summaries"
+toc: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+{{< include _setup.qmd >}}
+
+### Fema Declaration Likelihood by State
+
+```{r, fig.height = 9, fig.width = 9}
+ggplot() +
+  geom_col(
+    data = by_state,
+    aes(y = state_name, x = `FEMA Declaration Percent`),
+    fill =  khroma::color('light', reverse = FALSE)(1),
+    color = 'white',
+  ) +
+  geom_text(
+    data = by_state,
+    aes(
+      y = state_name,
+      x = `FEMA Declaration Percent`,
+      label = paste0(
+        case_when(
+          between(`FEMA Declaration Percent`, .001, .02) ~ paste0(
+            sprintf('%.1f', 100 * `FEMA Declaration Percent`),
+            '%'
+          ),
+          `FEMA Declaration Percent` < .001 ~ '',
+          TRUE ~ paste0(sprintf('%.0f', 100 * `FEMA Declaration Percent`), '%'),
+        ),
+        if_else(
+          `FEMA Declarations` == 0,
+          '0',
+          glue(' ({`FEMA Declarations`})')
+        )
+      ),
+      hjust = -.1
+    ),
+    color = 'grey10'
+  ) +
+  scale_x_continuous(
+    labels = scales::percent,
+    name = 'Events declared disaster',
+    expand = c(0, 0, 0, .17)
+  ) +
+  scale_y_discrete(name = '', limits = rev, expand = c(.01, .01)) +
+  theme(
+    panel.margin = unit(0, 'cm'),
+    axis.ticks = element_blank(),
+    axis.text.y = element_text(hjust = 1),
+    panel.grid.major.x = element_line(linewidth = .25, color = 'grey25'),
+    panel.grid.minor.x = element_line(linewidth = .25, color = 'grey75')
+  )
+```
+
+### Variables vs. FEMA Declarations
+
+```{r, fig.height = 30, fig.width = 4}
+by_state_long <- by_state %>%
+  select(-`FEMA Declaration Percent`) %>% 
+  pivot_longer(-c(usfs_region, state_abb, state_name, `FEMA Declarations`)) 
+
+plotme <- function(by_state_long, name){
+  ggplot(by_state_long) +
+    #geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') +
+    geom_point(aes(x = value, y = `FEMA Declarations`, color = usfs_region)) +
+    ggrepel::geom_label_repel(
+      aes(x = value, y = `FEMA Declarations`, label = state_abb, fill = usfs_region),
+      max.overlaps = 5
+    ) +
+    scale_x_continuous(name = name, labels = scales::comma) +
+    scale_y_continuous(labels = scales::comma) +
+    scale_fill_manual(
+      values = region_colors
+    ) +
+    scale_color_manual(
+      values = region_colors
+    ) + 
+    #facet_wrap(~name, ncol = 1, scales = 'free', strip.position = 'bottom') +
+    theme(
+      plot.margin = margin(r = 25, l = 25, unit = "pt"),
+      panel.grid.major = element_line(linewidth = .25, color = 'grey75'), 
+      axis.ticks = element_blank(),
+      legend.position = 'bottom'#, 
+      #panel.spacing.y = unit(100, 'pt')
+    ) + 
+    guides(
+      color = 'none',
+      fill = guide_legend(ncol = 2, title = NULL, override.aes = list(label = '  '))
+    )
+}
+
+
+scatters <- by_state_long %>%
+  group_by(name) %>%
+  nest() %>%
+  mutate(
+    p_natural = map(data, plotme, name = name),
+    p_log = map(
+      p_natural, 
+      ~ .x +  
+        scale_x_continuous(name = name, labels = scales::comma, transform = 'pseudo_log') + #, breaks = scales::breaks_extended(n = 5)) +
+        scale_y_continuous(labels = scales::comma, transform = 'pseudo_log') #, breaks = scales::breaks_extended(n = 6)) 
+    )
+  )
+
+# Create text grobs for headers
+header_natural <- wrap_elements(grid::textGrob("Natural scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
+#header_log <- wrap_elements(grid::textGrob("Log scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
+
+# Put all plots together with headers
+n_plots <- nrow(scatters)
+all_plots <- c(
+  #list(header_natural), 
+  scatters$p_natural#,
+  #list(header_log), scatters$p_log
+)
+
+wrap_plots(
+  all_plots, 
+  ncol = 1, 
+  byrow = FALSE, 
+  #heights = c(0.1, rep(1, n_plots)), 
+  guides = 'collect'
+) & 
+  theme(legend.position = 'bottom', plot.margin = unit(c(0, 5, 50, 5), 'pt'))
+
+# 
+# wrap_plots(
+#   wrap_plots(scatters$p_natural, ncol = 1, guides = 'collect'),
+#   wrap_plots(scatters$p_log, ncol = 1, guides = 'collect'),
+#   ncol = 2,
+#   guides = 'collect'
+# )# +
+#   plot_annotation(theme = theme(legend.position = 'bottom'))
+```
+
+_Note: to show y axis label at each plot will require custom coding -- need to jitter y axis values
+or else create each plot without facet_
+
+```{r}
+hexgrid <- st_make_grid(states_pop, square = FALSE, n = c(500, 500)) %>%
+  st_as_sf() %>%
+  mutate(hexid = row_number()) %>%
+  st_filter(states_pop)
+
+hex_summary <- hexgrid %>%
+  st_join(wfbz, left = FALSE) %>%
+  group_by(hexid) %>%
+  summarize(
+    `Events` = n(),
+    `Fatalities` = sum(wildfire_max_civil_fatalities, na.rm = TRUE),
+    `Structures Destroyed` = sum(wildfire_struct_destroyed, na.rm = TRUE),
+    `FEMA Declarations` = sum(wildfire_fema_dec, na.rm = TRUE),
+    `Burned Area` = sum(wildfire_area, na.rm = TRUE),
+    `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
+    `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  st_shift_longitude()
+
+theme_update(
+  axis.ticks.x = element_blank(),
+  axis.ticks.y = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_blank(),
+  axis.line = element_blank()
+)
+```
+
+### Geographic Distribution (all years)
+
+Events
+
+```{r}
+ggplot() +
+  geom_sf(
+    data = shift_geometry(hex_summary),
+    aes(fill = Events),
+    color = NA
+  ) +
+  geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+  scale_fill_distiller(palette = 'Spectral', name = '')
+
+```
+
+FEMA Declarations
+
+```{r}
+ggplot() +
+  geom_sf(
+    data = shift_geometry(hex_summary),
+    aes(fill = `FEMA Declarations`),
+    color = NA
+  ) +
+  geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+  scale_fill_distiller(palette = 'Spectral', name = '')
+
+```
+
+Declarations per Event
+
+*How to disentangle that FEMA Declarations makes an event?*
+
+```{r}
+ggplot() +
+  geom_sf(
+    data = shift_geometry(hex_summary),
+    aes(fill = `FEMA Declarations` / Events),
+    color = NA
+  ) +
+  geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+  scale_fill_distiller(palette = 'Spectral', name = '', labels = scales::percent)
+```
+
+Declarations per Event (Scale Shifted)
+
+```{r}
+#| include: false
+ggplot() +
+  geom_sf(
+    data = shift_geometry(hex_summary),
+    aes(fill = `FEMA Declarations` / Events),
+    color = NA
+  ) +
+  geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+  scale_fill_distiller(
+    palette = 'Spectral',
+    name = '',
+    values = c(0, scales::breaks_log()(c(.0001, 1)))
+  )
+```
