@@ -4,7 +4,7 @@ See: https://casey-cohort.github.io/wfbz_descriptives/
 
 ## Dependencies
 
-R, Quarto, and the following R packages: 
+R, Quarto, Conda, and the following R packages: 
 
 * tidyverse
 * sf
@@ -16,13 +16,20 @@ R, Quarto, and the following R packages:
 * ggh4x
 * tigris
 
+For the python environment, run: 
+
+```
+conda create -n wfbz numpy pandas geopandas jupyter
+conda activate wfbz
+pip install popexposure
+```
+
 
 ## Data Prep
 
 Manually download data set from 
 https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DWILBW 
-and unzip to data/raw. Then run the R script `prep_data.R`. 
-
+and unzip to data/raw. 
 
 ## Rendering
 
