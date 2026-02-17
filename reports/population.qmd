@@ -22,47 +22,83 @@ library(duckdb)
 ```{r pop_data}
 # Download Population data if it doesn't exist
 
-download_spatial_ghs_pop <- function(yr, dst){
-  outfile <- file.path(dst, glue('GHS_POP_E{yr}_GLOBE_R2023A_54009_100_V1_0.tif'))	
-  if(!fs::file_exists(outfile)){
-  	unzip_url(
-  		glue('https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E{yr}_GLOBE_R2023A_54009_100/V1-0/GHS_POP_E{yr}_GLOBE_R2023A_54009_100_V1_0.zip'),
-  		dir_create(dst)
-  	)
+download_spatial_ghs_pop <- function(yr, dst) {
+  outfile <- file.path(
+    dst,
+    glue('GHS_POP_E{yr}_GLOBE_R2023A_54009_100_V1_0.tif')
+  )
+  if (!fs::file_exists(outfile)) {
+    unzip_url(
+      glue(
+        'https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E{yr}_GLOBE_R2023A_54009_100/V1-0/GHS_POP_E{yr}_GLOBE_R2023A_54009_100_V1_0.zip'
+      ),
+      dir_create(dst)
+    )
   }
   outfile
 }
 
-download_spatial_ghs_pop(2000, '..data/raw/pop_data/2000/')
-download_spatial_ghs_pop(2005, '..data/raw/pop_data/2005/')
-download_spatial_ghs_pop(2010, '..data/raw/pop_data/2010/')
-download_spatial_ghs_pop(2015, '..data/raw/pop_data/2015/')
-download_spatial_ghs_pop(2020, '..data/raw/pop_data/2020/')
+popfile <- list()
+popfile['2000'] <- download_spatial_ghs_pop(2000, '../data/raw/ghs_pop/2000/')
+popfile['2005'] <- download_spatial_ghs_pop(2005, '../data/raw/ghs_pop/2005/')
+popfile['2010'] <- download_spatial_ghs_pop(2010, '../data/raw/ghs_pop/2010/')
+popfile['2015'] <- download_spatial_ghs_pop(2015, '../data/raw/ghs_pop/2015/')
+popfile['2020'] <- download_spatial_ghs_pop(2020, '../data/raw/ghs_pop/2020/')
 ```
 
 ```{r census_data}
 # Pull Census data from NHGIS if it doesn't yet exist
-if(!dir_exists('../data/raw/nhgis')){
+if (!dir_exists('../data/raw/nhgis')) {
   dir_create('../data/raw/nhgis')
   datasets_to_fetch <- get_metadata_catalog('nhgis', 'data_tables') %>% # find which tables contain variables of interest
-    filter( 
-      name %in% c("NP049C", "NH030A", "NH035A", "NH034A", "NH044A", "B25014", 
-        "NH069A", "NH094A", "C24050", "B25024", "B25035", "B25034", "B25044", 
-        "B25070", "B25091", "B27010")
+    filter(
+      name %in%
+        c(
+          "NP049C",
+          "NH030A",
+          "NH035A",
+          "NH034A",
+          "NH044A",
+          "B25014",
+          "NH069A",
+          "NH094A",
+          "C24050",
+          "B25024",
+          "B25035",
+          "B25034",
+          "B25044",
+          "B25070",
+          "B25091",
+          "B27010"
+        )
     ) %>%
-    filter( # filter data sets to those from dates of interest
-      between(as.integer(substr(dataset_name, 1, 4)), 2000, 2022) 
+    filter(
+      # filter data sets to those from dates of interest
+      between(as.integer(substr(dataset_name, 1, 4)), 2000, 2022)
     ) %>%
     nest(.by = dataset_name) %>%
-    filter( # filter out any data set we found that doesn't have tracts
-      unlist(map(dataset_name, ~ 'tract' %in% get_metadata('nhgis', .x)$geog_levels$name))
-    ) 
+    filter(
+      # filter out any data set we found that doesn't have tracts
+      unlist(map(
+        dataset_name,
+        ~ 'tract' %in% get_metadata('nhgis', .x)$geog_levels$name
+      ))
+    )
   dir_create('../data/processed/nhgis')
-  write_csv(datasets_to_fetch %>% unnest(data), '../data/processed/nhgis/nhgis_datasets_pulled.csv')
-  dataset_specs <- datasets_to_fetch %>% pmap(\(dataset_name, data) ds_spec(dataset_name, data$name, geog_levels = 'tract'))
-  
-  ts_specs <- map(c("B84", "C50", "B79", "C20", "B85", "B37", "A43", "AV0", "CV4"), ~tst_spec(.x, geog_levels = "tract"))
-  
+  write_csv(
+    datasets_to_fetch %>% unnest(data),
+    '../data/processed/nhgis/nhgis_datasets_pulled.csv'
+  )
+  dataset_specs <- datasets_to_fetch %>%
+    pmap(\(dataset_name, data) {
+      ds_spec(dataset_name, data$name, geog_levels = 'tract')
+    })
+
+  ts_specs <- map(
+    c("B84", "C50", "B79", "C20", "B85", "B37", "A43", "AV0", "CV4"),
+    ~ tst_spec(.x, geog_levels = "tract")
+  )
+
   nhgis_extract_request <- define_extract_agg(
     "nhgis",
     description = "WFBZ Population Analysis",
@@ -72,47 +108,102 @@ if(!dir_exists('../data/raw/nhgis')){
   )
   submitted_extract <- submit_extract(nhgis_extract_request)
   downloadable_extract <- wait_for_extract(submitted_extract)
-  path_to_data_files <- download_extract(downloadable_extract, download_dir = '../data/raw/nhgis')
+  path_to_data_files <- download_extract(
+    downloadable_extract,
+    download_dir = '../data/raw/nhgis'
+  )
   # Get rid of specific data request number and move files out of zip dir
-  dir_ls('../data/raw/nhgis', glob = '*.zip') %>% walk(unzip, exdir = '../data/raw/nhgis')
-  dir_ls('../data/raw/nhgis', type = 'directory') %>% dir_ls() %>% walk(~file_move(.x, path('../data/raw/nhgis', str_replace(basename(.x), 'nhgis[0-9]{4}_', '')))) 
+  dir_ls('../data/raw/nhgis', glob = '*.zip') %>%
+    walk(unzip, exdir = '../data/raw/nhgis')
+  dir_ls('../data/raw/nhgis', type = 'directory') %>%
+    dir_ls() %>%
+    walk(
+      ~ file_move(
+        .x,
+        path(
+          '../data/raw/nhgis',
+          str_replace(basename(.x), 'nhgis[0-9]{4}_', '')
+        )
+      )
+    )
   dir_ls('../data/raw/nhgis', type = 'directory') %>% walk(fs::dir_delete)
 }
 ```
 
 ```{r duckify}
-conn <- dbConnect(duckdb(), '../data/processed/nhgis/nhgis.duckdb') 
-for(f in dir_ls('../data/raw/nhgis', glob = '*tract.csv')){
-  dbExecute(conn, glue('CREATE TABLE IF NOT EXISTS {fs::path_ext_remove(basename(f))} AS SELECT * FROM read_csv_auto(\'{f}\', sample_size=-1)'))
+#| cache: True
+conn <- dbConnect(duckdb(), '../data/processed/nhgis/nhgis.duckdb')
+for (f in dir_ls('../data/raw/nhgis', glob = '*tract.csv')) {
+  dbExecute(
+    conn,
+    glue(
+      'CREATE TABLE IF NOT EXISTS {fs::path_ext_remove(basename(f))} AS SELECT * FROM read_csv_auto(\'{f}\', sample_size=-1)'
+    )
+  )
 }
-for(f in dir_ls('../data/raw/nhgis', glob = '*codebook.txt')){
+for (f in dir_ls('../data/raw/nhgis', glob = '*codebook.txt')) {
   codebook <- read_nhgis_codebook(f)$var_info
-  dbWriteTable(conn, value = codebook, name = fs::path_ext_remove(basename(f)))
+  dbWriteTable(
+    conn,
+    value = codebook,
+    name = fs::path_ext_remove(basename(f)),
+    overwrite = TRUE
+  )
 }
 ```
 
 ```{r format_census_data}
+#| cache: True
 # turn everything into one really long table
-tbls <- fs::path_ext_remove(basename(dir_ls('../data/raw/nhgis', glob = '*tract.csv')))
+tbls <- fs::path_ext_remove(basename(dir_ls(
+  '../data/raw/nhgis',
+  glob = '*tract.csv'
+)))
 long_tbls <- map(
   str_subset(tbls, '^ts', negate = TRUE),
-  ~tbl(conn, .x) %>%
-    select(-matches('Margin(s?) of error')) %>% 
-    pivot_longer(-c(YEAR, STATEA, COUNTYA, TRACTA), names_to = 'var_name', values_drop_na = TRUE) %>%
-    inner_join(tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')) %>%
+  ~ tbl(conn, .x) %>%
+    select(-matches('Margin(s?) of error')) %>%
+    pivot_longer(
+      -c(YEAR, STATEA, COUNTYA, TRACTA),
+      names_to = 'var_name',
+      values_drop_na = TRUE
+    ) %>%
+    inner_join(
+      tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')
+    ) %>%
     mutate(GEOID = paste0(STATEA, COUNTYA, TRACTA)) %>%
-    select(GEOID, YEAR, code = var_name, table = var_desc, category = var_label, value) 
+    select(
+      GEOID,
+      YEAR,
+      code = var_name,
+      table = var_desc,
+      category = var_label,
+      value
+    )
 ) %>%
   append(
     map(
       str_subset(tbls, '^ts'),
-      ~tbl(conn, .x) %>%
-        select(-matches('Margin(s?) of error')) %>% 
-        pivot_longer(-c(YEAR, STATEFP, COUNTYFP, TRACTA), names_to = 'var_name', values_drop_na = TRUE) %>%
-        inner_join(tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')) %>%
+      ~ tbl(conn, .x) %>%
+        select(-matches('Margin(s?) of error')) %>%
+        pivot_longer(
+          -c(YEAR, STATEFP, COUNTYFP, TRACTA),
+          names_to = 'var_name',
+          values_drop_na = TRUE
+        ) %>%
+        inner_join(
+          tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')
+        ) %>%
         mutate(GEOID = paste0(STATEFP, COUNTYFP, TRACTA)) %>%
-        select(GEOID, YEAR, code = var_name, table = var_desc, category = var_label, value) 
-    ) 
+        select(
+          GEOID,
+          YEAR,
+          code = var_name,
+          table = var_desc,
+          category = var_label,
+          value
+        )
+    )
   ) %>%
   reduce(union_all) %>%
   compute(name = paste0('all_long'), overwrite = TRUE, temporary = FALSE)
@@ -122,87 +213,105 @@ long_tbls <- map(
 ```{r}
 # Pull all data, categorize, name, and break it up into our output vars of interst
 var_types_ts <- tribble(
-  ~nhgis_code, ~var_type,
-  'AV0',	'population',
-  'B84',	'unemployment',
-  'C50',	'commute_time',
-  'B79',	'income',
-  'C20',	'poverty_lt_100',
-  'B37',	'renters',
-  'A43',	'housing_vacant',
-  'CV4',	'race',
-  'B85',	'education',
+  ~nhgis_code , ~var_type        ,
+  'AV0'       , 'population'     ,
+  'B84'       , 'unemployment'   ,
+  'C50'       , 'commute_time'   ,
+  'B79'       , 'income'         ,
+  'C20'       , 'poverty_lt_100' ,
+  'B37'       , 'renters'        ,
+  'A43'       , 'housing_vacant' ,
+  'CV4'       , 'race'           ,
+  'B85'       , 'education'      ,
 )
 var_types_ds <- tribble(
-  ~name, ~var_type,
-  'NP049C',	'industry',
-  'C24050',	'industry',
-  'B27010',	'health_insurance',
-  'NH030A',	'housing_type',
-  'B25024',	'housing_type',
-  'NH035A',	'housing_year',
-  'B25035',	'housing_year',
-  'NH034A', 'housing_year',
-  'B25034', 'housing_year',
-  'NH044A',	'vehicle_avail',
-  'B25044',	'vehicle_avail',
-  'B28011',	'internet',
-  'B25014',	'housing_crowding',
-  'NH069A',	'housing_cost_burden',
-  'NH094A',	'housing_cost_burden',
-  'B25070',	'housing_cost_burden',
-  'B25091',	'housing_cost_burden',
+  ~name    , ~var_type             ,
+  'NP049C' , 'industry'            ,
+  'C24050' , 'industry'            ,
+  'B27010' , 'health_insurance'    ,
+  'NH030A' , 'housing_type'        ,
+  'B25024' , 'housing_type'        ,
+  'NH035A' , 'housing_year'        ,
+  'B25035' , 'housing_year'        ,
+  'NH034A' , 'housing_year'        ,
+  'B25034' , 'housing_year'        ,
+  'NH044A' , 'vehicle_avail'       ,
+  'B25044' , 'vehicle_avail'       ,
+  'B28011' , 'internet'            ,
+  'B25014' , 'housing_crowding'    ,
+  'NH069A' , 'housing_cost_burden' ,
+  'NH094A' , 'housing_cost_burden' ,
+  'B25070' , 'housing_cost_burden' ,
+  'B25091' , 'housing_cost_burden' ,
 ) %>%
   left_join(get_metadata_catalog('nhgis', 'data_tables')) %>%
   select(nhgis_code, var_type) %>%
   distinct()
 
 
-
 ```
 
 ```{r}
-vt <- dbGetQuery(conn, 'select * from all_long where GEOID like \'50%\' and category not like \'Margin of error%\'') %>%
+vt <- dbGetQuery(
+  conn,
+  'select * from all_long where category not like \'Margin of error%\''
+) %>%
   mutate(nhgis_code = str_extract(table, '(?<=Table )[A-Z0-9]+')) %>%
   left_join(bind_rows(var_types_ds, var_types_ts)) %>%
-  split(.$var_type) #%>% 
-  #map(
-  #  ~ pivot_wider(.x, id_cols = c(GEOID, table, YEAR, var_type), values_from = value, names_from = category)
-  #)
+  split(.$var_type) #%>%
+#map(
+#  ~ pivot_wider(.x, id_cols = c(GEOID, table, YEAR, var_type), values_from = value, names_from = category)
+#)
 vt_processed <- list()
 vt_processed$commute_time <- vt$commute_time %>%
   group_by(GEOID, YEAR) %>%
-    transmute(
-    GEOID, 
+  transmute(
+    GEOID,
     year = YEAR,
     commute_time_min = case_when(
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ Less than 5 minutes" ~ 0,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 5 to 9 minutes"      ~ 5,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 10 to 14 minutes"    ~ 10,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 15 to 19 minutes"    ~ 15,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 20 to 29 minutes"    ~ 20,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 30 to 44 minutes"    ~ 30,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 45 to 59 minutes"    ~ 45,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 60 or more minutes"  ~ 60
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ Less than 5 minutes" ~ 0,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 5 to 9 minutes" ~ 5,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 10 to 14 minutes" ~ 10,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 15 to 19 minutes" ~ 15,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 20 to 29 minutes" ~ 20,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 30 to 44 minutes" ~ 30,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 45 to 59 minutes" ~ 45,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 60 or more minutes" ~ 60
     ),
     commute_time_max = case_when(
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ Less than 5 minutes" ~ 4,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 5 to 9 minutes"      ~ 9,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 10 to 14 minutes"    ~ 14,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 15 to 19 minutes"    ~ 19,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 20 to 29 minutes"    ~ 29,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 30 to 44 minutes"    ~ 44,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 45 to 59 minutes"    ~ 59,
-      category == "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 60 or more minutes"  ~ Inf
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ Less than 5 minutes" ~ 4,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 5 to 9 minutes" ~ 9,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 10 to 14 minutes" ~ 14,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 15 to 19 minutes" ~ 19,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 20 to 29 minutes" ~ 29,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 30 to 44 minutes" ~ 44,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 45 to 59 minutes" ~ 59,
+      category ==
+        "Persons: Worker ~ 16 years and over ~ Did not work from home ~ 60 or more minutes" ~ Inf
     ),
     count = as.numeric(value),
-    frac = count/sum(count, na.rm = TRUE)
+    frac = count / sum(count, na.rm = TRUE)
   )
 
 vt_processed$education <- vt$education %>%
   group_by(GEOID, YEAR) %>%
   transmute(
-    GEOID, 
+    GEOID,
     year = YEAR,
     education = str_replace(category, 'Persons: 25 years and over ~ ', ''),
     education_order = case_when(
@@ -215,21 +324,36 @@ vt_processed$education <- vt$education %>%
       str_detect(category, "Graduate or professional degree") ~ 7
     ),
     count = as.numeric(value),
-    frac = count/sum(count, na.rm = TRUE)
+    frac = count / sum(count, na.rm = TRUE)
   )
 
 vt_processed$housing_cost_burden <- vt$housing_cost_burden %>%
   filter(
-    (str_detect(table, "Mortgage Status by Selected Monthly Owner Costs as a Percentage of Household Income in the Past 12 Months") & str_detect(category, "^Estimates")) |
-    (str_detect(table, "Gross Rent as a Percentage of Household Income in the Past 12 Months") & str_detect(category, "^Estimates"))
+    (str_detect(
+      table,
+      "Mortgage Status by Selected Monthly Owner Costs as a Percentage of Household Income in the Past 12 Months"
+    ) &
+      str_detect(category, "^Estimates")) |
+      (str_detect(
+        table,
+        "Gross Rent as a Percentage of Household Income in the Past 12 Months"
+      ) &
+        str_detect(category, "^Estimates"))
   ) %>%
   mutate(
-    GEOID, 
+    GEOID,
     year = YEAR,
     education = str_replace(category, 'Persons: 25 years and over ~ ', ''),
-    cost_burdened =
-      (str_detect(table, "Mortgage Status by Selected Monthly Owner Costs as a Percentage of Household Income in the Past 12 Months") & str_detect(category, "50.0 percent or more")) |
-      (str_detect(table, "Gross Rent as a Percentage of Household Income in the Past 12 Months") & str_detect(category, "50.0 percent or more")),
+    cost_burdened = (str_detect(
+      table,
+      "Mortgage Status by Selected Monthly Owner Costs as a Percentage of Household Income in the Past 12 Months"
+    ) &
+      str_detect(category, "50.0 percent or more")) |
+      (str_detect(
+        table,
+        "Gross Rent as a Percentage of Household Income in the Past 12 Months"
+      ) &
+        str_detect(category, "50.0 percent or more")),
     count = as.numeric(value)
   ) %>%
   group_by(GEOID, year, cost_burdened) %>%
@@ -239,14 +363,18 @@ vt_processed$housing_cost_burden <- vt$housing_cost_burden %>%
   ) %>%
   group_by(GEOID, year) %>%
   mutate(
-    frac = count/sum(count),
+    frac = count / sum(count),
   ) %>%
   ungroup()
-  
+
 vt_processed$poverty_lt_100 <- vt$poverty_lt_100 %>%
   mutate(
     year = YEAR,
-    poverty_lt_100 = coalesce(as.numeric(str_extract(category, '[0-9\\.]+$')), Inf) < 1.0,
+    poverty_lt_100 = coalesce(
+      as.numeric(str_extract(category, '[0-9\\.]+$')),
+      Inf
+    ) <
+      1.0,
   ) %>%
   group_by(GEOID, year, poverty_lt_100) %>%
   summarize(
@@ -255,11 +383,11 @@ vt_processed$poverty_lt_100 <- vt$poverty_lt_100 %>%
   ) %>%
   group_by(GEOID, year) %>%
   mutate(
-    frac = count/sum(count),
+    frac = count / sum(count),
   ) %>%
   ungroup()
 
-  
+
 vt_processed$vehicle_avail <- vt$vehicle_avail %>%
   filter(str_detect(category, 'Estimates'), !str_detect(category, "Total")) %>%
   mutate(
@@ -273,21 +401,23 @@ vt_processed$vehicle_avail <- vt$vehicle_avail %>%
   ) %>%
   group_by(GEOID, year) %>%
   mutate(
-    frac = count/sum(count),
+    frac = count / sum(count),
   ) %>%
   ungroup()
 
 vt_processed$race <- vt$race %>%
- group_by(GEOID, YEAR) %>%
+  group_by(GEOID, YEAR) %>%
   transmute(
-    GEOID, 
+    GEOID,
     year = YEAR,
     race_ethnicity = category,
     ethnicity = str_extract(category, '(Not )?Hispanic or Latino'),
     race = str_extract(category, '(?<=~ ).*$'),
     count = as.numeric(value),
-    frac = count/sum(count, na.rm = TRUE)
+    frac = count / sum(count, na.rm = TRUE)
   )
+
+saveRDS(vt_processed, '../data/processed/nhgis/for_report.rds')
 
 ```
 
@@ -302,19 +432,27 @@ Housing Cost Burden (>50%)
 
 library(tigris)
 library(sf)
-tracts_sf <- tracts(state = 'VT', county = 'Chittenden', cb = TRUE, year = 2010) %>% mutate(GEOID = paste0(STATE, COUNTY, TRACT)) %>% tigris::erase_water(area_threshold = .9)
+tracts_sf <- tracts(
+  state = 'VT',
+  county = 'Chittenden',
+  cb = TRUE,
+  year = 2010
+) %>%
+  mutate(GEOID = paste0(STATE, COUNTY, TRACT)) %>%
+  tigris::erase_water(area_threshold = .9)
 
 inner_join(
   tracts_sf,
-  vt_processed$housing_cost_burden %>% filter(year == '2015-2019', cost_burdened),
+  vt_processed$housing_cost_burden %>%
+    filter(year == '2015-2019', cost_burdened),
   by = "GEOID"
 ) %>%
-  ggplot() + 
+  ggplot() +
   geom_sf(
     color = NA,
     aes(fill = frac)
-  ) + 
-  scale_fill_distiller(palette = 'Spectral') + 
+  ) +
+  scale_fill_distiller(palette = 'Spectral') +
   theme_void()
 
 ```
@@ -330,13 +468,13 @@ inner_join(
   vt_processed$poverty_lt_100 %>% filter(year == '2015-2019', poverty_lt_100),
   by = "GEOID"
 ) %>%
-  ggplot() + 
+  ggplot() +
   geom_sf(
     color = NA,
     aes(fill = frac)
-  ) + 
-  scale_fill_distiller(palette = 'Spectral', name = '') + 
-  theme_void() + 
+  ) +
+  scale_fill_distiller(palette = 'Spectral', name = '') +
+  theme_void() +
   ggtitle("Population Above 100% Poverty Limit")
 
 ```
@@ -350,13 +488,13 @@ inner_join(
   vt_processed$vehicle_avail %>% filter(year == '2015-2019', !no_vehicle),
   by = "GEOID"
 ) %>%
-  ggplot() + 
+  ggplot() +
   geom_sf(
     color = NA,
     aes(fill = frac)
-  ) + 
-  scale_fill_distiller(palette = 'Spectral', name = '') + 
-  theme_void() + 
+  ) +
+  scale_fill_distiller(palette = 'Spectral', name = '') +
+  theme_void() +
   ggtitle("Vehicle Available in Household")
 ```
 
@@ -366,15 +504,20 @@ Race (% NH White)
 
 inner_join(
   tracts_sf,
-  vt_processed$race %>% filter(year == '2015-2019', str_detect(race, 'White'), str_detect(ethnicity, 'Not')),
+  vt_processed$race %>%
+    filter(
+      year == '2015-2019',
+      str_detect(race, 'White'),
+      str_detect(ethnicity, 'Not')
+    ),
   by = "GEOID"
 ) %>%
-  ggplot() + 
+  ggplot() +
   geom_sf(
     color = NA,
     aes(fill = frac)
-  ) + 
-  scale_fill_distiller(palette = 'Spectral', name = '') + 
-  theme_void() + 
+  ) +
+  scale_fill_distiller(palette = 'Spectral', name = '') +
+  theme_void() +
   ggtitle("Non-Hispanic White")
 ```

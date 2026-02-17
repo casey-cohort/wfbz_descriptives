@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 data/raw/
+data/processed/
 .vscode
 rsconnect/
 *cache/
@@ -11,3 +12,4 @@ rsconnect/
 docs/
 **/*.quarto_ipynb
 *.html
+rendered/
