@@ -19,9 +19,17 @@ set.seed(708)
 ```
 
 ```{r data_check}
-expected_parquet <- c('race', 'poverty_lt_100', 'vehicle_avail', 'housing_cost_burden')
+expected_parquet <- c(
+  'race',
+  'poverty_lt_100',
+  'vehicle_avail',
+  'housing_cost_burden'
+)
 missing_parquet <- expected_parquet[
-  !file.exists(here('data/processed/nhgis', paste0(expected_parquet, '.parquet')))
+  !file.exists(here(
+    'data/processed/nhgis',
+    paste0(expected_parquet, '.parquet')
+  ))
 ]
 if (length(missing_parquet) > 0) {
   stop(
@@ -53,140 +61,86 @@ housing_cost <- read_parquet(here(
 wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
 ```
 
-```{r}
-census_sf <- reduce(
-  list(
-    race %>%
-      mutate(census_year = 10 * floor(start_year / 10)) %>%
-      group_by(GEOID, census_year) %>%
-      nest(.key = 'race'),
-    poverty %>%
-      mutate(census_year = 10 * floor(start_year / 10)) %>%
-      group_by(GEOID, census_year) %>%
-      nest(.key = 'poverty'),
-    vehicle_avail %>%
-      mutate(census_year = 10 * floor(start_year / 10)) %>%
-      group_by(GEOID, census_year) %>%
-      nest(.key = 'vehicle_avail'),
-    housing_cost %>%
-      mutate(census_year = 10 * floor(start_year / 10)) %>%
-      group_by(GEOID, census_year) %>%
-      nest(.key = 'housing_cost'),
-    tract_sf
-  ),
-  full_join,
-  by = c('GEOID', 'census_year')
-) %>%
-  st_as_sf()
-
-census_data_by_wf <- st_join(
-  wfbz,
-  census_sf,
+```{r spatial_join}
+#| cache: True
+# Lean spatial join: just get wildfire_id -> GEOID mappings (no census payload)
+wf_tract_matches <- st_join(
+  wfbz %>% select(wildfire_id, wildfire_year),
+  tract_sf %>% select(GEOID, census_year),
   join = st_is_within_distance,
   dist = units::as_units(10, 'km')
 ) %>%
-  select(
-    wildfire_id,
-    wildfire_year,
-    census_year,
-    GEOID,
-    race,
-    poverty,
-    vehicle_avail,
-    housing_cost
-  ) %>%
   st_drop_geometry() %>%
-  filter(10 * floor(wildfire_year / 10) == census_year) %>% # filter to correct tract geographies
-  # RACE
-  unnest(race, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`race|start_year`) %>%
-  filter(between(wildfire_year, `race|start_year`, `race|end_year`)) %>%
-  filter(`race|period` == first(`race|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'race', .names_sep = '|') %>%
+  filter(10 * floor(wildfire_year / 10) == census_year)
 
-  # POVERTY
-  unnest(poverty, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`poverty|start_year`) %>%
-  filter(between(wildfire_year, `poverty|start_year`, `poverty|end_year`)) %>%
-  filter(`poverty|period` == first(`poverty|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'poverty', .names_sep = '|') %>%
+rm(tract_sf)
 
-  # VEHICLE AVAILABLE
-  unnest(vehicle_avail, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`vehicle_avail|start_year`) %>%
-  filter(between(
-    wildfire_year,
-    `vehicle_avail|start_year`,
-    `vehicle_avail|end_year`
-  )) %>%
-  filter(`vehicle_avail|period` == first(`vehicle_avail|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'vehicle_avail', .names_sep = '|') %>%
+# For each variable: join flat census data, keep earliest matching survey period
+join_census <- function(matches, census_data) {
+  matches %>%
+    left_join(census_data, by = 'GEOID') %>%
+    filter(between(wildfire_year, start_year, end_year)) %>%
+    group_by(wildfire_id, GEOID) %>%
+    filter(period == period[which.min(start_year)]) %>%
+    ungroup()
+}
 
-  # HOUSING COST
-  unnest(housing_cost, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`housing_cost|start_year`) %>%
-  filter(between(
-    wildfire_year,
-    `housing_cost|start_year`,
-    `housing_cost|end_year`
-  )) %>%
-  filter(`housing_cost|period` == first(`housing_cost|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'housing_cost', .names_sep = '|') %>%
-  select(-census_year, -wildfire_year)
+race_by_wf         <- join_census(wf_tract_matches, race)
+poverty_by_wf      <- join_census(wf_tract_matches, poverty)
+vehicle_avail_by_wf <- join_census(wf_tract_matches, vehicle_avail)
+housing_cost_by_wf  <- join_census(wf_tract_matches, housing_cost)
 
-# Aggregate all the blocks in each wfbz's buffer
-z <- census_data_by_wf %>%
-  mutate(
-    race = map(
-      race,
-      ~ .x %>%
-        group_by(race, ethnicity, period) %>%
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
-        ungroup() %>%
-        mutate(frac = count / sum(count)) %>%
-        pivot_wider(
-          values_from = c(count, frac),
-          names_from = c(race, ethnicity)
-        )
-    ),
-    poverty = map(
-      poverty,
-      ~ .x %>%
-        group_by(category, period) %>%
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
-        ungroup() %>%
-        mutate(frac = count / sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(category))
-    ),
-    vehicle_avail = map(
-      vehicle_avail,
-      ~ .x %>%
-        group_by(no_vehicle, period) %>%
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
-        ungroup() %>%
-        mutate(frac = count / sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(no_vehicle))
-    ),
-    cost_burdened = map(
-      housing_cost,
-      ~ .x %>%
-        group_by(cost_burdened, period) %>%
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
-        ungroup() %>%
-        mutate(frac = count / sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(cost_burdened))
-    )
-  ) %>%
-  unnest(race, names_sep = '|') %>%
-  unnest(poverty, names_sep = '|') %>%
-  unnest(vehicle_avail, names_sep = '|') %>%
-  unnest(housing_cost, names_sep = '|')
+rm(wf_tract_matches, race, poverty, vehicle_avail, housing_cost)
+
+# Aggregate across tracts per wildfire
+z <- reduce(
+  list(
+    race_by_wf %>%
+      group_by(wildfire_id, race, ethnicity, period) %>%
+      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      group_by(wildfire_id) %>%
+      mutate(frac = count / sum(count)) %>%
+      ungroup() %>%
+      pivot_wider(
+        values_from = c(count, frac, n_tracts),
+        names_from = c(race, ethnicity),
+        names_sep = '|'
+      ),
+    poverty_by_wf %>%
+      group_by(wildfire_id, category, period) %>%
+      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      group_by(wildfire_id) %>%
+      mutate(frac = count / sum(count)) %>%
+      ungroup() %>%
+      pivot_wider(
+        values_from = c(count, frac, n_tracts),
+        names_from = category,
+        names_sep = '|'
+      ),
+    vehicle_avail_by_wf %>%
+      group_by(wildfire_id, no_vehicle, period) %>%
+      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      group_by(wildfire_id) %>%
+      mutate(frac = count / sum(count)) %>%
+      ungroup() %>%
+      pivot_wider(
+        values_from = c(count, frac, n_tracts),
+        names_from = no_vehicle,
+        names_sep = '|'
+      ),
+    housing_cost_by_wf %>%
+      group_by(wildfire_id, cost_burdened, period) %>%
+      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      group_by(wildfire_id) %>%
+      mutate(frac = count / sum(count)) %>%
+      ungroup() %>%
+      pivot_wider(
+        values_from = c(count, frac, n_tracts),
+        names_from = cost_burdened,
+        names_sep = '|'
+      )
+  ),
+  left_join,
+  by = 'wildfire_id'
+)
 ```
