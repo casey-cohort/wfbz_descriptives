@@ -13,66 +13,40 @@ library(here)
 library(tidyverse)
 library(sf)
 library(arrow)
-library(tigris)
 
 options(scipen = 9999)
 set.seed(708)
 ```
 
-```{r census_data_check}
-expected <- c('race', 'poverty_lt_100', 'vehicle_avail', 'housing_cost_burden')
-missing <- expected[!file.exists(here('data/processed/nhgis', paste0(expected, '.parquet')))]
-if (length(missing) > 0) {
-  stop("Run prep_population.R from the project root first. Missing: ", paste(missing, collapse = ', '))
+```{r data_check}
+expected_parquet <- c('race', 'poverty_lt_100', 'vehicle_avail', 'housing_cost_burden')
+missing_parquet <- expected_parquet[
+  !file.exists(here('data/processed/nhgis', paste0(expected_parquet, '.parquet')))
+]
+if (length(missing_parquet) > 0) {
+  stop(
+    "Run prep_population.R from the project root first. Missing: ",
+    paste(missing_parquet, collapse = ', ')
+  )
+}
+if (!file.exists(here('data/processed/tiger_tracts.rds'))) {
+  stop("Run prep_tracts.R from the project root first.")
 }
 ```
 
 ```{r get_tracts}
-#| cache: True
-tract_sf <- map(
-  c(state.abb, 'PR', 'DC'),
-  function(state){
-  bind_rows(
-    tracts(
-      state = state,
-      cb = TRUE,
-      year = 2000,
-      progress_bar = FALSE
-    ) %>%
-      transmute(
-        census_year = 2000, 
-        GEOID = paste0(STATE, COUNTY, TRACT)
-      ),
-    tracts(
-      state = state,
-      cb = TRUE,
-      year = 2010,
-      progress_bar = FALSE
-    ) %>%
-      transmute(
-        census_year = 2010, 
-        GEOID = paste0(STATE, COUNTY, TRACT)
-      ),
-    tracts(
-      state = state,
-      cb = TRUE,
-      year = 2020,
-      progress_bar = FALSE
-    ) %>%
-      transmute(
-        census_year = 2020, 
-        GEOID
-      )
-    )
-  }
-) %>% bind_rows()
+tract_sf <- readRDS(here('data/processed/tiger_tracts.rds'))
 ```
 
 ```{r census_data}
 race <- read_parquet(here('data/processed/nhgis/race.parquet'))
 poverty <- read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet'))
-vehicle_avail <- read_parquet(here('data/processed/nhgis/vehicle_avail.parquet'))
-housing_cost <- read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet'))
+vehicle_avail <- read_parquet(here(
+  'data/processed/nhgis/vehicle_avail.parquet'
+))
+housing_cost <- read_parquet(here(
+  'data/processed/nhgis/housing_cost_burden.parquet'
+))
 ```
 
 ```{r wfbz_data}
@@ -82,25 +56,47 @@ wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
 ```{r}
 census_sf <- reduce(
   list(
-    race %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'race'),
-    poverty %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'poverty'),
-    vehicle_avail %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'vehicle_avail'),
-    housing_cost %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'housing_cost'),
+    race %>%
+      mutate(census_year = 10 * floor(start_year / 10)) %>%
+      group_by(GEOID, census_year) %>%
+      nest(.key = 'race'),
+    poverty %>%
+      mutate(census_year = 10 * floor(start_year / 10)) %>%
+      group_by(GEOID, census_year) %>%
+      nest(.key = 'poverty'),
+    vehicle_avail %>%
+      mutate(census_year = 10 * floor(start_year / 10)) %>%
+      group_by(GEOID, census_year) %>%
+      nest(.key = 'vehicle_avail'),
+    housing_cost %>%
+      mutate(census_year = 10 * floor(start_year / 10)) %>%
+      group_by(GEOID, census_year) %>%
+      nest(.key = 'housing_cost'),
     tract_sf
   ),
   full_join,
   by = c('GEOID', 'census_year')
-) %>% st_as_sf()
+) %>%
+  st_as_sf()
 
 census_data_by_wf <- st_join(
-  wfbz, 
-  census_sf, 
+  wfbz,
+  census_sf,
   join = st_is_within_distance,
   dist = units::as_units(10, 'km')
 ) %>%
-  select(wildfire_id, wildfire_year, census_year, GEOID, race, poverty, vehicle_avail, housing_cost) %>%
+  select(
+    wildfire_id,
+    wildfire_year,
+    census_year,
+    GEOID,
+    race,
+    poverty,
+    vehicle_avail,
+    housing_cost
+  ) %>%
   st_drop_geometry() %>%
-  filter(10*floor(wildfire_year/10) == census_year) %>% # filter to correct tract geographies
+  filter(10 * floor(wildfire_year / 10) == census_year) %>% # filter to correct tract geographies
   # RACE
   unnest(race, names_sep = '|') %>% # unnest and pull earliest matching census record
   group_by(wildfire_id) %>%
@@ -109,7 +105,7 @@ census_data_by_wf <- st_join(
   filter(`race|period` == first(`race|period`)) %>%
   ungroup() %>%
   nest(.by = -matches('\\|'), .key = 'race', .names_sep = '|') %>%
-  
+
   # POVERTY
   unnest(poverty, names_sep = '|') %>% # unnest and pull earliest matching census record
   group_by(wildfire_id) %>%
@@ -119,21 +115,28 @@ census_data_by_wf <- st_join(
   ungroup() %>%
   nest(.by = -matches('\\|'), .key = 'poverty', .names_sep = '|') %>%
 
-
   # VEHICLE AVAILABLE
   unnest(vehicle_avail, names_sep = '|') %>% # unnest and pull earliest matching census record
   group_by(wildfire_id) %>%
   arrange(`vehicle_avail|start_year`) %>%
-  filter(between(wildfire_year, `vehicle_avail|start_year`, `vehicle_avail|end_year`)) %>%
+  filter(between(
+    wildfire_year,
+    `vehicle_avail|start_year`,
+    `vehicle_avail|end_year`
+  )) %>%
   filter(`vehicle_avail|period` == first(`vehicle_avail|period`)) %>%
   ungroup() %>%
   nest(.by = -matches('\\|'), .key = 'vehicle_avail', .names_sep = '|') %>%
-  
+
   # HOUSING COST
   unnest(housing_cost, names_sep = '|') %>% # unnest and pull earliest matching census record
   group_by(wildfire_id) %>%
   arrange(`housing_cost|start_year`) %>%
-  filter(between(wildfire_year, `housing_cost|start_year`, `housing_cost|end_year`)) %>%
+  filter(between(
+    wildfire_year,
+    `housing_cost|start_year`,
+    `housing_cost|end_year`
+  )) %>%
   filter(`housing_cost|period` == first(`housing_cost|period`)) %>%
   ungroup() %>%
   nest(.by = -matches('\\|'), .key = 'housing_cost', .names_sep = '|') %>%
@@ -143,45 +146,47 @@ census_data_by_wf <- st_join(
 z <- census_data_by_wf %>%
   mutate(
     race = map(
-      race, 
-      ~.x %>% 
-        group_by(race, ethnicity, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(race, ethnicity))
+      race,
+      ~ .x %>%
+        group_by(race, ethnicity, period) %>%
+        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+        ungroup() %>%
+        mutate(frac = count / sum(count)) %>%
+        pivot_wider(
+          values_from = c(count, frac),
+          names_from = c(race, ethnicity)
+        )
     ),
     poverty = map(
       poverty,
-      ~.x %>%
-        group_by(category, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%
+      ~ .x %>%
+        group_by(category, period) %>%
+        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+        ungroup() %>%
+        mutate(frac = count / sum(count)) %>%
         pivot_wider(values_from = c(count, frac), names_from = c(category))
     ),
     vehicle_avail = map(
       vehicle_avail,
-      ~.x %>% 
-        group_by(no_vehicle, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%
+      ~ .x %>%
+        group_by(no_vehicle, period) %>%
+        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+        ungroup() %>%
+        mutate(frac = count / sum(count)) %>%
         pivot_wider(values_from = c(count, frac), names_from = c(no_vehicle))
-
     ),
     cost_burdened = map(
       housing_cost,
-      ~.x %>% 
-        group_by(cost_burdened, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%         
+      ~ .x %>%
+        group_by(cost_burdened, period) %>%
+        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+        ungroup() %>%
+        mutate(frac = count / sum(count)) %>%
         pivot_wider(values_from = c(count, frac), names_from = c(cost_burdened))
     )
   ) %>%
-  unnest(race, names_sep = '|') %>% 
-  unnest(poverty, names_sep = '|') %>% 
-  unnest(vehicle_avail, names_sep = '|') %>% 
-  unnest(housing_cost, names_sep = '|') 
+  unnest(race, names_sep = '|') %>%
+  unnest(poverty, names_sep = '|') %>%
+  unnest(vehicle_avail, names_sep = '|') %>%
+  unnest(housing_cost, names_sep = '|')
 ```

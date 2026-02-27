@@ -35,9 +35,10 @@ To build the processed population data, run from the project root:
 
 ```
 Rscript prep_population.R
+Rscript prep_tracts.R
 ```
 
-This requires an IPUMS API key set as `IPUMS_API_KEY` in your `.Renviron`.
+`prep_population.R` requires an IPUMS API key set as `IPUMS_API_KEY` in your `.Renviron`.
 
 ## Rendering
 
