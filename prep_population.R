@@ -193,8 +193,10 @@ long_tbls <- map(
         )
     )
   ) %>%
-  reduce(union_all) %>%
-  compute(name = paste0('all_long'), overwrite = TRUE, temporary = FALSE)
+  reduce(union_all)
+
+dbExecute(conn, "DROP TABLE IF EXISTS all_long")
+long_tbls <- compute(long_tbls, name = 'all_long', temporary = FALSE)
 
 # ── Variable classification ───────────────────────────────────────────────────
 
