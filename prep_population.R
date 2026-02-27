@@ -195,9 +195,6 @@ long_tbls <- map(
   ) %>%
   reduce(union_all)
 
-dbExecute(conn, "DROP TABLE IF EXISTS all_long")
-long_tbls <- compute(long_tbls, name = 'all_long', temporary = FALSE)
-
 # ── Variable classification ───────────────────────────────────────────────────
 
 var_types_ts <- tribble(
@@ -237,7 +234,7 @@ var_types_ds <- tribble(
   distinct()
 
 all_long <-
-  tbl(conn, 'all_long') %>%
+  long_tbls %>%
   mutate(nhgis_code = regexp_replace(regexp_extract(table, 'Table [A-Z0-9]+'), 'Table ', '')) %>%
   left_join(bind_rows(var_types_ds, var_types_ts), copy = TRUE) %>%
   select(GEOID, table, YEAR, var_type, category, value)
