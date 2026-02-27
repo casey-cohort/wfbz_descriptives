@@ -31,11 +31,26 @@ download_spatial_ghs_pop <- function(yr, dst) {
 }
 
 popfile <- list()
-popfile['2000'] <- download_spatial_ghs_pop(2000, here('data/raw/ghs_pop/2000/'))
-popfile['2005'] <- download_spatial_ghs_pop(2005, here('data/raw/ghs_pop/2005/'))
-popfile['2010'] <- download_spatial_ghs_pop(2010, here('data/raw/ghs_pop/2010/'))
-popfile['2015'] <- download_spatial_ghs_pop(2015, here('data/raw/ghs_pop/2015/'))
-popfile['2020'] <- download_spatial_ghs_pop(2020, here('data/raw/ghs_pop/2020/'))
+popfile['2000'] <- download_spatial_ghs_pop(
+  2000,
+  here('data/raw/ghs_pop/2000/')
+)
+popfile['2005'] <- download_spatial_ghs_pop(
+  2005,
+  here('data/raw/ghs_pop/2005/')
+)
+popfile['2010'] <- download_spatial_ghs_pop(
+  2010,
+  here('data/raw/ghs_pop/2010/')
+)
+popfile['2015'] <- download_spatial_ghs_pop(
+  2015,
+  here('data/raw/ghs_pop/2015/')
+)
+popfile['2020'] <- download_spatial_ghs_pop(
+  2020,
+  here('data/raw/ghs_pop/2020/')
+)
 
 # ── NHGIS Census API pull ─────────────────────────────────────────────────────
 
@@ -120,6 +135,9 @@ if (!dir_exists(here('data/raw/nhgis'))) {
 # ── DuckDB ETL ────────────────────────────────────────────────────────────────
 
 dir_create(here('data/processed/nhgis/'))
+if (file_exists(here('data/processed/nhgis/nhgis.duckdb'))) {
+  file_delete(here('data/processed/nhgis/nhgis.duckdb'))
+}
 conn <- dbConnect(duckdb(), here('data/processed/nhgis/nhgis.duckdb'))
 
 for (f in dir_ls(here('data/raw/nhgis'), glob = '*tract.csv')) {
@@ -158,7 +176,7 @@ long_tbls <- map(
     inner_join(
       tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')
     ) %>%
-    filter(!grepl(table, 'Margin(s?) of error')) %>%
+    filter(!str_detect(table, 'Margin(s?) of error')) %>%
     mutate(GEOID = paste0(STATEA, COUNTYA, TRACTA)) %>%
     select(
       GEOID,
@@ -181,7 +199,7 @@ long_tbls <- map(
         inner_join(
           tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')
         ) %>%
-        filter(!grepl(table, 'Margin(s?) of error')) %>%
+        filter(!str_detect(table, 'Margin(s?) of error')) %>%
         mutate(GEOID = paste0(STATEFP, COUNTYFP, TRACTA)) %>%
         select(
           GEOID,
@@ -235,7 +253,13 @@ var_types_ds <- tribble(
 
 all_long <-
   long_tbls %>%
-  mutate(nhgis_code = regexp_replace(regexp_extract(table, 'Table [A-Z0-9]+'), 'Table ', '')) %>%
+  mutate(
+    nhgis_code = regexp_replace(
+      regexp_extract(table, 'Table [A-Z0-9]+'),
+      'Table ',
+      ''
+    )
+  ) %>%
   left_join(bind_rows(var_types_ds, var_types_ts), copy = TRUE) %>%
   select(GEOID, table, YEAR, var_type, category, value)
 
@@ -439,7 +463,10 @@ all_long_processed$race <- all_long %>%
 
 walk(
   names(all_long_processed),
-  ~ write_parquet(all_long_processed[[.x]], here('data/processed/nhgis/', paste0(.x, '.parquet')))
+  ~ write_parquet(
+    all_long_processed[[.x]],
+    here('data/processed/nhgis/', paste0(.x, '.parquet'))
+  )
 )
 
 dbDisconnect(conn)
