@@ -9,19 +9,22 @@ execute:
 
 
 ```{r packages}
+library(here)
 library(tidyverse)
 library(sf)
-library(patchwork)
-library(gt)
-library(glue)
-library(showtext)
-library(tidycensus)
-library(ggh4x)
-library(lemon)
+library(arrow)
 library(tigris)
 
 options(scipen = 9999)
 set.seed(708)
+```
+
+```{r census_data_check}
+expected <- c('race', 'poverty_lt_100', 'vehicle_avail', 'housing_cost_burden')
+missing <- expected[!file.exists(here('data/processed/nhgis', paste0(expected, '.parquet')))]
+if (length(missing) > 0) {
+  stop("Run prep_population.R from the project root first. Missing: ", paste(missing, collapse = ', '))
+}
 ```
 
 ```{r get_tracts}

@@ -27,9 +27,17 @@ pip install popexposure
 
 ## Data Prep
 
-Manually download data set from 
-https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DWILBW 
-and unzip to data/raw. 
+Manually download data set from
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DWILBW
+and unzip to data/raw.
+
+To build the processed population data, run from the project root:
+
+```
+Rscript prep_population.R
+```
+
+This requires an IPUMS API key set as `IPUMS_API_KEY` in your `.Renviron`.
 
 ## Rendering
 

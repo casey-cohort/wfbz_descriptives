@@ -1,18 +1,6 @@
----
-title: "Population Summaries"
-toc: true
-#jupyter: python3
-execute:
-  echo: false
-  warning: false
-  message: false
----
+# Run once from project root to build data/processed/nhgis/*.parquet
+# Requires IPUMS_API_KEY set in .Renviron
 
-Coming soon! 
-
-{{< include _helpers.qmd >}}
-            
-```{r packages}
 library(sf)
 library(tidyverse)
 library(fs)
@@ -21,10 +9,10 @@ library(ipumsr)
 library(duckdb)
 library(here)
 library(arrow)
-```
 
-```{r pop_data}
-# Download Population data if it doesn't exist
+source(here::here('R/utils.R'))
+
+# ── GHS Population rasters ────────────────────────────────────────────────────
 
 download_spatial_ghs_pop <- function(yr, dst) {
   outfile <- file.path(
@@ -41,19 +29,19 @@ download_spatial_ghs_pop <- function(yr, dst) {
   }
   outfile
 }
+
 popfile <- list()
 popfile['2000'] <- download_spatial_ghs_pop(2000, here('data/raw/ghs_pop/2000/'))
 popfile['2005'] <- download_spatial_ghs_pop(2005, here('data/raw/ghs_pop/2005/'))
 popfile['2010'] <- download_spatial_ghs_pop(2010, here('data/raw/ghs_pop/2010/'))
 popfile['2015'] <- download_spatial_ghs_pop(2015, here('data/raw/ghs_pop/2015/'))
 popfile['2020'] <- download_spatial_ghs_pop(2020, here('data/raw/ghs_pop/2020/'))
-```
 
-```{r census_data}
-# Pull Census data from NHGIS if it doesn't yet exist
+# ── NHGIS Census API pull ─────────────────────────────────────────────────────
+
 if (!dir_exists(here('data/raw/nhgis'))) {
   dir_create(here('data/raw/nhgis'))
-  datasets_to_fetch <- get_metadata_catalog('nhgis', 'data_tables') %>% # find which tables contain variables of interest
+  datasets_to_fetch <- get_metadata_catalog('nhgis', 'data_tables') %>%
     filter(
       name %in%
         c(
@@ -72,17 +60,14 @@ if (!dir_exists(here('data/raw/nhgis'))) {
           "B25044",
           "B25070",
           "B25091",
-          "B27010"#,
-          #"B28011" # internet
+          "B27010"
         )
     ) %>%
     filter(
-      # filter data sets to those from dates of interest
       between(as.integer(substr(dataset_name, 1, 4)), 2000, 2022)
     ) %>%
     nest(.by = dataset_name) %>%
     filter(
-      # filter out any data set we found that doesn't have tracts
       unlist(map(
         dataset_name,
         ~ 'tract' %in% get_metadata('nhgis', .x)$geog_levels$name
@@ -116,7 +101,6 @@ if (!dir_exists(here('data/raw/nhgis'))) {
     downloadable_extract,
     download_dir = here('data/raw/nhgis')
   )
-  # Get rid of specific data request number and move files out of zip dir
   dir_ls(here('data/raw/nhgis'), glob = '*.zip') %>%
     walk(unzip, exdir = here('data/raw/nhgis'))
   dir_ls(here('data/raw/nhgis'), type = 'directory') %>%
@@ -132,14 +116,13 @@ if (!dir_exists(here('data/raw/nhgis'))) {
     )
   dir_ls(here('data/raw/nhgis'), type = 'directory') %>% walk(fs::dir_delete)
 }
-```
 
-```{r duckify}
-#| cache: True
+# ── DuckDB ETL ────────────────────────────────────────────────────────────────
 
 dir_create(here('data/processed/nhgis/'))
 conn <- dbConnect(duckdb(), here('data/processed/nhgis/nhgis.duckdb'))
- for (f in dir_ls(here('data/raw/nhgis'), glob = '*tract.csv')) {
+
+for (f in dir_ls(here('data/raw/nhgis'), glob = '*tract.csv')) {
   dbExecute(
     conn,
     glue(
@@ -156,11 +139,9 @@ for (f in dir_ls(here('data/raw/nhgis'), glob = '*codebook.txt')) {
     overwrite = TRUE
   )
 }
-```
 
-```{r format_census_data}
-#| cache: True
-# turn everything into one really long table
+# ── Long-format transformation ────────────────────────────────────────────────
+
 tbls <- fs::path_ext_remove(basename(dir_ls(
   here('data/raw/nhgis'),
   glob = '*tract.csv'
@@ -215,10 +196,8 @@ long_tbls <- map(
   reduce(union_all) %>%
   compute(name = paste0('all_long'), overwrite = TRUE, temporary = FALSE)
 
-```
+# ── Variable classification ───────────────────────────────────────────────────
 
-```{r}
-# Pull all data, categorize, name, and break it up into our output vars of interst
 var_types_ts <- tribble(
   ~nhgis_code , ~var_type        ,
   'AV0'       , 'population'     ,
@@ -255,29 +234,18 @@ var_types_ds <- tribble(
   select(nhgis_code, var_type) %>%
   distinct()
 
-
-```
-
-```{r}
-all_long <- 
+all_long <-
   tbl(conn, 'all_long') %>%
   mutate(nhgis_code = regexp_replace(regexp_extract(table, 'Table [A-Z0-9]+'), 'Table ', '')) %>%
   left_join(bind_rows(var_types_ds, var_types_ts), copy = TRUE) %>%
   select(GEOID, table, YEAR, var_type, category, value)
 
-#walk(
-#  all_long %>% select(var_type) %>% distinct() %>% pull(), # for each var_type
-#  function(.x){
-#    all_long %>% 
-#      filter(var_type == .x) %>%
-#      pivot_wider(id_cols = c(GEOID, table, YEAR, var_type), values_from = value, names_from = category) %>%
-#      compute(name = .x, overwrite = TRUE, temporary = FALSE)
-#  }
-#)
+# ── Variable processing ───────────────────────────────────────────────────────
 
 all_long_processed <- list()
+
 all_long_processed$commute_time <- all_long %>%
-  filter(var_type == 'commute_time') %>% 
+  filter(var_type == 'commute_time') %>%
   group_by(GEOID, YEAR) %>%
   filter(!str_detect(category, 'Margin of error')) %>%
   transmute(
@@ -325,7 +293,7 @@ all_long_processed$commute_time <- all_long %>%
     count = as.numeric(value),
     frac = count / sum(count, na.rm = TRUE)
   ) %>%
-  collect() 
+  collect()
 
 all_long_processed$education <- all_long %>%
   filter(var_type == 'education') %>%
@@ -351,10 +319,10 @@ all_long_processed$education <- all_long %>%
     frac = count / sum(count, na.rm = TRUE)
   ) %>%
   ungroup() %>%
-  collect() 
+  collect()
 
 all_long_processed$housing_cost_burden <- all_long %>%
-  filter(var_type == 'housing_cost_burden') %>% 
+  filter(var_type == 'housing_cost_burden') %>%
   filter(!str_detect(category, 'Margin of error')) %>%
   group_by(GEOID, YEAR) %>%
   filter(
@@ -375,7 +343,6 @@ all_long_processed$housing_cost_burden <- all_long %>%
     period = YEAR,
     start_year = as.integer(regexp_extract(YEAR, '^\\d{4}')),
     end_year = as.integer(regexp_extract(YEAR, '\\d{4}$')),
-    education = str_replace(category, 'Persons: 25 years and over ~ ', ''),
     cost_burdened = (str_detect(
       table,
       "Mortgage Status by Selected Monthly Owner Costs as a Percentage of Household Income in the Past 12 Months"
@@ -398,11 +365,11 @@ all_long_processed$housing_cost_burden <- all_long %>%
     frac = count / sum(count),
   ) %>%
   ungroup() %>%
-  collect() 
+  collect()
 
 all_long_processed$poverty_lt_100 <-
   all_long %>%
-  filter(var_type == 'poverty_lt_100') %>% 
+  filter(var_type == 'poverty_lt_100') %>%
   group_by(GEOID, YEAR) %>%
   filter(!str_detect(category, 'Margin of error')) %>%
   mutate(
@@ -425,12 +392,11 @@ all_long_processed$poverty_lt_100 <-
     frac = count / sum(count),
   ) %>%
   ungroup() %>%
-  collect() 
-
+  collect()
 
 all_long_processed$vehicle_avail <-
   all_long %>%
-  filter(var_type == 'vehicle_avail') %>% 
+  filter(var_type == 'vehicle_avail') %>%
   group_by(GEOID, YEAR) %>%
   filter(str_detect(category, 'Estimates'), !str_detect(category, "Total")) %>%
   mutate(
@@ -449,15 +415,15 @@ all_long_processed$vehicle_avail <-
     frac = count / sum(count),
   ) %>%
   ungroup() %>%
-  collect() 
+  collect()
 
 all_long_processed$race <- all_long %>%
   filter(var_type == 'race') %>%
-  filter(!str_detect(category, 'Margin of error')) %>% 
+  filter(!str_detect(category, 'Margin of error')) %>%
   group_by(GEOID, YEAR) %>%
   transmute(
     GEOID,
-    category, 
+    category,
     period = YEAR,
     start_year = as.integer(regexp_extract(YEAR, '^\\d{4}')),
     end_year = as.integer(regexp_extract(YEAR, '\\d{4}$')),
@@ -468,114 +434,14 @@ all_long_processed$race <- all_long %>%
     frac = count / sum(count, na.rm = TRUE)
   ) %>%
   ungroup() %>%
-  collect() 
+  collect()
 
-#all_long_processed <- map(all_long_processed, ~mutate(.x, category = as.factor(category)))
+# ── Write parquet outputs ─────────────────────────────────────────────────────
 
 walk(
-  names(all_long_processed), 
-  ~write_parquet(all_long_processed[[.x]], here('data/processed/nhgis/', paste0(.x, '.parquet')))
+  names(all_long_processed),
+  ~ write_parquet(all_long_processed[[.x]], here('data/processed/nhgis/', paste0(.x, '.parquet')))
 )
 
-```
-
-## Maps!
-
-ACS 2015-2019, Chittenden County all_long
-
-
-Housing Cost Burden (>50%)
-
-```{r}
-
-library(tigris)
-library(sf)
-tracts_sf <- tracts(
-  state = 'vt',
-  county = 'Chittenden',
-  cb = TRUE,
-  year = 2010
-) %>%
-  mutate(GEOID = paste0(STATE, COUNTY, TRACT)) %>%
-  tigris::erase_water(area_threshold = .9)
-
-inner_join(
-  tracts_sf,
-  all_long_processed$housing_cost_burden %>%
-    filter(year == '2015-2019', cost_burdened),
-  by = "GEOID"
-) %>%
-  ggplot() +
-  geom_sf(
-    color = NA,
-    aes(fill = frac)
-  ) +
-  scale_fill_distiller(palette = 'Spectral') +
-  theme_void()
-
-```
-
-
-Poverty (>100% Poverty Level)
-
-
-```{r}
-
-inner_join(
-  tracts_sf,
-  all_long_processed$poverty_lt_100 %>% filter(year == '2015-2019', poverty_lt_100),
-  by = "GEOID"
-) %>%
-  ggplot() +
-  geom_sf(
-    color = NA,
-    aes(fill = frac)
-  ) +
-  scale_fill_distiller(palette = 'Spectral', name = '') +
-  theme_void() +
-  ggtitle("Population Above 100% Poverty Limit")
-
-```
-
-Vehicle Available
-
-```{r}
-
-inner_join(
-  tracts_sf,
-  all_long_processed$vehicle_avail %>% filter(year == '2015-2019', !no_vehicle),
-  by = "GEOID"
-) %>%
-  ggplot() +
-  geom_sf(
-    color = NA,
-    aes(fill = frac)
-  ) +
-  scale_fill_distiller(palette = 'Spectral', name = '') +
-  theme_void() +
-  ggtitle("Vehicle Available in Household")
-```
-
-Race (% NH White)
-
-```{r}
-
-inner_join(
-  tracts_sf,
-  all_long_processed$race %>%
-    filter(
-      year == '2015-2019',
-      str_detect(race, 'White'),
-      str_detect(ethnicity, 'Not')
-    ),
-  by = "GEOID"
-) %>%
-  ggplot() +
-  geom_sf(
-    color = NA,
-    aes(fill = frac)
-  ) +
-  scale_fill_distiller(palette = 'Spectral', name = '') +
-  theme_void() +
-  ggtitle("Non-Hispanic White")
-```
+dbDisconnect(conn)
+cat("Done. Parquet files written to data/processed/nhgis/\n")

@@ -1,5 +1,6 @@
 
 ```{r packages}
+library(here)
 library(tidyverse)
 library(sf)
 library(patchwork)
@@ -55,15 +56,7 @@ if (!file.exists('../data/raw/wfbz_disasters_2000-2025.geojson')) {
   )
 }
 
-unzip_url <- function(url, dst) {
-  download.file(
-    url = url,
-    destfile = t <- tempfile(fileext = ".zip")
-  )
-  unzip(t, overwrite = TRUE, exdir = dst)
-  unlink(t, recursive = TRUE)
-  dst
-}
+source(here::here('R/utils.R'))
 
 wfbz <- read_sf("../data/raw/wfbz_disasters_2000-2025.geojson") %>%
   filter(!st_is_empty(geometry))
