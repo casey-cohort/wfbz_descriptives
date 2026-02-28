@@ -93,50 +93,59 @@ housing_cost_by_wf <- join_census(wf_tract_matches, housing_cost)
 rm(wf_tract_matches, race, poverty, vehicle_avail, housing_cost)
 
 # Aggregate across tracts per wildfire
+# Column schema: <var>|period, <var>|count|<category>, <var>|frac|<category>
 z <- reduce(
   list(
     race_by_wf %>%
       group_by(wildfire_id, race, ethnicity, period) %>%
-      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      summarize(count = sum(count), .groups = 'drop') %>%
       group_by(wildfire_id) %>%
       mutate(frac = count / sum(count)) %>%
       ungroup() %>%
+      rename(`race|period` = period) %>%
       pivot_wider(
-        values_from = c(count, frac, n_tracts),
+        values_from = c(count, frac),
         names_from = c(race, ethnicity),
+        names_prefix = 'race|',
         names_sep = '|'
       ),
     poverty_by_wf %>%
       group_by(wildfire_id, category, period) %>%
-      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      summarize(count = sum(count), .groups = 'drop') %>%
       group_by(wildfire_id) %>%
       mutate(frac = count / sum(count)) %>%
       ungroup() %>%
+      rename(`poverty|period` = period) %>%
       pivot_wider(
-        values_from = c(count, frac, n_tracts),
+        values_from = c(count, frac),
         names_from = category,
+        names_prefix = 'poverty|',
         names_sep = '|'
       ),
     vehicle_avail_by_wf %>%
       group_by(wildfire_id, no_vehicle, period) %>%
-      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      summarize(count = sum(count), .groups = 'drop') %>%
       group_by(wildfire_id) %>%
       mutate(frac = count / sum(count)) %>%
       ungroup() %>%
+      rename(`vehicle_avail|period` = period) %>%
       pivot_wider(
-        values_from = c(count, frac, n_tracts),
+        values_from = c(count, frac),
         names_from = no_vehicle,
+        names_prefix = 'vehicle_avail|',
         names_sep = '|'
       ),
     housing_cost_by_wf %>%
       group_by(wildfire_id, cost_burdened, period) %>%
-      summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>%
+      summarize(count = sum(count), .groups = 'drop') %>%
       group_by(wildfire_id) %>%
       mutate(frac = count / sum(count)) %>%
       ungroup() %>%
+      rename(`housing_cost|period` = period) %>%
       pivot_wider(
-        values_from = c(count, frac, n_tracts),
+        values_from = c(count, frac),
         names_from = cost_burdened,
+        names_prefix = 'housing_cost|',
         names_sep = '|'
       )
   ),
