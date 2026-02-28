@@ -78,17 +78,17 @@ rm(tract_sf)
 # For each variable: join flat census data, keep earliest matching survey period
 join_census <- function(matches, census_data) {
   matches %>%
-    left_join(census_data, by = 'GEOID') %>%
+    left_join(census_data, by = 'GEOID', relationship = 'many-to-many') %>%
     filter(between(wildfire_year, start_year, end_year)) %>%
     group_by(wildfire_id, GEOID) %>%
     filter(period == period[which.min(start_year)]) %>%
     ungroup()
 }
 
-race_by_wf         <- join_census(wf_tract_matches, race)
-poverty_by_wf      <- join_census(wf_tract_matches, poverty)
+race_by_wf <- join_census(wf_tract_matches, race)
+poverty_by_wf <- join_census(wf_tract_matches, poverty)
 vehicle_avail_by_wf <- join_census(wf_tract_matches, vehicle_avail)
-housing_cost_by_wf  <- join_census(wf_tract_matches, housing_cost)
+housing_cost_by_wf <- join_census(wf_tract_matches, housing_cost)
 
 rm(wf_tract_matches, race, poverty, vehicle_avail, housing_cost)
 
