@@ -93,15 +93,68 @@ housing_cost_by_wf <- join_census(wf_tract_matches, housing_cost)
 rm(wf_tract_matches, race, poverty, vehicle_avail, housing_cost)
 
 # Aggregate across tracts per wildfire
+race_summ <- race_by_wf %>%
+  group_by(wildfire_id, race, ethnicity, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+poverty_summ <- poverty_by_wf %>%
+  group_by(wildfire_id, category, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+vehicle_avail_summ <- vehicle_avail_by_wf %>%
+  group_by(wildfire_id, no_vehicle, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+housing_cost_summ <- housing_cost_by_wf %>%
+  group_by(wildfire_id, cost_burdened, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+# Checks: fracs sum to ~1, fracs agree with counts
+check_fracs <- function(df, label) {
+  frac_sums <- df %>%
+    group_by(wildfire_id) %>%
+    summarize(frac_sum = sum(frac), count_total = sum(count), .groups = 'drop')
+  n_nan     <- sum(is.nan(frac_sums$frac_sum))   # all-zero count groups
+  bad_sum   <- filter(frac_sums, abs(frac_sum - 1) > 0.01)
+  bad_agree <- df %>%
+    group_by(wildfire_id) %>%
+    mutate(expected_frac = count / sum(count)) %>%
+    filter(abs(frac - expected_frac) > 1e-9) %>%
+    nrow()
+  tibble(
+    variable        = label,
+    n_wildfires     = n_distinct(df$wildfire_id),
+    frac_sum_ok     = nrow(bad_sum) == 0,
+    n_all_zero      = n_nan,
+    frac_min        = round(min(frac_sums$frac_sum, na.rm = TRUE), 4),
+    frac_max        = round(max(frac_sums$frac_sum, na.rm = TRUE), 4),
+    count_agree     = bad_agree == 0
+  )
+}
+
+bind_rows(
+  check_fracs(race_summ,          'race'),
+  check_fracs(poverty_summ,       'poverty'),
+  check_fracs(vehicle_avail_summ, 'vehicle_avail'),
+  check_fracs(housing_cost_summ,  'housing_cost')
+) |> knitr::kable()
+
 # Column schema: <var>|period, <var>|count|<category>, <var>|frac|<category>
 z <- reduce(
   list(
-    race_by_wf %>%
-      group_by(wildfire_id, race, ethnicity, period) %>%
-      summarize(count = sum(count), .groups = 'drop') %>%
-      group_by(wildfire_id) %>%
-      mutate(frac = count / sum(count)) %>%
-      ungroup() %>%
+    race_summ %>%
       rename(`race|period` = period) %>%
       pivot_wider(
         values_from = c(count, frac),
@@ -109,12 +162,7 @@ z <- reduce(
         names_prefix = 'race|',
         names_sep = '|'
       ),
-    poverty_by_wf %>%
-      group_by(wildfire_id, category, period) %>%
-      summarize(count = sum(count), .groups = 'drop') %>%
-      group_by(wildfire_id) %>%
-      mutate(frac = count / sum(count)) %>%
-      ungroup() %>%
+    poverty_summ %>%
       rename(`poverty|period` = period) %>%
       pivot_wider(
         values_from = c(count, frac),
@@ -122,12 +170,7 @@ z <- reduce(
         names_prefix = 'poverty|',
         names_sep = '|'
       ),
-    vehicle_avail_by_wf %>%
-      group_by(wildfire_id, no_vehicle, period) %>%
-      summarize(count = sum(count), .groups = 'drop') %>%
-      group_by(wildfire_id) %>%
-      mutate(frac = count / sum(count)) %>%
-      ungroup() %>%
+    vehicle_avail_summ %>%
       rename(`vehicle_avail|period` = period) %>%
       pivot_wider(
         values_from = c(count, frac),
@@ -135,12 +178,7 @@ z <- reduce(
         names_prefix = 'vehicle_avail|',
         names_sep = '|'
       ),
-    housing_cost_by_wf %>%
-      group_by(wildfire_id, cost_burdened, period) %>%
-      summarize(count = sum(count), .groups = 'drop') %>%
-      group_by(wildfire_id) %>%
-      mutate(frac = count / sum(count)) %>%
-      ungroup() %>%
+    housing_cost_summ %>%
       rename(`housing_cost|period` = period) %>%
       pivot_wider(
         values_from = c(count, frac),
