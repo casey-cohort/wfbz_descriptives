@@ -82,7 +82,7 @@ join_census <- function(matches, census_data) {
   matches %>%
     left_join(census_data, by = 'GEOID', relationship = 'many-to-many') %>%
     group_by(wildfire_id, GEOID) %>%
-    filter(period == period[which.min(abs(wildfire_year - (start_year + end_year) / 2))]) %>%
+    slice_min(abs(wildfire_year - (start_year + end_year) / 2), n = 1, with_ties = FALSE) %>%
     ungroup()
 }
 
