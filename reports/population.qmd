@@ -75,13 +75,14 @@ wf_tract_matches <- st_join(
 
 rm(tract_sf)
 
-# For each variable: join flat census data, keep earliest matching survey period
+# For each variable: join flat census data, pick the survey period whose
+# midpoint is closest to the wildfire year (handles pre-ACS fires and
+# post-2022 fires that fall outside strict period coverage)
 join_census <- function(matches, census_data) {
   matches %>%
     left_join(census_data, by = 'GEOID', relationship = 'many-to-many') %>%
-    filter(between(wildfire_year, start_year, end_year)) %>%
     group_by(wildfire_id, GEOID) %>%
-    filter(period == period[which.min(start_year)]) %>%
+    filter(period == period[which.min(abs(wildfire_year - (start_year + end_year) / 2))]) %>%
     ungroup()
 }
 
@@ -126,30 +127,31 @@ check_fracs <- function(df, label) {
   frac_sums <- df %>%
     group_by(wildfire_id) %>%
     summarize(frac_sum = sum(frac), count_total = sum(count), .groups = 'drop')
-  n_nan     <- sum(is.nan(frac_sums$frac_sum))   # all-zero count groups
-  bad_sum   <- filter(frac_sums, abs(frac_sum - 1) > 0.01)
+  n_nan <- sum(is.nan(frac_sums$frac_sum)) # all-zero count groups
+  bad_sum <- filter(frac_sums, abs(frac_sum - 1) > 0.01)
   bad_agree <- df %>%
     group_by(wildfire_id) %>%
     mutate(expected_frac = count / sum(count)) %>%
     filter(abs(frac - expected_frac) > 1e-9) %>%
     nrow()
   tibble(
-    variable        = label,
-    n_wildfires     = n_distinct(df$wildfire_id),
-    frac_sum_ok     = nrow(bad_sum) == 0,
-    n_all_zero      = n_nan,
-    frac_min        = round(min(frac_sums$frac_sum, na.rm = TRUE), 4),
-    frac_max        = round(max(frac_sums$frac_sum, na.rm = TRUE), 4),
-    count_agree     = bad_agree == 0
+    variable = label,
+    n_wildfires = n_distinct(df$wildfire_id),
+    frac_sum_ok = nrow(bad_sum) == 0,
+    n_all_zero = n_nan,
+    frac_min = round(min(frac_sums$frac_sum, na.rm = TRUE), 4),
+    frac_max = round(max(frac_sums$frac_sum, na.rm = TRUE), 4),
+    count_agree = bad_agree == 0
   )
 }
 
 bind_rows(
-  check_fracs(race_summ,          'race'),
-  check_fracs(poverty_summ,       'poverty'),
+  check_fracs(race_summ, 'race'),
+  check_fracs(poverty_summ, 'poverty'),
   check_fracs(vehicle_avail_summ, 'vehicle_avail'),
-  check_fracs(housing_cost_summ,  'housing_cost')
-) |> knitr::kable()
+  check_fracs(housing_cost_summ, 'housing_cost')
+) |>
+  knitr::kable()
 
 # Column schema: <var>|period, <var>|count|<category>, <var>|frac|<category>
 z <- reduce(
@@ -190,4 +192,8 @@ z <- reduce(
   left_join,
   by = 'wildfire_id'
 )
+```
+
+```{r}
+anti_join(wfbz, z, by = 'wildfire_id')
 ```
