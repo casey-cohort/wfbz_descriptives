@@ -40,6 +40,19 @@ Rscript prep_tracts.R
 
 `prep_population.R` requires an IPUMS API key set as `IPUMS_API_KEY` in your `.Renviron`.
 
+## Census period assignment
+
+Each wildfire is linked to census demographic data via a two-step spatial/temporal match:
+
+1. **Spatial**: tract geometries (2000, 2010, 2020 vintages from TIGER) are joined to each wildfire using a 10 km buffer (`st_is_within_distance`). The tract vintage is chosen by decade — fires in 2000–2009 use 2000 tracts, 2010–2019 use 2010 tracts, 2020+ use 2020 tracts.
+
+2. **Temporal**: for each matched tract, the NHGIS survey period (decennial census or ACS 5-year estimate) whose midpoint is closest to the wildfire year is selected. This means:
+   - Fires in 2001–2004 fall back to the 2000 decennial (no ACS data existed yet)
+   - Fires in 2005–2022 use the nearest ACS 5-year window (e.g. a 2007 fire uses 2005–2009)
+   - Fires in 2023+ fall back to the most recent available period (2018–2022 in the current extract)
+
+The NHGIS extract covers 2000–2022. Fires with no tract within 10 km receive no census data.
+
 ## Rendering
 
 To update this page on Github Pages, run:

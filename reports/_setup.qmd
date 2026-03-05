@@ -19,7 +19,7 @@ set.seed(708)
 ```{r theme}
 # Set Font Arial
 showtext_auto()
-font_add("Arial", regular = "../assets/LiberationSans-Regular.ttf")
+font_add("Arial", regular = here("assets/LiberationSans-Regular.ttf"))
 base_size = 16
 theme_set(
   ggplot2::theme_minimal(
@@ -209,7 +209,10 @@ by_state <- wfbz %>%
   unnest(state_abb) %>%
   left_join(st_drop_geometry(states_pop)) %>%
   left_join(
-    st_centroid(states_sf, of_largest_polygon = TRUE) %>% st_join(regions) %>% st_drop_geometry() %>% select(STUSPS, usfs_region),
+    st_centroid(states_sf, of_largest_polygon = TRUE) %>%
+      st_join(regions) %>%
+      st_drop_geometry() %>%
+      select(STUSPS, usfs_region),
     by = join_by(state_abb == STUSPS)
   ) %>%
   filter(wildfire_community_intersect) %>%
@@ -266,7 +269,7 @@ wfbz_crit <- wfbz %>%
     `WUI-Interface Percent` = 100 *
       sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE) /
       n(),
-   `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
+    `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
     .groups = 'drop'
   )
 

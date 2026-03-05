@@ -176,7 +176,6 @@ long_tbls <- map(
     inner_join(
       tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')
     ) %>%
-    filter(!str_detect(table, 'Margin(s?) of error')) %>%
     mutate(GEOID = paste0(STATEA, COUNTYA, TRACTA)) %>%
     select(
       GEOID,
@@ -199,7 +198,6 @@ long_tbls <- map(
         inner_join(
           tbl(conn, paste0(.x, '_codebook')) %>% filter(var_desc != '')
         ) %>%
-        filter(!str_detect(table, 'Margin(s?) of error')) %>%
         mutate(GEOID = paste0(STATEFP, COUNTYFP, TRACTA)) %>%
         select(
           GEOID,
@@ -225,7 +223,7 @@ var_types_ts <- tribble(
   'B37'       , 'renters'        ,
   'A43'       , 'housing_vacant' ,
   'CV4'       , 'race'           ,
-  'B85'       , 'education'      ,
+  'B85'       , 'education'
 )
 var_types_ds <- tribble(
   ~name    , ~var_type             ,
@@ -240,12 +238,12 @@ var_types_ds <- tribble(
   'B25034' , 'housing_year'        ,
   'NH044A' , 'vehicle_avail'       ,
   'B25044' , 'vehicle_avail'       ,
-  'B28011' , 'internet'            ,
+  #'B28011' , 'internet'            ,
   'B25014' , 'housing_crowding'    ,
   'NH069A' , 'housing_cost_burden' ,
   'NH094A' , 'housing_cost_burden' ,
   'B25070' , 'housing_cost_burden' ,
-  'B25091' , 'housing_cost_burden' ,
+  'B25091' , 'housing_cost_burden'
 ) %>%
   left_join(get_metadata_catalog('nhgis', 'data_tables')) %>%
   select(nhgis_code, var_type) %>%
