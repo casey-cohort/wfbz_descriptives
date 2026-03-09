@@ -1,5 +1,8 @@
 # Run once from project root to build data/processed/nhgis/*.parquet
 # Requires IPUMS_API_KEY set in .Renviron
+#
+# Set FORCE_REBUILD <- TRUE to bypass all caching guards and rebuild from scratch.
+FORCE_REBUILD <- FALSE
 
 library(sf)
 library(tidyverse)
@@ -54,7 +57,8 @@ popfile['2020'] <- download_spatial_ghs_pop(
 
 # ── NHGIS Census API pull ─────────────────────────────────────────────────────
 
-if (!dir_exists(here('data/raw/nhgis'))) {
+if (FORCE_REBUILD || !dir_exists(here('data/raw/nhgis'))) {
+  if (FORCE_REBUILD) dir_delete(here('data/raw/nhgis'))
   dir_create(here('data/raw/nhgis'))
   datasets_to_fetch <- get_metadata_catalog('nhgis', 'data_tables') %>%
     filter(
@@ -132,7 +136,17 @@ if (!dir_exists(here('data/raw/nhgis'))) {
   dir_ls(here('data/raw/nhgis'), type = 'directory') %>% walk(fs::dir_delete)
 }
 
-# ── DuckDB ETL ────────────────────────────────────────────────────────────────
+# ── DuckDB ETL + variable processing ─────────────────────────────────────────
+# Skipped if all output parquets already exist.
+# Delete data/processed/nhgis/*.parquet to force a rebuild.
+
+census_parquets <- here('data/processed/nhgis', paste0(
+  c('race', 'poverty_lt_100', 'vehicle_avail', 'housing_cost_burden',
+    'commute_time', 'education'),
+  '.parquet'
+))
+
+if (FORCE_REBUILD || !all(file_exists(census_parquets))) {
 
 dir_create(here('data/processed/nhgis/'))
 if (file_exists(here('data/processed/nhgis/nhgis.duckdb'))) {
@@ -398,7 +412,7 @@ all_long_processed$poverty_lt_100 <-
     start_year = as.integer(regexp_extract(YEAR, '^\\d{4}')),
     end_year = as.integer(regexp_extract(YEAR, '\\d{4}$')),
     poverty_lt_100 = coalesce(
-      sql("try_cast(regexp_extract(category, '[0-9\\.]+$') as integer)"),
+      sql("try_cast(regexp_extract(category, '[0-9\\.]+$') as double)"),
       999
     ) <
       1.0,
@@ -468,4 +482,96 @@ walk(
 )
 
 dbDisconnect(conn)
+cat("Census parquets written to data/processed/nhgis/\n")
+
+} else {
+  cat("Census parquets already exist, skipping DuckDB build.\n")
+}
+
+# ── Regional population reference fractions ───────────────────────────────────
+# Requires regions.geojson (built by quarto render on main.qmd) and
+# tiger_tracts.rds (built by prep_tracts.R).
+
+if (!file.exists(here('data/processed/regions.geojson'))) {
+  stop("data/processed/regions.geojson not found. Render main.qmd first.")
+}
+if (!file.exists(here('data/processed/tiger_tracts.rds'))) {
+  stop("Run prep_tracts.R first.")
+}
+
+regions_sf <- read_sf(here('data/processed/regions.geojson'))
+
+tract_region <- readRDS(here('data/processed/tiger_tracts.rds')) %>%
+  filter(census_year == 2020) %>%
+  mutate(
+    usfs_region = regions_sf$usfs_region[st_nearest_feature(
+      geometry,
+      regions_sf
+    )]
+  ) %>%
+  st_drop_geometry() %>%
+  select(GEOID, usfs_region)
+
+# Map every year 2000-2024 to its nearest census period (same rule as join_census)
+year_to_period <- function(dat) {
+  crossing(
+    wildfire_year = 2000:2024,
+    dat %>% distinct(period, start_year, end_year)
+  ) %>%
+    group_by(wildfire_year) %>%
+    slice_min(
+      abs(wildfire_year - (start_year + end_year) / 2),
+      n = 1,
+      with_ties = FALSE
+    ) %>%
+    ungroup() %>%
+    select(wildfire_year, period)
+}
+
+region_pop_by_year <- function(dat, num_expr) {
+  ypm <- year_to_period(dat)
+  dat %>%
+    inner_join(tract_region, by = 'GEOID') %>%
+    inner_join(ypm, by = 'period', relationship = 'many-to-many') %>%
+    group_by(wildfire_year, usfs_region) %>%
+    summarize(
+      frac_pop = {{ num_expr }} / sum(count, na.rm = TRUE),
+      .groups = 'drop'
+    )
+}
+
+write_parquet(
+  region_pop_by_year(
+    read_parquet(here('data/processed/nhgis/vehicle_avail.parquet')),
+    sum(count[no_vehicle == TRUE], na.rm = TRUE)
+  ),
+  here('data/processed/nhgis/region_pop_vehicle.parquet')
+)
+write_parquet(
+  region_pop_by_year(
+    read_parquet(here('data/processed/nhgis/race.parquet')),
+    sum(
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
+      na.rm = TRUE
+    )
+  ),
+  here('data/processed/nhgis/region_pop_race.parquet')
+)
+write_parquet(
+  region_pop_by_year(
+    read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet')),
+    sum(count[poverty_lt_100 == TRUE], na.rm = TRUE)
+  ),
+  here('data/processed/nhgis/region_pop_poverty.parquet')
+)
+write_parquet(
+  region_pop_by_year(
+    read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet')),
+    sum(count[cost_burdened == TRUE], na.rm = TRUE)
+  ),
+  here('data/processed/nhgis/region_pop_housing.parquet')
+)
+
 cat("Done. Parquet files written to data/processed/nhgis/\n")

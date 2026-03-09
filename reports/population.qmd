@@ -28,7 +28,11 @@ expected_parquet <- c(
   'race',
   'poverty_lt_100',
   'vehicle_avail',
-  'housing_cost_burden'
+  'housing_cost_burden',
+  'region_pop_vehicle',
+  'region_pop_race',
+  'region_pop_poverty',
+  'region_pop_housing'
 )
 missing_parquet <- expected_parquet[
   !file.exists(here(
@@ -94,12 +98,20 @@ join_census <- function(matches, census_data) {
     ) %>%
     distinct(wildfire_year, period, start_year, end_year) %>%
     group_by(wildfire_year) %>%
-    slice_min(abs(wildfire_year - (start_year + end_year) / 2), n = 1, with_ties = FALSE) %>%
+    slice_min(
+      abs(wildfire_year - (start_year + end_year) / 2),
+      n = 1,
+      with_ties = FALSE
+    ) %>%
     ungroup() %>%
     select(wildfire_year, period)
   matches %>%
     inner_join(best_period_by_year, by = 'wildfire_year') %>%
-    inner_join(census_data, by = c('GEOID', 'period'), relationship = 'many-to-many')
+    inner_join(
+      census_data,
+      by = c('GEOID', 'period'),
+      relationship = 'many-to-many'
+    )
 }
 
 race_by_wf <- join_census(wf_tract_matches, race)
@@ -275,70 +287,97 @@ pop_theme <- theme_minimal(base_family = "Arial") +
     panel.grid = element_blank(),
     axis.text.x = element_text(angle = 90, vjust = .5),
     axis.ticks = element_line(),
-    plot.margin = unit(c(0, 0, 0, 0), "pt")
+    plot.margin = unit(c(0, 0, 0, 0), "pt"),
+    legend.position = 'none'
   )
 
 plot_pop_var <- function(df, label) {
   df %>%
-    ggplot(aes(x = wildfire_year, y = frac, color = usfs_region)) +
-    geom_line() +
-    geom_point(size = 1) +
+    ggplot(aes(x = wildfire_year)) +
+    geom_line(
+      aes(y = frac_pop, color = usfs_region),
+      linetype = 'dashed',
+      linewidth = 0.4
+    ) +
+    geom_point(aes(y = frac_pop, color = usfs_region), size = 1, shape = 1) +
+    geom_line(aes(y = frac, color = usfs_region)) +
+    geom_point(aes(y = frac, color = usfs_region), size = 1) +
     scale_color_manual(name = "Region", values = region_colors) +
     scale_x_continuous(
       limits = c(2000, 2024),
       breaks = seq(2000, 2024, by = 2)
     ) +
     scale_y_continuous(labels = scales::percent) +
+    facet_wrap(~usfs_region, ncol = 1, scales = 'free_y') +
     xlab("Year") +
     ylab(label) +
     pop_theme
 }
 ```
 
+```{r region_pop}
+region_pop_vehicle <- read_parquet(here(
+  'data/processed/nhgis/region_pop_vehicle.parquet'
+))
+region_pop_race <- read_parquet(here(
+  'data/processed/nhgis/region_pop_race.parquet'
+))
+region_pop_poverty <- read_parquet(here(
+  'data/processed/nhgis/region_pop_poverty.parquet'
+))
+region_pop_housing <- read_parquet(here(
+  'data/processed/nhgis/region_pop_housing.parquet'
+))
+```
+
 ## Vehicle Availability
 
-```{r vehicle_avail_fig}
+```{r vehicle_avail_fig, fig.height = 16}
 #| fig-cap: "Share of fire-affected households with no vehicle access, by USFS region and year"
-vehicle_avail_by_wf %>%
+vehicle_avail_by_region <- vehicle_avail_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
     frac = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
       sum(count, na.rm = TRUE),
-    nobs = n(),
-    period = list(unique(period)),
     .groups = 'drop'
   ) %>%
+  left_join(region_pop_vehicle, by = c('wildfire_year', 'usfs_region')) %>%
   inner_join(REGION_ORDER, by = 'usfs_region') %>%
-  mutate(usfs_region = fct_reorder(usfs_region, plot_order)) %>%
-  plot_pop_var("Share with no vehicle")
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(vehicle_avail_by_region, "Share with no vehicle")
 ```
 
 ## Race
 
-```{r race_fig}
+```{r race_fig, fig.height = 16}
 #| fig-cap: "Share of fire-affected population that is Non-Hispanic White, by USFS region and year"
-race_by_wf %>%
+race_by_region <- race_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
     frac = sum(
-      count[ethnicity == "Not Hispanic or Latino" & race == "White alone"],
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
       na.rm = TRUE
     ) /
       sum(count, na.rm = TRUE),
     .groups = 'drop'
   ) %>%
+  left_join(region_pop_race, by = c('wildfire_year', 'usfs_region')) %>%
   inner_join(REGION_ORDER, by = 'usfs_region') %>%
-  mutate(usfs_region = fct_reorder(usfs_region, plot_order)) %>%
-  plot_pop_var("Share Non-Hispanic White")
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(race_by_region, "Share Non-Hispanic White")
 ```
 
 ## Poverty
 
-```{r poverty_fig}
+```{r poverty_fig, fig.height = 16}
 #| fig-cap: "Population below 100% of poverty line near wildfire burn zones, by USFS region and year"
-poverty_by_wf %>%
+poverty_by_region <- poverty_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
@@ -346,16 +385,18 @@ poverty_by_wf %>%
       sum(count, na.rm = TRUE),
     .groups = 'drop'
   ) %>%
+  left_join(region_pop_poverty, by = c('wildfire_year', 'usfs_region')) %>%
   inner_join(REGION_ORDER, by = 'usfs_region') %>%
-  mutate(usfs_region = fct_reorder(usfs_region, plot_order)) %>%
-  plot_pop_var("Share below 100% poverty line")
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(poverty_by_region, "Share below 100% poverty line")
 ```
 
 ## Housing Cost Burden
 
-```{r housing_cost_fig}
+```{r housing_cost_fig, fig.height = 16}
 #| fig-cap: "Cost-burdened households (≥50% income on housing) near wildfire burn zones, by USFS region and year"
-housing_cost_by_wf %>%
+housing_cost_by_region <- housing_cost_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
@@ -363,7 +404,9 @@ housing_cost_by_wf %>%
       sum(count, na.rm = TRUE),
     .groups = 'drop'
   ) %>%
+  left_join(region_pop_housing, by = c('wildfire_year', 'usfs_region')) %>%
   inner_join(REGION_ORDER, by = 'usfs_region') %>%
-  mutate(usfs_region = fct_reorder(usfs_region, plot_order)) %>%
-  plot_pop_var("Share housing cost burdened (≥50%)")
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(housing_cost_by_region, "Share housing cost burdened (≥50%)")
 ```
