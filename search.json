@@ -11,7 +11,42 @@
     "href": "reports/population.html",
     "title": "Population Summaries",
     "section": "",
-    "text": "Coming soon!"
+    "text": "variable\nn_wildfires\nfrac_sum_ok\nn_all_zero\nfrac_min\nfrac_max\ncount_agree\n\n\n\n\nrace\n6010\nTRUE\n0\n1\n1\nTRUE\n\n\npoverty\n6010\nTRUE\n0\n1\n1\nTRUE\n\n\nvehicle_avail\n6140\nTRUE\n1\n1\n1\nTRUE\n\n\nhousing_cost\n6140\nTRUE\n1\n1\n1\nTRUE\nQA: fires missing census data (colored) vs. all fires (grey)"
+  },
+  {
+    "objectID": "reports/population.html#vehicle-availability",
+    "href": "reports/population.html#vehicle-availability",
+    "title": "Population Summaries",
+    "section": "Vehicle Availability",
+    "text": "Vehicle Availability\n\n\n\n\n\nShare of fire-affected households with no vehicle access, by USFS region and year"
+  },
+  {
+    "objectID": "reports/population.html#race",
+    "href": "reports/population.html#race",
+    "title": "Population Summaries",
+    "section": "Race",
+    "text": "Race\n\n\n\n\n\nShare of fire-affected population that is Non-Hispanic White, by USFS region and year"
+  },
+  {
+    "objectID": "reports/population.html#poverty",
+    "href": "reports/population.html#poverty",
+    "title": "Population Summaries",
+    "section": "Poverty",
+    "text": "Poverty\n\n\n\n\n\nPopulation below 100% of poverty line near wildfire burn zones, by USFS region and year"
+  },
+  {
+    "objectID": "reports/population.html#housing-cost-burden",
+    "href": "reports/population.html#housing-cost-burden",
+    "title": "Population Summaries",
+    "section": "Housing Cost Burden",
+    "text": "Housing Cost Burden\n\n\n\n\n\nCost-burdened households (≥50% income on housing) near wildfire burn zones, by USFS region and year"
+  },
+  {
+    "objectID": "reports/population.html#diverging-charts",
+    "href": "reports/population.html#diverging-charts",
+    "title": "Population Summaries",
+    "section": "Diverging Charts",
+    "text": "Diverging Charts\n\nOverall\n\n\n\n\n\nDifference in fire-affected vs. general population shares, pooled 2000–2024\n\n\n\n\n\n\nBy Region\n\n\n\n\n\nDifference in fire-affected vs. general population shares by USFS region, pooled 2000–2024\n\n\n\n\n\n\nRace Breakdown\n\n\n\n\n\nRace/ethnicity composition: fire-affected minus general population share, pooled 2000–2024"
   },
   {
     "objectID": "reports/main.html",
