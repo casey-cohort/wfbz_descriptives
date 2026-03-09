@@ -10,7 +10,7 @@ execute:
 {{< include _setup.qmd >}}
 
 
-```{r}
+```{r plotme_fn}
 # Plot Main Figures Showing Variables over Time
 plotme <- function(
   dat,
@@ -73,7 +73,7 @@ plotme <- function(
       geom_col(
         aes(x = wildfire_year, y = get(var), fill = usfs_region),
         color = "grey25",
-        size = .1,
+        linewidth = .1,
         width = 1
       ) +
       scale_fill_manual(
@@ -92,7 +92,7 @@ plotme <- function(
         limits = c(0, 100),
         labels = ~ paste0(.x, '%')
       ) +
-      xlab("Year") +
+      xlab(NULL) +
       ylab(glue("{var}{if_else(is.na(unit), '', paste0(' (', unit, ')'))}")) +
       theme(
         panel.border = element_rect(color = "grey25", fill = NA, size = .25),
@@ -109,7 +109,7 @@ plotme <- function(
       geom_col(
         aes(x = wildfire_year, y = get(var), fill = usfs_region),
         color = "grey25",
-        size = .1,
+        linewidth = .1,
         width = 1,
         position = position_fill()
       ) +
@@ -126,7 +126,7 @@ plotme <- function(
         expand = expansion(mult = c(0, 0)),
         labels = scales::percent
       ) +
-      xlab("Year") +
+      xlab(NULL) +
       ylab(glue("{var} (Share of Total)")) +
       theme(
         panel.border = element_rect(color = "grey25", fill = NA, size = .25),
@@ -158,7 +158,7 @@ plotme <- function(
         expand = expansion(mult = c(0, 0)),
         labels = scales::percent
       ) +
-      xlab("Year") +
+      xlab(NULL) +
       ylab(glue("{var} (Share of Total)")) +
       theme(
         panel.border = element_rect(color = "grey25", fill = NA, size = .25),
@@ -173,7 +173,7 @@ plotme <- function(
       geom_col(
         aes(x = wildfire_year, y = get(var), fill = usfs_region),
         color = "grey25",
-        size = .1,
+        linewidth = .1,
         width = 1
       ) +
       scale_fill_manual(
@@ -186,7 +186,7 @@ plotme <- function(
         breaks = seq(2000, 2024, by = 2)
       ) +
       scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::label_comma()) +
-      xlab("Year") +
+      xlab(NULL) +
       ylab(glue("{var}{if_else(is.na(unit), '', paste0(' (', unit, ')'))}")) +
       theme(
         panel.border = element_rect(color = "grey25", fill = NA, size = .25),
@@ -318,7 +318,7 @@ tbl_counts <- wfbz_by_region_agg %>%
 ```
 
 ### Community-Impacting Fires
-```{r}
+```{r tbl_crit_counts}
 tbl_counts %>%
   filter(agg == "Community-Impacting Fires") %>%
   gt(rowname_col = 'name') %>%
@@ -331,7 +331,7 @@ tbl_counts %>%
 
 ```
 
-```{r}
+```{r tbl_crit_summaries}
 tbl_summaries %>%
   filter(agg == "Community-Impacting Fires") %>%
   gt(rowname_col = 'name') %>%
@@ -342,7 +342,7 @@ tbl_summaries %>%
 ```
 
 ### All Fires
-```{r}
+```{r tbl_all_counts}
 tbl_counts %>%
   filter(agg == 'All Fires') %>%
   gt(rowname_col = 'name') %>%
@@ -354,7 +354,7 @@ tbl_counts %>%
   tab_header("Column counts", subtitle = "N (Percent of total in region)")
 ```
 
-```{r}
+```{r tbl_all_summaries}
 tbl_summaries %>%
   filter(agg == 'All Fires') %>%
   gt(rowname_col = 'name') %>%
@@ -368,7 +368,7 @@ tbl_summaries %>%
 
 ### Number of Fire Disasters per Region over Time
 
-```{r, fig.height = 8, fig.width = 16}
+```{r events_over_time, fig.height = 8, fig.width = 16}
 plotme(wfbz_crit, 'Events', rel = FALSE) +
   ggtitle('Community-Impacting Disasters') +
   plotme(wfbz_crit_all, 'Events', rel = FALSE) +
@@ -386,7 +386,7 @@ plotme(wfbz_crit, 'Events', rel = FALSE) +
 The five deadliest fires in our data set are labeled.
 
 
-```{r, fig.height = 8, fig.width = 16}
+```{r fatalities_over_time, fig.height = 8, fig.width = 16}
 (plotme(wfbz_crit, 'Fatalities', rel = FALSE) +
   annotate(
     "text",
@@ -493,7 +493,7 @@ The five deadliest fires in our data set are labeled.
 
 The five fires in our data set with the most destroyed structures are labeled.
 
-```{r, fig.height = 8, fig.width = 16}
+```{r structures_over_time, fig.height = 8, fig.width = 16}
 (plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
   annotate(
     "text",
@@ -598,7 +598,7 @@ The five fires in our data set with the most destroyed structures are labeled.
 
 ### Number of FEMA Declarations per Region over Time
 
-```{r, fig.height = 8, fig.width = 16}
+```{r fema_over_time, fig.height = 8, fig.width = 16}
 plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
   ggtitle('Community-Impacting Disasters') +
   plotme(wfbz_crit_all, 'FEMA Declarations (n)', rel = FALSE) +
@@ -612,7 +612,7 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
 
 ### Burned Area over Time
 
-```{r, fig.height = 8, fig.width = 16}
+```{r burned_area_over_time, fig.height = 8, fig.width = 16}
 (plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)), labels = scales::comma
@@ -630,7 +630,7 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
 
 ### Average Fire Size over Time
 
-```{r, fig.height = 4, fig.width = 16}
+```{r fire_size_over_time, fig.height = 4, fig.width = 16}
 (plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
@@ -650,7 +650,7 @@ Alaska has quite an outlier for community-intersecting fires in 2004. This was t
 
 ### Share of Fires in Wildland-Urban Interface over Time
 
-```{r, fig.height = 12, fig.width = 14}
+```{r wui_interface_over_time, fig.height = 12, fig.width = 14}
 plotme(wfbz_crit, 'WUI-Interface', stack = FALSE) +
   ggtitle('Community-Impacting Disasters') +
   xlab('')
@@ -658,7 +658,7 @@ plotme(wfbz_crit, 'WUI-Interface', stack = FALSE) +
 
 ### Share of Fires in Wildland-Urban Intermix over Time
 
-```{r, fig.height = 12, fig.width = 14}
+```{r wui_intermix_over_time, fig.height = 12, fig.width = 14}
 plotme(wfbz_crit, 'WUI-Intermix', stack = FALSE) +
   ggtitle('Community-Impacting Disasters') +
   xlab('')
@@ -666,7 +666,7 @@ plotme(wfbz_crit, 'WUI-Intermix', stack = FALSE) +
 
 ## Correlations
 
-```{r}
+```{r corr_data}
 library('ggh4x')
 wfbz_lab <- wfbz %>%
   st_drop_geometry() %>%
@@ -688,7 +688,7 @@ wfbz_lab <- wfbz %>%
 
 ### Numeric Values Compared
 
-```{r, fig.height = 12, fig.width = 12}
+```{r corr_numeric, fig.height = 12, fig.width = 12}
 xwfbz_num <- wfbz_lab %>%
   select(where(is.numeric)) %>%
   pivot_longer(-wildfire_id)
@@ -729,7 +729,7 @@ ggplot(xwfbz_num) +
 ### Numeric & Categorical Values Compared
 
 
-```{r, fig.height = 8, fig.width = 16}
+```{r corr_numcat, fig.height = 8, fig.width = 16}
 xwfbz_numcat <- wfbz_lab %>%
   pivot_longer(
     cols = c(where(is.numeric), -wildfire_id),
@@ -794,7 +794,7 @@ p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & 
 
 ### Categorical Values Compared
 
-```{r, fig.height = 6, fig.width = 6}
+```{r corr_cat, fig.height = 6, fig.width = 6}
 
 wfbz_lab %>%
   group_by(`FEMA Declarations (n)`) %>%
@@ -820,7 +820,7 @@ wfbz_lab %>%
 
 ## Fire Season Timing
 
-```{r, fig.height = 12, fig.width = 10}
+```{r fire_season_timing, fig.height = 12, fig.width = 10}
 
 # Determine order to plot in
 #region_summary <- wfbz %>%
@@ -919,7 +919,7 @@ wfbz %>%
 
 ### Regions Mapped
 
-```{r, fig.height = 6, fig.width = 8}
+```{r regions_map, fig.height = 6, fig.width = 8}
 regions_cart <- regions %>%
   st_cast('POLYGON') %>%
   tigris::shift_geometry()
@@ -951,6 +951,8 @@ ggplot(regions_cart) +
   scale_x_continuous(limits = c(-3115585, 2263736)) +
   scale_y_continuous(limits = c(-1702303, 1559103)) +
   theme(
-    axis.text = element_blank()
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank()
   )
 ```

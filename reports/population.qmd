@@ -309,7 +309,7 @@ plot_pop_var <- function(df, label) {
     ) +
     scale_y_continuous(labels = scales::percent) +
     facet_wrap(~usfs_region, ncol = 1, scales = 'free_y') +
-    xlab("Year") +
+    xlab(NULL) +
     ylab(label) +
     pop_theme
 }
@@ -409,4 +409,227 @@ housing_cost_by_region <- housing_cost_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(housing_cost_by_region, "Share housing cost burdened (≥50%)")
+```
+
+## Diverging Charts
+
+```{r diverge_data}
+# Pool all years: fire-affected fracs
+fire_vehicle <- vehicle_avail_by_wf %>%
+  summarize(frac = sum(count[no_vehicle == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "No vehicle")
+
+fire_poverty <- poverty_by_wf %>%
+  summarize(frac = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "Below poverty line")
+
+fire_housing <- housing_cost_by_wf %>%
+  summarize(frac = sum(count[cost_burdened == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "Housing cost burdened")
+
+fire_white <- race_by_wf %>%
+  summarize(
+    frac = sum(count[ethnicity == "Not Hispanic or Latino" & race == "White (single race)"], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+# General population fracs: use most recent period per GEOID (2018-2022 ACS snapshot)
+most_recent_period <- function(dat) {
+  dat %>% group_by(GEOID) %>% filter(start_year == max(start_year)) %>% ungroup()
+}
+
+pop_vehicle_all <- read_parquet(here('data/processed/nhgis/vehicle_avail.parquet')) %>%
+  most_recent_period() %>%
+  summarize(frac_pop = sum(count[no_vehicle == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "No vehicle")
+
+pop_poverty_all <- read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet')) %>%
+  most_recent_period() %>%
+  summarize(frac_pop = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "Below poverty line")
+
+pop_housing_all <- read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet')) %>%
+  most_recent_period() %>%
+  summarize(frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "Housing cost burdened")
+
+pop_white_all <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+  most_recent_period() %>%
+  summarize(
+    frac_pop = sum(count[ethnicity == "Not Hispanic or Latino" & race == "White (single race)"], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+# National diverging data
+stat_order <- c("Non-Hispanic White", "No vehicle", "Below poverty line", "Housing cost burdened")
+
+diverge_national <- bind_rows(
+  bind_cols(fire_vehicle, pop_vehicle_all %>% select(frac_pop)),
+  bind_cols(fire_poverty, pop_poverty_all %>% select(frac_pop)),
+  bind_cols(fire_housing, pop_housing_all %>% select(frac_pop)),
+  bind_cols(fire_white,   pop_white_all   %>% select(frac_pop))
+) %>%
+  mutate(
+    diff = frac - frac_pop,
+    stat = factor(stat, levels = stat_order)
+  )
+
+# Regional diverging data: fire side
+fire_vehicle_reg <- vehicle_avail_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region) %>%
+  summarize(frac = sum(count[no_vehicle == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "No vehicle")
+
+fire_poverty_reg <- poverty_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region) %>%
+  summarize(frac = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "Below poverty line")
+
+fire_housing_reg <- housing_cost_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region) %>%
+  summarize(frac = sum(count[cost_burdened == TRUE], na.rm = TRUE) / sum(count, na.rm = TRUE)) %>%
+  mutate(stat = "Housing cost burdened")
+
+fire_white_reg <- race_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac = sum(count[ethnicity == "Not Hispanic or Latino" & race == "White (single race)"], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+# Regional pop side: use region_pop parquets, average across years
+pop_vehicle_reg <- region_pop_vehicle %>%
+  group_by(usfs_region) %>%
+  summarize(frac_pop = mean(frac_pop, na.rm = TRUE)) %>%
+  mutate(stat = "No vehicle")
+
+pop_poverty_reg <- region_pop_poverty %>%
+  group_by(usfs_region) %>%
+  summarize(frac_pop = mean(frac_pop, na.rm = TRUE)) %>%
+  mutate(stat = "Below poverty line")
+
+pop_housing_reg <- region_pop_housing %>%
+  group_by(usfs_region) %>%
+  summarize(frac_pop = mean(frac_pop, na.rm = TRUE)) %>%
+  mutate(stat = "Housing cost burdened")
+
+pop_white_reg <- region_pop_race %>%
+  group_by(usfs_region) %>%
+  summarize(frac_pop = mean(frac_pop, na.rm = TRUE)) %>%
+  mutate(stat = "Non-Hispanic White")
+
+diverge_regional <- bind_rows(
+  left_join(fire_vehicle_reg, pop_vehicle_reg, by = c('usfs_region', 'stat')),
+  left_join(fire_poverty_reg, pop_poverty_reg, by = c('usfs_region', 'stat')),
+  left_join(fire_housing_reg, pop_housing_reg, by = c('usfs_region', 'stat')),
+  left_join(fire_white_reg,   pop_white_reg,   by = c('usfs_region', 'stat'))
+) %>%
+  mutate(
+    diff = frac - frac_pop,
+    stat = factor(stat, levels = stat_order)
+  ) %>%
+  inner_join(REGION_ORDER, by = 'usfs_region') %>%
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+# Race diverging data
+fire_race <- race_by_wf %>%
+  mutate(
+    race_group = if_else(ethnicity == "Hispanic or Latino", "Hispanic", race)
+  ) %>%
+  group_by(race_group) %>%
+  summarize(frac = sum(count, na.rm = TRUE) / sum(race_by_wf$count, na.rm = TRUE))
+
+pop_race <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+  most_recent_period() %>%
+  mutate(
+    race_group = if_else(ethnicity == "Hispanic or Latino", "Hispanic", race)
+  ) %>%
+  group_by(race_group) %>%
+  summarize(count = sum(count, na.rm = TRUE)) %>%
+  mutate(frac_pop = count / sum(count)) %>%
+  select(race_group, frac_pop)
+
+diverge_race <- left_join(fire_race, pop_race, by = 'race_group') %>%
+  mutate(
+    diff = frac - frac_pop,
+    race_group = case_when(
+      str_detect(race_group, "Black or African American") ~ "Black",
+      str_detect(race_group, "American Indian") ~ "AIAN, Asian, or Pacific Islander",
+      str_detect(race_group, "Some Other Race") ~ "Other",
+      str_detect(race_group, "White") ~ "White",
+      TRUE ~ race_group
+    ),
+    race_group = fct_reorder(race_group, diff)
+  )
+```
+
+### Overall
+
+```{r diverge_overall_fig, fig.height = 2}
+#| fig-cap: "Difference in fire-affected vs. general population shares, pooled 2000–2024"
+div_theme <- pop_theme +
+  theme(
+    axis.text.x = element_text(angle = 0, vjust = 0.5),
+    axis.ticks.y = element_blank()
+  )
+
+ggplot(diverge_national, aes(x = diff, y = stat)) +
+  geom_col(fill = khroma::color('light', reverse = FALSE)(1), color = "grey25", linewidth = .1) +
+  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+  scale_x_continuous(
+    labels = scales::percent_format(accuracy = 1),
+    limits = function(x) max(abs(x)) * c(-1, 1)
+  ) +
+  xlab("Fire-affected minus general population (percentage points)") +
+  ylab(NULL) +
+  div_theme +
+  theme(panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25))
+```
+
+### By Region
+
+```{r diverge_regional_fig, fig.height = 6, fig.width = 14}
+#| fig-cap: "Difference in fire-affected vs. general population shares by USFS region, pooled 2000–2024"
+ggplot(diverge_regional, aes(x = diff, y = usfs_region, fill = usfs_region)) +
+  geom_col(width = 1, color = "grey25", linewidth = .1) +
+  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+  scale_fill_manual(values = region_colors) +
+  scale_x_continuous(
+    labels = scales::percent_format(accuracy = 1),
+    limits = function(x) max(abs(x)) * c(-1, 1)
+  ) +
+  facet_grid(stat ~ ., scales = 'fixed') +
+  xlab("Fire-affected minus general population (percentage points)") +
+  ylab(NULL) +
+  div_theme +
+  theme(
+    strip.text.y = element_text(angle = 0, hjust = 0, size = 8),
+    axis.text.y = element_text(angle = 45, hjust = 1),
+    panel.spacing.y = unit(0, 'pt'),
+    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+  )
+```
+
+### Race Breakdown
+
+```{r diverge_race_fig, fig.height = 3}
+#| fig-cap: "Race/ethnicity composition: fire-affected minus general population share, pooled 2000–2024"
+ggplot(diverge_race, aes(x = diff, y = race_group)) +
+  geom_col(fill = khroma::color('light', reverse = FALSE)(1), color = "grey25", linewidth = .1) +
+  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+  scale_x_continuous(
+    labels = scales::percent_format(accuracy = 1),
+    limits = function(x) max(abs(x)) * c(-1, 1)
+  ) +
+  xlab("Fire-affected minus general population (percentage points)") +
+  ylab(NULL) +
+  div_theme +
+  theme(panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25))
 ```
