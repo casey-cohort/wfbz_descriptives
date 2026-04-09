@@ -16,7 +16,7 @@ ggplot() +
   geom_col(
     data = by_state,
     aes(y = state_name, x = `FEMA Declaration Percent`),
-    fill =  khroma::color('light', reverse = FALSE)(1),
+    fill = khroma::color('light', reverse = FALSE)(1),
     color = 'white',
   ) +
   geom_text(
@@ -62,15 +62,20 @@ ggplot() +
 
 ```{r, fig.height = 30, fig.width = 4}
 by_state_long <- by_state %>%
-  select(-`FEMA Declaration Percent`) %>% 
-  pivot_longer(-c(usfs_region, state_abb, state_name, `FEMA Declarations`)) 
+  select(-`FEMA Declaration Percent`) %>%
+  pivot_longer(-c(usfs_region, state_abb, state_name, `FEMA Declarations`))
 
-plotme <- function(by_state_long, name){
+plotme <- function(by_state_long, name) {
   ggplot(by_state_long) +
     #geom_abline(slope = 1, intercept = 0, linetype = 'dashed', color = 'grey75') +
     geom_point(aes(x = value, y = `FEMA Declarations`, color = usfs_region)) +
     ggrepel::geom_label_repel(
-      aes(x = value, y = `FEMA Declarations`, label = state_abb, fill = usfs_region),
+      aes(
+        x = value,
+        y = `FEMA Declarations`,
+        label = state_abb,
+        fill = usfs_region
+      ),
       max.overlaps = 5
     ) +
     scale_x_continuous(name = name, labels = scales::comma) +
@@ -80,18 +85,22 @@ plotme <- function(by_state_long, name){
     ) +
     scale_color_manual(
       values = region_colors
-    ) + 
+    ) +
     #facet_wrap(~name, ncol = 1, scales = 'free', strip.position = 'bottom') +
     theme(
       plot.margin = margin(r = 25, l = 25, unit = "pt"),
-      panel.grid.major = element_line(linewidth = .25, color = 'grey75'), 
+      panel.grid.major = element_line(linewidth = .25, color = 'grey75'),
       axis.ticks = element_blank(),
-      legend.position = 'bottom'#, 
+      legend.position = 'bottom' #,
       #panel.spacing.y = unit(100, 'pt')
-    ) + 
+    ) +
     guides(
       color = 'none',
-      fill = guide_legend(ncol = 2, title = NULL, override.aes = list(label = '  '))
+      fill = guide_legend(
+        ncol = 2,
+        title = NULL,
+        override.aes = list(label = '  ')
+      )
     )
 }
 
@@ -102,35 +111,42 @@ scatters <- by_state_long %>%
   mutate(
     p_natural = map(data, plotme, name = name),
     p_log = map(
-      p_natural, 
-      ~ .x +  
-        scale_x_continuous(name = name, labels = scales::comma, transform = 'pseudo_log') + #, breaks = scales::breaks_extended(n = 5)) +
-        scale_y_continuous(labels = scales::comma, transform = 'pseudo_log') #, breaks = scales::breaks_extended(n = 6)) 
+      p_natural,
+      ~ .x +
+        scale_x_continuous(
+          name = name,
+          labels = scales::comma,
+          transform = 'pseudo_log'
+        ) + #, breaks = scales::breaks_extended(n = 5)) +
+        scale_y_continuous(labels = scales::comma, transform = 'pseudo_log') #, breaks = scales::breaks_extended(n = 6))
     )
   )
 
 # Create text grobs for headers
-header_natural <- wrap_elements(grid::textGrob("Natural scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
+header_natural <- wrap_elements(grid::textGrob(
+  "Natural scale",
+  gp = grid::gpar(fontsize = 14, fontface = "bold")
+))
 #header_log <- wrap_elements(grid::textGrob("Log scale", gp = grid::gpar(fontsize = 14, fontface = "bold")))
 
 # Put all plots together with headers
 n_plots <- nrow(scatters)
 all_plots <- c(
-  #list(header_natural), 
-  scatters$p_natural#,
+  #list(header_natural),
+  scatters$p_natural #,
   #list(header_log), scatters$p_log
 )
 
 wrap_plots(
-  all_plots, 
-  ncol = 1, 
-  byrow = FALSE, 
-  #heights = c(0.1, rep(1, n_plots)), 
+  all_plots,
+  ncol = 1,
+  byrow = FALSE,
+  #heights = c(0.1, rep(1, n_plots)),
   guides = 'collect'
-) & 
+) &
   theme(legend.position = 'bottom', plot.margin = unit(c(0, 5, 50, 5), 'pt'))
 
-# 
+#
 # wrap_plots(
 #   wrap_plots(scatters$p_natural, ncol = 1, guides = 'collect'),
 #   wrap_plots(scatters$p_log, ncol = 1, guides = 'collect'),
@@ -215,13 +231,17 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(palette = 'Spectral', name = '', labels = scales::percent)
+  scale_fill_distiller(
+    palette = 'Spectral',
+    name = '',
+    labels = scales::percent
+  )
 ```
 
 Declarations per Event (Scale Shifted)
 
 ```{r}
-#| include: false
+#| include: true
 ggplot() +
   geom_sf(
     data = shift_geometry(hex_summary),

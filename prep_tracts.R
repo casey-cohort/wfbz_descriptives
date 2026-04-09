@@ -45,5 +45,5 @@ tract_sf <- map(
 ) %>%
   bind_rows()
 
-saveRDS(tract_sf, here('data/processed/tiger_tracts.rds'))
-cat("Done. Tract geometries written to data/processed/tiger_tracts.rds\n")
+st_write(tract_sf, here('data/processed/tiger_tracts.geojson'), delete_dsn = TRUE)
+cat("Done. Tract geometries written to data/processed/tiger_tracts.geojson\n")
