@@ -287,7 +287,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="population_files/figure-html/diverge_overall_fig-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Difference in fire-affected vs.&nbsp;general population shares, pooled 2000–2024</figcaption>
+<figcaption>Difference in fire-affected vs.&nbsp;high-wildfire-risk population shares, pooled 2000–2024</figcaption>
 </figure>
 </div>
 </div>
@@ -300,7 +300,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="population_files/figure-html/diverge_regional_fig-1.png" class="img-fluid figure-img" width="1344"></p>
-<figcaption>Difference in fire-affected vs.&nbsp;general population shares by USFS region, pooled 2000–2024</figcaption>
+<figcaption>Difference in fire-affected vs.&nbsp;high-wildfire-risk population shares by USFS region, pooled 2000–2024</figcaption>
 </figure>
 </div>
 </div>
@@ -313,7 +313,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="population_files/figure-html/diverge_race_fig-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Race/ethnicity composition: fire-affected minus general population share, pooled 2000–2024</figcaption>
+<figcaption>Race/ethnicity composition: fire-affected minus high-wildfire-risk population share, pooled 2000–2024</figcaption>
 </figure>
 </div>
 </div>
@@ -397,7 +397,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/casey-cohort\.github\.io\/wfbz_descriptives\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
