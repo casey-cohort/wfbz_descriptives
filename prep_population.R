@@ -147,6 +147,7 @@ census_parquets <- here(
   paste0(
     c(
       'race',
+      'population',
       'poverty_lt_100',
       'vehicle_avail',
       'housing_cost_burden',
