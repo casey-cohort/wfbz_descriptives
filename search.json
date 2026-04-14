@@ -14,6 +14,13 @@
     "text": "variable\nn_wildfires\nfrac_sum_ok\nn_all_zero\nfrac_min\nfrac_max\ncount_agree\n\n\n\n\nrace\n6010\nTRUE\n0\n1\n1\nTRUE\n\n\npoverty\n6010\nTRUE\n0\n1\n1\nTRUE\n\n\nvehicle_avail\n6140\nTRUE\n1\n1\n1\nTRUE\n\n\nhousing_cost\n6140\nTRUE\n1\n1\n1\nTRUE\nQA: fires missing census data (colored) vs. all fires (grey)"
   },
   {
+    "objectID": "reports/population.html#pop-over-time",
+    "href": "reports/population.html#pop-over-time",
+    "title": "Population Summaries",
+    "section": "Pop over time",
+    "text": "Pop over time"
+  },
+  {
     "objectID": "reports/population.html#vehicle-availability",
     "href": "reports/population.html#vehicle-availability",
     "title": "Population Summaries",
@@ -96,12 +103,5 @@
     "title": "Summaries by Variable",
     "section": "Reference",
     "text": "Reference\n\nRegions Mapped"
-  },
-  {
-    "objectID": "reports/population.html#pop-over-time",
-    "href": "reports/population.html#pop-over-time",
-    "title": "Population Summaries",
-    "section": "Pop over time",
-    "text": "Pop over time"
   }
 ]
