@@ -9,176 +9,953 @@ execute:
 
 
 ```{r packages}
+library(here)
 library(tidyverse)
 library(sf)
+library(arrow)
 library(patchwork)
-library(gt)
-library(glue)
 library(showtext)
-library(tidycensus)
-library(ggh4x)
-library(lemon)
-library(tigris)
+
+showtext_auto()
+font_add("Arial", regular = here("assets/LiberationSans-Regular.ttf"))
 
 options(scipen = 9999)
 set.seed(708)
 ```
 
+```{r data_check}
+expected_parquet <- c(
+  'race',
+  'poverty_lt_100',
+  'vehicle_avail',
+  'housing_cost_burden',
+  'population',
+  'region_pop_vehicle',
+  'region_pop_race',
+  'region_pop_poverty',
+  'region_pop_housing'
+)
+missing_parquet <- expected_parquet[
+  !file.exists(here(
+    'data/processed/nhgis',
+    paste0(expected_parquet, '.parquet')
+  ))
+]
+if (length(missing_parquet) > 0) {
+  stop(
+    "Run staging/prep_population.R from the project root first. Missing: ",
+    paste(missing_parquet, collapse = ', ')
+  )
+}
+if (!file.exists(here('data/processed/tiger_tracts.geojson'))) {
+  stop("Run staging/prep_tracts.R from the project root first.")
+}
+```
+
 ```{r get_tracts}
-#| cache: True
-tract_sf <- map(
-  c(state.abb, 'PR', 'DC'),
-  function(state){
-  bind_rows(
-    tracts(
-      state = state,
-      cb = TRUE,
-      year = 2000,
-      progress_bar = FALSE
-    ) %>%
-      transmute(
-        census_year = 2000, 
-        GEOID = paste0(STATE, COUNTY, TRACT)
-      ),
-    tracts(
-      state = state,
-      cb = TRUE,
-      year = 2010,
-      progress_bar = FALSE
-    ) %>%
-      transmute(
-        census_year = 2010, 
-        GEOID = paste0(STATE, COUNTY, TRACT)
-      ),
-    tracts(
-      state = state,
-      cb = TRUE,
-      year = 2020,
-      progress_bar = FALSE
-    ) %>%
-      transmute(
-        census_year = 2020, 
-        GEOID
-      )
-    )
-  }
-) %>% bind_rows()
+tract_sf <- bind_rows(
+  read_sf(here('data/processed/tract_WHP_AK.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '02'),
+  read_sf(here('data/processed/tract_WHP_HI.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '15'),
+  read_sf(here('data/processed/tract_WHP_CONUS.geojson')) %>%
+    filter(!(substr(GEOID, 1, 2) %in% c('02', '15')))
+)
+```
+
+```{r join_tract_pop}
+# Join tract-level population to WHP tracts (most recent period per tract)
+tract_pop <- read_parquet(here('data/processed/nhgis/population.parquet')) %>%
+  group_by(GEOID) %>%
+  filter(start_year == max(start_year)) %>%
+  ungroup() %>%
+  select(GEOID, pop)
+
+tract_sf <- tract_sf %>%
+  left_join(tract_pop, by = 'GEOID')
 ```
 
 ```{r census_data}
 race <- read_parquet(here('data/processed/nhgis/race.parquet'))
 poverty <- read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet'))
-vehicle_avail <- read_parquet(here('data/processed/nhgis/vehicle_avail.parquet'))
-housing_cost <- read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet'))
+vehicle_avail <- read_parquet(here(
+  'data/processed/nhgis/vehicle_avail.parquet'
+))
+housing_cost <- read_parquet(here(
+  'data/processed/nhgis/housing_cost_burden.parquet'
+))
 ```
 
 ```{r wfbz_data}
 wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
 ```
 
-```{r}
-census_sf <- reduce(
-  list(
-    race %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'race'),
-    poverty %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'poverty'),
-    vehicle_avail %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'vehicle_avail'),
-    housing_cost %>% mutate(census_year = 10*floor(start_year/10)) %>% group_by(GEOID, census_year) %>% nest(.key = 'housing_cost'),
-    tract_sf
-  ),
-  full_join,
-  by = c('GEOID', 'census_year')
-) %>% st_as_sf()
-
-census_data_by_wf <- st_join(
-  wfbz, 
-  census_sf, 
+```{r spatial_join}
+#| cache: True
+# Lean spatial join: just get wildfire_id -> GEOID mappings (no census payload)
+wf_tract_matches <- st_join(
+  wfbz %>% select(wildfire_id, wildfire_year),
+  tract_sf %>% select(GEOID, census_year),
   join = st_is_within_distance,
   dist = units::as_units(10, 'km')
 ) %>%
-  select(wildfire_id, wildfire_year, census_year, GEOID, race, poverty, vehicle_avail, housing_cost) %>%
   st_drop_geometry() %>%
-  filter(10*floor(wildfire_year/10) == census_year) %>% # filter to correct tract geographies
-  # RACE
-  unnest(race, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`race|start_year`) %>%
-  filter(between(wildfire_year, `race|start_year`, `race|end_year`)) %>%
-  filter(`race|period` == first(`race|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'race', .names_sep = '|') %>%
-  
-  # POVERTY
-  unnest(poverty, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`poverty|start_year`) %>%
-  filter(between(wildfire_year, `poverty|start_year`, `poverty|end_year`)) %>%
-  filter(`poverty|period` == first(`poverty|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'poverty', .names_sep = '|') %>%
+  filter(10 * floor(wildfire_year / 10) == census_year)
 
 
-  # VEHICLE AVAILABLE
-  unnest(vehicle_avail, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`vehicle_avail|start_year`) %>%
-  filter(between(wildfire_year, `vehicle_avail|start_year`, `vehicle_avail|end_year`)) %>%
-  filter(`vehicle_avail|period` == first(`vehicle_avail|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'vehicle_avail', .names_sep = '|') %>%
-  
-  # HOUSING COST
-  unnest(housing_cost, names_sep = '|') %>% # unnest and pull earliest matching census record
-  group_by(wildfire_id) %>%
-  arrange(`housing_cost|start_year`) %>%
-  filter(between(wildfire_year, `housing_cost|start_year`, `housing_cost|end_year`)) %>%
-  filter(`housing_cost|period` == first(`housing_cost|period`)) %>%
-  ungroup() %>%
-  nest(.by = -matches('\\|'), .key = 'housing_cost', .names_sep = '|') %>%
-  select(-census_year, -wildfire_year)
-
-# Aggregate all the blocks in each wfbz's buffer
-z <- census_data_by_wf %>%
-  mutate(
-    race = map(
-      race, 
-      ~.x %>% 
-        group_by(race, ethnicity, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(race, ethnicity))
-    ),
-    poverty = map(
-      poverty,
-      ~.x %>%
-        group_by(category, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(category))
-    ),
-    vehicle_avail = map(
-      vehicle_avail,
-      ~.x %>% 
-        group_by(no_vehicle, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%
-        pivot_wider(values_from = c(count, frac), names_from = c(no_vehicle))
-
-    ),
-    cost_burdened = map(
-      housing_cost,
-      ~.x %>% 
-        group_by(cost_burdened, period) %>% 
-        summarize(count = sum(count), n_tracts = n(), .groups = 'drop') %>% 
-        ungroup() %>% 
-        mutate(frac = count/sum(count)) %>%         
-        pivot_wider(values_from = c(count, frac), names_from = c(cost_burdened))
+# For each variable: join flat census data, pick the survey period whose
+# midpoint is closest to the wildfire year (handles pre-ACS fires and
+# post-2022 fires that fall outside strict period coverage)
+join_census <- function(matches, census_data) {
+  # Pick one period per wildfire_year so all fires and tracts in a given year
+  # use the same census period
+  best_period_by_year <- matches %>%
+    left_join(
+      census_data %>% distinct(GEOID, period, start_year, end_year),
+      by = 'GEOID',
+      relationship = 'many-to-many'
+    ) %>%
+    distinct(wildfire_year, period, start_year, end_year) %>%
+    group_by(wildfire_year) %>%
+    slice_min(
+      abs(wildfire_year - (start_year + end_year) / 2),
+      n = 1,
+      with_ties = FALSE
+    ) %>%
+    ungroup() %>%
+    select(wildfire_year, period)
+  matches %>%
+    inner_join(best_period_by_year, by = 'wildfire_year') %>%
+    inner_join(
+      census_data,
+      by = c('GEOID', 'period'),
+      relationship = 'many-to-many'
     )
+}
+
+race_by_wf <- join_census(wf_tract_matches, race)
+poverty_by_wf <- join_census(wf_tract_matches, poverty)
+vehicle_avail_by_wf <- join_census(wf_tract_matches, vehicle_avail)
+housing_cost_by_wf <- join_census(wf_tract_matches, housing_cost)
+
+rm(wf_tract_matches, race, poverty, vehicle_avail, housing_cost)
+
+# Aggregate across tracts per wildfire
+race_summ <- race_by_wf %>%
+  group_by(wildfire_id, race, ethnicity, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+poverty_summ <- poverty_by_wf %>%
+  group_by(wildfire_id, category, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+vehicle_avail_summ <- vehicle_avail_by_wf %>%
+  group_by(wildfire_id, no_vehicle, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+housing_cost_summ <- housing_cost_by_wf %>%
+  group_by(wildfire_id, cost_burdened, period) %>%
+  summarize(count = sum(count), .groups = 'drop') %>%
+  group_by(wildfire_id) %>%
+  mutate(frac = count / sum(count)) %>%
+  ungroup()
+
+# Checks: fracs sum to ~1, fracs agree with counts
+check_fracs <- function(df, label) {
+  frac_sums <- df %>%
+    group_by(wildfire_id) %>%
+    summarize(frac_sum = sum(frac), count_total = sum(count), .groups = 'drop')
+  n_nan <- sum(is.nan(frac_sums$frac_sum)) # all-zero count groups
+  bad_sum <- filter(frac_sums, abs(frac_sum - 1) > 0.01)
+  bad_agree <- df %>%
+    group_by(wildfire_id) %>%
+    mutate(expected_frac = count / sum(count)) %>%
+    filter(abs(frac - expected_frac) > 1e-9) %>%
+    nrow()
+  tibble(
+    variable = label,
+    n_wildfires = n_distinct(df$wildfire_id),
+    frac_sum_ok = nrow(bad_sum) == 0,
+    n_all_zero = n_nan,
+    frac_min = round(min(frac_sums$frac_sum, na.rm = TRUE), 4),
+    frac_max = round(max(frac_sums$frac_sum, na.rm = TRUE), 4),
+    count_agree = bad_agree == 0
+  )
+}
+
+bind_rows(
+  check_fracs(race_summ, 'race'),
+  check_fracs(poverty_summ, 'poverty'),
+  check_fracs(vehicle_avail_summ, 'vehicle_avail'),
+  check_fracs(housing_cost_summ, 'housing_cost')
+) |>
+  knitr::kable()
+
+# Column schema: <var>|period, <var>|count|<category>, <var>|frac|<category>
+z <- reduce(
+  list(
+    race_summ %>%
+      rename(`race|period` = period) %>%
+      pivot_wider(
+        values_from = c(count, frac),
+        names_from = c(race, ethnicity),
+        names_prefix = 'race|',
+        names_sep = '|'
+      ),
+    poverty_summ %>%
+      rename(`poverty|period` = period) %>%
+      pivot_wider(
+        values_from = c(count, frac),
+        names_from = category,
+        names_prefix = 'poverty|',
+        names_sep = '|'
+      ),
+    vehicle_avail_summ %>%
+      rename(`vehicle_avail|period` = period) %>%
+      pivot_wider(
+        values_from = c(count, frac),
+        names_from = no_vehicle,
+        names_prefix = 'vehicle_avail|',
+        names_sep = '|'
+      ),
+    housing_cost_summ %>%
+      rename(`housing_cost|period` = period) %>%
+      pivot_wider(
+        values_from = c(count, frac),
+        names_from = cost_burdened,
+        names_prefix = 'housing_cost|',
+        names_sep = '|'
+      )
+  ),
+  left_join,
+  by = 'wildfire_id'
+)
+```
+
+```{r qa_missing}
+#| fig-cap: "QA: fires missing census data (colored) vs. all fires (grey)"
+#| warning: false
+missing_sf <- anti_join(wfbz, z, by = 'wildfire_id') %>%
+  filter(!st_is_empty(geometry)) %>%
+  st_centroid()
+
+all_centroids <- wfbz %>%
+  filter(!st_is_empty(geometry)) %>%
+  st_centroid()
+
+world_sf <- st_as_sf(maps::map("world", plot = FALSE, fill = TRUE))
+
+ggplot() +
+  geom_sf(data = world_sf, fill = 'grey95', color = 'grey70', linewidth = 0.2) +
+  geom_sf(data = all_centroids, size = 0.2, color = 'grey60') +
+  geom_sf(data = missing_sf, aes(color = factor(wildfire_year)), size = 0.8) +
+  scale_color_viridis_d(option = 'turbo') +
+  theme_void() +
+  labs(color = 'Year') +
+  ggtitle(
+    "Fires missing census data",
+    subtitle = glue::glue(
+      "{nrow(missing_sf)} of {nrow(all_centroids)} fires ({round(100*nrow(missing_sf)/nrow(all_centroids))}%)"
+    )
+  )
+```
+
+```{r region_setup}
+REGION_ORDER <- tibble(
+  usfs_region = c(
+    "California",
+    "Southern",
+    "Alaska",
+    "Southern Rockies",
+    "Southwestern",
+    "Northern Rockies",
+    "Intermountain",
+    "Pacific Northwest",
+    "Eastern",
+    "Hawaii"
+  ),
+  plot_order = 10:1
+)
+region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
+region_colors[region_colors == '#dddddd'] <- '#757575'
+attr(region_colors, "missing") <- NA
+names(region_colors) <- sort(REGION_ORDER$usfs_region)
+
+# Assign each fire to its nearest USFS region (regions.geojson built by main.qmd)
+regions <- read_sf(here('data/processed/regions.geojson'))
+wfbz_region <- wfbz %>%
+  filter(!st_is_empty(geometry)) %>%
+  select(wildfire_id) %>%
+  mutate(
+    usfs_region = regions$usfs_region[st_nearest_feature(geometry, regions)]
   ) %>%
-  unnest(race, names_sep = '|') %>% 
-  unnest(poverty, names_sep = '|') %>% 
-  unnest(vehicle_avail, names_sep = '|') %>% 
-  unnest(housing_cost, names_sep = '|') 
+  st_drop_geometry()
+
+pop_theme <- theme_minimal(base_family = "Arial") +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25),
+    panel.grid = element_blank(),
+    axis.text.x = element_text(angle = 90, vjust = .5),
+    axis.ticks = element_line(),
+    plot.margin = unit(c(0, 0, 0, 0), "pt"),
+    legend.position = 'none'
+  )
+
+plot_pop_var <- function(df, label) {
+  df %>%
+    ggplot() +
+    geom_line(
+      aes(x = wildfire_year, y = frac_pop, color = usfs_region),
+      linetype = 'dashed',
+      linewidth = 0.4
+    ) +
+    geom_point(
+      aes(x = wildfire_year, y = frac_pop, color = usfs_region),
+      size = 1,
+      shape = 1
+    ) +
+    geom_line(aes(x = wildfire_year, y = frac_median, color = usfs_region)) +
+    geom_point(
+      aes(x = wildfire_year, y = frac_median, color = usfs_region),
+      size = 1
+    ) +
+    geom_errorbar(
+      aes(
+        x = wildfire_year,
+        ymin = frac_p25,
+        ymax = frac_p75,
+        color = usfs_region
+      ),
+      width = .2
+    ) +
+    scale_color_manual(name = "Region", values = region_colors) +
+    scale_x_continuous(breaks = seq(2000, 2024, by = 2)) +
+    coord_cartesian(xlim = c(2000, 2024)) +
+    scale_y_continuous(labels = scales::percent) +
+    facet_wrap(~usfs_region, ncol = 1, scales = 'free_y') +
+    xlab(NULL) +
+    ylab(label) +
+    pop_theme
+}
+```
+
+```{r region_pop}
+region_pop_vehicle <- read_parquet(here(
+  'data/processed/nhgis/region_pop_vehicle.parquet'
+))
+region_pop_race <- read_parquet(here(
+  'data/processed/nhgis/region_pop_race.parquet'
+))
+region_pop_poverty <- read_parquet(here(
+  'data/processed/nhgis/region_pop_poverty.parquet'
+))
+region_pop_housing <- read_parquet(here(
+  'data/processed/nhgis/region_pop_housing.parquet'
+))
+```
+
+## Pop over time
+
+
+```{r pop_affected, fig.height = 8, fig.width = 16}
+pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
+  rename(
+    wildfire_year = year,
+    `Population Affected` = exposed_10km,
+    usfs_region = region
+  ) %>%
+  select(-ID_hazard)
+
+p1 <- ggplot(data = pop) +
+  geom_line(
+    aes(x = wildfire_year, y = `Population Affected`, color = usfs_region),
+    linewidth = 0.4
+  ) +
+  geom_point(
+    aes(x = wildfire_year, y = `Population Affected`, color = usfs_region)
+  ) +
+  geom_text(
+    data = filter(
+      pop,
+      wildfire_year == 2025 |
+        (usfs_region %in% 'Alaska' & wildfire_year == 2024) |
+        (usfs_region %in% 'Hawaii' & wildfire_year == 2023)
+    ),
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      label = usfs_region,
+      color = usfs_region
+    ),
+    size = 3,
+    angle = -45,
+    hjust = -.1,
+    vjust = 0
+  ) +
+  scale_color_manual(name = "Region", values = region_colors) +
+  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2025, by = 2),
+    expand = expansion(mult = c(.025, .1))
+  ) +
+  #    coord_cartesian(xlim = c(2000, 2025)) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = c(.01, .01),
+    transform = "log"
+  ) +
+  xlab(NULL) +
+  ylab(NULL) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    #legend.position = 'right',
+    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+
+p2 <- ggplot(data = pop) +
+  geom_col(
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      fill = usfs_region
+    ),
+    width = 1,
+    linewidth = 0.25,
+    color = 'grey25'
+  ) +
+  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2025, by = 2),
+    expand = expansion(add = c(0, 1.5))
+  ) +
+  #    coord_cartesian(xlim = c(2000, 2025)) +
+  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
+  xlab(NULL) +
+  ylab(NULL) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    legend.position = 'right',
+    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+
+p3 <- ggplot(data = pop) +
+  geom_area(
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      fill = usfs_region
+    ),
+    width = 1,
+    linewidth = 0.25,
+    color = 'grey25'
+  ) +
+  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2025, by = 2),
+    expand = expansion(add = c(0, 1.5))
+  ) +
+  #    coord_cartesian(xlim = c(2000, 2025)) +
+  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
+  xlab(NULL) +
+  ylab(NULL) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    legend.position = 'right',
+    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+p1 +
+  ggtitle("Population within 10km of a WFBZ annually, by region (log-scale)") +
+  p2 +
+  ggtitle("Population within 10km of a WFBZ annually, by region (cumulative)") +
+  p3 +
+  ggtitle(
+    "Population within 10km of a WFBZ annually, by region (cumulative) -- but area plot"
+  ) +
+  plot_layout(ncol = 1, guides = 'collect')
+```
+
+
+## Vehicle Availability
+
+```{r vehicle_avail_fig, fig.height = 16}
+#| fig-cap: "Share of fire-affected households with no vehicle access, by USFS region and year"
+vehicle_avail_by_region <- vehicle_avail_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region, wildfire_year, wildfire_id) %>%
+  summarize(
+    pct_no_vehicle = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  group_by(wildfire_year, usfs_region) %>%
+  summarize(
+    frac_p25 = quantile(pct_no_vehicle, .25, na.rm = TRUE),
+    frac_median = median(pct_no_vehicle, na.rm = TRUE),
+    frac_p75 = quantile(pct_no_vehicle, .75, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  left_join(region_pop_vehicle, by = c('wildfire_year', 'usfs_region')) %>%
+  inner_join(REGION_ORDER, by = 'usfs_region') %>%
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(vehicle_avail_by_region, "Share with no vehicle")
+```
+
+## Race
+
+```{r race_fig, fig.height = 16}
+#| fig-cap: "Share of fire-affected population that is Non-Hispanic White, by USFS region and year"
+race_by_region <- race_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region, wildfire_year, wildfire_id) %>%
+  summarize(
+    pct_nhw = sum(
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
+      na.rm = TRUE
+    ) /
+      sum(count, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  group_by(wildfire_year, usfs_region) %>%
+  summarize(
+    frac_p25 = quantile(pct_nhw, .25, na.rm = TRUE),
+    frac_median = median(pct_nhw, na.rm = TRUE),
+    frac_p75 = quantile(pct_nhw, .75, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  left_join(region_pop_race, by = c('wildfire_year', 'usfs_region')) %>%
+  inner_join(REGION_ORDER, by = 'usfs_region') %>%
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(race_by_region, "Share Non-Hispanic White")
+```
+
+## Poverty
+
+```{r poverty_fig, fig.height = 16}
+#| fig-cap: "Population below 100% of poverty line near wildfire burn zones, by USFS region and year"
+poverty_by_region <- poverty_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region, wildfire_year, wildfire_id) %>%
+  summarize(
+    pct_poverty = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  group_by(wildfire_year, usfs_region) %>%
+  summarize(
+    frac_p25 = quantile(pct_poverty, .25, na.rm = TRUE),
+    frac_median = median(pct_poverty, na.rm = TRUE),
+    frac_p75 = quantile(pct_poverty, .75, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  left_join(region_pop_poverty, by = c('wildfire_year', 'usfs_region')) %>%
+  inner_join(REGION_ORDER, by = 'usfs_region') %>%
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(poverty_by_region, "Share below 100% poverty line")
+```
+
+## Housing Cost Burden
+
+```{r housing_cost_fig, fig.height = 16}
+#| fig-cap: "Cost-burdened households (≥50% income on housing) near wildfire burn zones, by USFS region and year"
+housing_cost_by_region <- housing_cost_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  group_by(usfs_region, wildfire_year, wildfire_id) %>%
+  summarize(
+    pct_cost_burdened = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  group_by(wildfire_year, usfs_region) %>%
+  summarize(
+    frac_p25 = quantile(pct_cost_burdened, .25, na.rm = TRUE),
+    frac_median = median(pct_cost_burdened, na.rm = TRUE),
+    frac_p75 = quantile(pct_cost_burdened, .75, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  left_join(region_pop_housing, by = c('wildfire_year', 'usfs_region')) %>%
+  inner_join(REGION_ORDER, by = 'usfs_region') %>%
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+plot_pop_var(housing_cost_by_region, "Share housing cost burdened (≥50%)")
+```
+
+## Diverging Charts
+
+```{r high_risk_tracts}
+# Assign USFS regions to tracts; identify high-risk tracts
+# (>= 90th percentile of pop * whp_mean within each region)
+tract_risk <- tract_sf %>%
+  filter(!is.na(whp_mean), !is.na(pop), pop > 0) %>%
+  mutate(
+    usfs_region = regions$usfs_region[st_nearest_feature(
+      geometry,
+      st_transform(regions, 4326)
+    )],
+    pop_whp = pop * whp_mean
+  ) %>%
+  st_drop_geometry()
+
+high_risk_tracts <- tract_risk %>%
+  group_by(usfs_region) %>%
+  filter(pop_whp >= quantile(pop_whp, 0.9, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(GEOID, usfs_region)
+
+high_risk_geoids <- high_risk_tracts$GEOID
+```
+
+```{r diverge_data}
+# Pool all years: fire-affected fracs
+fire_vehicle <- vehicle_avail_by_wf %>%
+  summarize(
+    frac = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "No vehicle")
+
+fire_poverty <- poverty_by_wf %>%
+  summarize(
+    frac = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Below poverty line")
+
+fire_housing <- housing_cost_by_wf %>%
+  summarize(
+    frac = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Housing cost burdened")
+
+fire_white <- race_by_wf %>%
+  summarize(
+    frac = sum(
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
+      na.rm = TRUE
+    ) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+# Reference population fracs: high-risk tracts (>= 90th pctl pop*whp by region)
+most_recent_period <- function(dat) {
+  dat %>%
+    group_by(GEOID) %>%
+    filter(start_year == max(start_year)) %>%
+    ungroup()
+}
+
+pop_vehicle_all <- read_parquet(here(
+  'data/processed/nhgis/vehicle_avail.parquet'
+)) %>%
+  most_recent_period() %>%
+  filter(GEOID %in% high_risk_geoids) %>%
+  summarize(
+    frac_pop = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "No vehicle")
+
+pop_poverty_all <- read_parquet(here(
+  'data/processed/nhgis/poverty_lt_100.parquet'
+)) %>%
+  most_recent_period() %>%
+  filter(GEOID %in% high_risk_geoids) %>%
+  summarize(
+    frac_pop = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Below poverty line")
+
+pop_housing_all <- read_parquet(here(
+  'data/processed/nhgis/housing_cost_burden.parquet'
+)) %>%
+  most_recent_period() %>%
+  filter(GEOID %in% high_risk_geoids) %>%
+  summarize(
+    frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Housing cost burdened")
+
+pop_white_all <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+  most_recent_period() %>%
+  filter(GEOID %in% high_risk_geoids) %>%
+  summarize(
+    frac_pop = sum(
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
+      na.rm = TRUE
+    ) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+# National diverging data
+stat_order <- c(
+  "Non-Hispanic White",
+  "No vehicle",
+  "Below poverty line",
+  "Housing cost burdened"
+)
+
+diverge_national <- bind_rows(
+  bind_cols(fire_vehicle, pop_vehicle_all %>% select(frac_pop)),
+  bind_cols(fire_poverty, pop_poverty_all %>% select(frac_pop)),
+  bind_cols(fire_housing, pop_housing_all %>% select(frac_pop)),
+  bind_cols(fire_white, pop_white_all %>% select(frac_pop))
+) %>%
+  mutate(
+    diff = frac - frac_pop,
+    stat = factor(stat, levels = stat_order)
+  )
+
+# Regional diverging data: fire side
+fire_vehicle_reg <- vehicle_avail_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "No vehicle")
+
+fire_poverty_reg <- poverty_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Below poverty line")
+
+fire_housing_reg <- housing_cost_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Housing cost burdened")
+
+fire_white_reg <- race_by_wf %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac = sum(
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
+      na.rm = TRUE
+    ) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+# Regional pop side: high-risk tracts per region
+pop_vehicle_reg <- read_parquet(here(
+  'data/processed/nhgis/vehicle_avail.parquet'
+)) %>%
+  most_recent_period() %>%
+  inner_join(high_risk_tracts, by = 'GEOID') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac_pop = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "No vehicle")
+
+pop_poverty_reg <- read_parquet(here(
+  'data/processed/nhgis/poverty_lt_100.parquet'
+)) %>%
+  most_recent_period() %>%
+  inner_join(high_risk_tracts, by = 'GEOID') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac_pop = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Below poverty line")
+
+pop_housing_reg <- read_parquet(here(
+  'data/processed/nhgis/housing_cost_burden.parquet'
+)) %>%
+  most_recent_period() %>%
+  inner_join(high_risk_tracts, by = 'GEOID') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Housing cost burdened")
+
+pop_white_reg <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+  most_recent_period() %>%
+  inner_join(high_risk_tracts, by = 'GEOID') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    frac_pop = sum(
+      count[
+        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
+      ],
+      na.rm = TRUE
+    ) /
+      sum(count, na.rm = TRUE)
+  ) %>%
+  mutate(stat = "Non-Hispanic White")
+
+diverge_regional <- bind_rows(
+  left_join(fire_vehicle_reg, pop_vehicle_reg, by = c('usfs_region', 'stat')),
+  left_join(fire_poverty_reg, pop_poverty_reg, by = c('usfs_region', 'stat')),
+  left_join(fire_housing_reg, pop_housing_reg, by = c('usfs_region', 'stat')),
+  left_join(fire_white_reg, pop_white_reg, by = c('usfs_region', 'stat'))
+) %>%
+  mutate(
+    diff = frac - frac_pop,
+    stat = factor(stat, levels = stat_order)
+  ) %>%
+  left_join(REGION_ORDER, by = 'usfs_region') %>%
+  replace_na(list(plot_order = 11)) %>%
+  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+# Race diverging data
+fire_race <- race_by_wf %>%
+  mutate(
+    race_group = if_else(ethnicity == "Hispanic or Latino", "Hispanic", race)
+  ) %>%
+  group_by(race_group) %>%
+  summarize(
+    frac = sum(count, na.rm = TRUE) / sum(race_by_wf$count, na.rm = TRUE)
+  )
+
+pop_race <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+  most_recent_period() %>%
+  filter(GEOID %in% high_risk_geoids) %>%
+  mutate(
+    race_group = if_else(ethnicity == "Hispanic or Latino", "Hispanic", race)
+  ) %>%
+  group_by(race_group) %>%
+  summarize(count = sum(count, na.rm = TRUE)) %>%
+  mutate(frac_pop = count / sum(count)) %>%
+  select(race_group, frac_pop)
+
+diverge_race <- left_join(fire_race, pop_race, by = 'race_group') %>%
+  mutate(
+    diff = frac - frac_pop,
+    race_group = case_when(
+      str_detect(race_group, "Black or African American") ~ "Black",
+      str_detect(
+        race_group,
+        "American Indian"
+      ) ~ "AIAN, Asian, or Pacific Islander",
+      str_detect(race_group, "Some Other Race") ~ "Other",
+      str_detect(race_group, "White") ~ "White",
+      TRUE ~ race_group
+    ),
+    race_group = fct_reorder(race_group, diff)
+  )
+```
+
+### Overall
+
+```{r diverge_overall_fig, fig.height = 2}
+#| fig-cap: "Difference in fire-affected vs. high-wildfire-risk population shares, pooled 2000–2024"
+div_theme <- pop_theme +
+  theme(
+    axis.text.x = element_text(angle = 0, vjust = 0.5),
+    axis.ticks.y = element_blank()
+  )
+
+ggplot(diverge_national, aes(x = diff, y = stat)) +
+  geom_col(
+    fill = khroma::color('light', reverse = FALSE)(1),
+    color = "grey25",
+    linewidth = .1
+  ) +
+  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  xlab("Fire-affected minus high-risk reference (percentage points)") +
+  ylab(NULL) +
+  div_theme +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+  )
+```
+
+### By Region
+
+```{r diverge_regional_fig, fig.height = 6, fig.width = 14}
+#| fig-cap: "Difference in fire-affected vs. high-wildfire-risk population shares by USFS region, pooled 2000–2024"
+ggplot(
+  diverge_regional,
+  aes(x = diff, y = usfs_region, fill = usfs_region)
+) +
+  geom_col(width = 1, color = "grey25", linewidth = .1) +
+  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+  scale_fill_manual(values = c('black', rev(region_colors))) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  facet_grid(stat ~ ., scales = 'fixed') +
+  xlab("Fire-affected minus high-risk reference (percentage points)") +
+  ylab(NULL) +
+  div_theme +
+  theme(
+    strip.text.y = element_text(angle = 0, hjust = 0, size = 8),
+    axis.text.y = element_text(angle = 45, hjust = 1),
+    panel.spacing.y = unit(0, 'pt'),
+    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+  )
+```
+
+### Race Breakdown
+
+```{r diverge_race_fig, fig.height = 3}
+#| fig-cap: "Race/ethnicity composition: fire-affected minus high-wildfire-risk population share, pooled 2000–2024"
+ggplot(diverge_race, aes(x = diff, y = race_group)) +
+  geom_col(
+    fill = khroma::color('light', reverse = FALSE)(1),
+    color = "grey25",
+    linewidth = .1
+  ) +
+  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
+  xlab("Fire-affected minus high-risk reference (percentage points)") +
+  ylab(NULL) +
+  div_theme +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+  )
 ```

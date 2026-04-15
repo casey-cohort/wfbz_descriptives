@@ -6,7 +6,7 @@ project:
 website:
   title: "WFBZ Descriptives"
   site-path: "wfbz_descriptives/"
-  navbar: 
+  navbar:
     left:
       - reports/main.qmd
       - reports/fema.qmd
@@ -15,4 +15,4 @@ format:
   html:
     theme: cosmo
     toc: true
-jupyter: wfbz    
+#jupyter: wfbz
