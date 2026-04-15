@@ -5,7 +5,7 @@ zonal statistics (mean and max WHP) using popexposure / exactextract.
 
 Prerequisites
 -------------
-- Run prep_tracts.R first to generate data/processed/tiger_tracts.geojson.
+- Run staging/prep_tracts.R first to generate data/processed/tiger_tracts.geojson.
 
 Dependencies (conda wfbz env)
 ------------------------------
@@ -30,7 +30,7 @@ import geopandas as gpd
 import popexposure as ex
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).parent.parent
 DST = ROOT / "data" / "raw" / "wildfire_risk"
 TRACTS_GEOJSON = ROOT / "data" / "processed" / "tiger_tracts.geojson"
 
@@ -56,7 +56,7 @@ def load_tracts() -> gpd.GeoDataFrame:
     """Load census tract geometries from the GeoJSON written by prep_tracts.R."""
     if not TRACTS_GEOJSON.exists():
         raise FileNotFoundError(
-            f"{TRACTS_GEOJSON} not found. Run prep_tracts.R from the project root first."
+            f"{TRACTS_GEOJSON} not found. Run staging/prep_tracts.R from the project root first."
         )
     gdf = gpd.read_file(TRACTS_GEOJSON)
     # popexposure requires a column whose name contains "ID"

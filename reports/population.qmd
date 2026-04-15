@@ -43,12 +43,12 @@ missing_parquet <- expected_parquet[
 ]
 if (length(missing_parquet) > 0) {
   stop(
-    "Run prep_population.R from the project root first. Missing: ",
+    "Run staging/prep_population.R from the project root first. Missing: ",
     paste(missing_parquet, collapse = ', ')
   )
 }
 if (!file.exists(here('data/processed/tiger_tracts.geojson'))) {
-  stop("Run prep_tracts.R from the project root first.")
+  stop("Run staging/prep_tracts.R from the project root first.")
 }
 ```
 
@@ -56,10 +56,10 @@ if (!file.exists(here('data/processed/tiger_tracts.geojson'))) {
 tract_sf <- bind_rows(
   read_sf(here('data/processed/tract_WHP_AK.geojson')) %>%
     filter(substr(GEOID, 1, 2) == '02'),
-  read_sf(here('data/processed/tract_WHP_HI.geojson')) %>% # !!! NOTHING HERE !!!
-    filter(substr(GEOID, 1, 2) == '11'),
+  read_sf(here('data/processed/tract_WHP_HI.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '15'),
   read_sf(here('data/processed/tract_WHP_CONUS.geojson')) %>%
-    filter(!(substr(GEOID, 1, 2) %in% c('02', '11')))
+    filter(!(substr(GEOID, 1, 2) %in% c('02', '15')))
 )
 ```
 
@@ -323,9 +323,9 @@ plot_pop_var <- function(df, label) {
       size = 1,
       shape = 1
     ) +
-    geom_line(aes(x = wildfire_year, y = frac_mean, color = usfs_region)) +
+    geom_line(aes(x = wildfire_year, y = frac_median, color = usfs_region)) +
     geom_point(
-      aes(x = wildfire_year, y = frac_mean, color = usfs_region),
+      aes(x = wildfire_year, y = frac_median, color = usfs_region),
       size = 1
     ) +
     geom_errorbar(
@@ -338,10 +338,8 @@ plot_pop_var <- function(df, label) {
       width = .2
     ) +
     scale_color_manual(name = "Region", values = region_colors) +
-    scale_x_continuous(
-      limits = c(2000, 2024),
-      breaks = seq(2000, 2024, by = 2)
-    ) +
+    scale_x_continuous(breaks = seq(2000, 2024, by = 2)) +
+    coord_cartesian(xlim = c(2000, 2024)) +
     scale_y_continuous(labels = scales::percent) +
     facet_wrap(~usfs_region, ncol = 1, scales = 'free_y') +
     xlab(NULL) +
@@ -365,6 +363,136 @@ region_pop_housing <- read_parquet(here(
 ))
 ```
 
+## Pop over time
+
+
+```{r pop_affected, fig.height = 8, fig.width = 16}
+pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
+  rename(
+    wildfire_year = year,
+    `Population Affected` = exposed_10km,
+    usfs_region = region
+  ) %>%
+  select(-ID_hazard)
+
+p1 <- ggplot(data = pop) +
+  geom_line(
+    aes(x = wildfire_year, y = `Population Affected`, color = usfs_region),
+    linewidth = 0.4
+  ) +
+  geom_point(
+    aes(x = wildfire_year, y = `Population Affected`, color = usfs_region)
+  ) +
+  geom_text(
+    data = filter(
+      pop,
+      wildfire_year == 2025 |
+        (usfs_region %in% 'Alaska' & wildfire_year == 2024) |
+        (usfs_region %in% 'Hawaii' & wildfire_year == 2023)
+    ),
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      label = usfs_region,
+      color = usfs_region
+    ),
+    size = 3,
+    angle = -45,
+    hjust = -.1,
+    vjust = 0
+  ) +
+  scale_color_manual(name = "Region", values = region_colors) +
+  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2025, by = 2),
+    expand = expansion(mult = c(.025, .1))
+  ) +
+  #    coord_cartesian(xlim = c(2000, 2025)) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = c(.01, .01),
+    transform = "log"
+  ) +
+  xlab(NULL) +
+  ylab(NULL) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    #legend.position = 'right',
+    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+
+p2 <- ggplot(data = pop) +
+  geom_col(
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      fill = usfs_region
+    ),
+    width = 1,
+    linewidth = 0.25,
+    color = 'grey25'
+  ) +
+  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2025, by = 2),
+    expand = expansion(add = c(0, 1.5))
+  ) +
+  #    coord_cartesian(xlim = c(2000, 2025)) +
+  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
+  xlab(NULL) +
+  ylab(NULL) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    legend.position = 'right',
+    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+
+p3 <- ggplot(data = pop) +
+  geom_area(
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      fill = usfs_region
+    ),
+    width = 1,
+    linewidth = 0.25,
+    color = 'grey25'
+  ) +
+  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2025, by = 2),
+    expand = expansion(add = c(0, 1.5))
+  ) +
+  #    coord_cartesian(xlim = c(2000, 2025)) +
+  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
+  xlab(NULL) +
+  ylab(NULL) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    legend.position = 'right',
+    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+p1 +
+  ggtitle("Population within 10km of a WFBZ annually, by region (log-scale)") +
+  p2 +
+  ggtitle("Population within 10km of a WFBZ annually, by region (cumulative)") +
+  p3 +
+  ggtitle(
+    "Population within 10km of a WFBZ annually, by region (cumulative) -- but area plot"
+  ) +
+  plot_layout(ncol = 1, guides = 'collect')
+```
+
+
 ## Vehicle Availability
 
 ```{r vehicle_avail_fig, fig.height = 16}
@@ -380,7 +508,7 @@ vehicle_avail_by_region <- vehicle_avail_by_wf %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
     frac_p25 = quantile(pct_no_vehicle, .25, na.rm = TRUE),
-    frac_mean = mean(pct_no_vehicle, na.rm = TRUE),
+    frac_median = median(pct_no_vehicle, na.rm = TRUE),
     frac_p75 = quantile(pct_no_vehicle, .75, na.rm = TRUE),
     .groups = 'drop'
   ) %>%
@@ -411,7 +539,7 @@ race_by_region <- race_by_wf %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
     frac_p25 = quantile(pct_nhw, .25, na.rm = TRUE),
-    frac_mean = mean(pct_nhw, na.rm = TRUE),
+    frac_median = median(pct_nhw, na.rm = TRUE),
     frac_p75 = quantile(pct_nhw, .75, na.rm = TRUE),
     .groups = 'drop'
   ) %>%
@@ -437,7 +565,7 @@ poverty_by_region <- poverty_by_wf %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
     frac_p25 = quantile(pct_poverty, .25, na.rm = TRUE),
-    frac_mean = mean(pct_poverty, na.rm = TRUE),
+    frac_median = median(pct_poverty, na.rm = TRUE),
     frac_p75 = quantile(pct_poverty, .75, na.rm = TRUE),
     .groups = 'drop'
   ) %>%
@@ -463,7 +591,7 @@ housing_cost_by_region <- housing_cost_by_wf %>%
   group_by(wildfire_year, usfs_region) %>%
   summarize(
     frac_p25 = quantile(pct_cost_burdened, .25, na.rm = TRUE),
-    frac_mean = mean(pct_cost_burdened, na.rm = TRUE),
+    frac_median = median(pct_cost_burdened, na.rm = TRUE),
     frac_p75 = quantile(pct_cost_burdened, .75, na.rm = TRUE),
     .groups = 'drop'
   ) %>%

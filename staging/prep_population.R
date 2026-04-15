@@ -515,7 +515,7 @@ if (!file.exists(here('data/processed/regions.geojson'))) {
   stop("data/processed/regions.geojson not found. Render main.qmd first.")
 }
 if (!file.exists(here('data/processed/tiger_tracts.geojson'))) {
-  stop("Run prep_tracts.R first.")
+  stop("Run staging/prep_tracts.R first.")
 }
 
 regions_sf <- read_sf(here('data/processed/regions.geojson'))

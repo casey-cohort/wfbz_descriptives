@@ -42,7 +42,13 @@ Other data (Census geometry, USFS region shapefiles) is downloaded automatically
 - `reports/main.qmd` — main descriptive summaries by USFS region and variable over time
 - `reports/fema.qmd` — FEMA declaration analyses
 - `reports/population.qmd` — population exposure summaries (uses R + Python via `popexposure`)
-- `reports/abstract.ipynb` / `reports/abstract.qmd` — abstract-level summary
+- `staging/abstract.py` — computes population exposure stats and generates abstract text
+
+### Staging scripts (run before rendering)
+- `staging/prep_tracts.R` — downloads Census tract geometries (2000/2010/2020) via `tigris`
+- `staging/prep_whp.py` — downloads USFS Wildfire Hazard Potential rasters, computes per-tract zonal stats
+- `staging/prep_population.R` — pulls NHGIS Census data via IPUMS API, builds demographic parquets
+- `staging/abstract.py` — computes population exposure via `popexposure`, writes `pop_affected.csv` and abstract text
 
 ### Key data objects (created in `_setup.qmd`)
 - `wfbz` — raw spatial dataset filtered to non-empty geometries, excluding flood events

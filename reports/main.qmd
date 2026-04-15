@@ -950,6 +950,7 @@ ggplot(regions_cart) +
   ) +
   scale_x_continuous(limits = c(-3115585, 2263736)) +
   scale_y_continuous(limits = c(-1702303, 1559103)) +
+  theme_void() +
   theme(
     axis.text = element_blank(),
     axis.title = element_blank(),

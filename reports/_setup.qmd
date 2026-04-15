@@ -11,6 +11,7 @@ library(tidycensus)
 library(ggh4x)
 library(lemon)
 library(tigris)
+library(here)
 
 options(scipen = 9999)
 set.seed(708)
@@ -50,7 +51,7 @@ theme_set(
 ```{r data}
 #| echo: false
 #| message: false
-if (!file.exists('../data/raw/wfbz_disasters_2000-2025.geojson')) {
+if (!file.exists(here('data/raw/wfbz_disasters_2000-2025.geojson'))) {
   stop(
     "Manually download data set from https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DWILBW and unzip to data/raw."
   )
@@ -58,14 +59,14 @@ if (!file.exists('../data/raw/wfbz_disasters_2000-2025.geojson')) {
 
 source(here::here('R/utils.R'))
 
-wfbz <- read_sf("../data/raw/wfbz_disasters_2000-2025.geojson") %>%
+wfbz <- read_sf(here("data/raw/wfbz_disasters_2000-2025.geojson")) %>%
   filter(!st_is_empty(geometry))
 wfbz <- wfbz %>%
   filter(!str_detect(wildfire_complex_names, '(FLOOD$|FLOOD 2013$)')) # remove some colorado floods that snuck in
 
 states_sf <- tigris::states(progress_bar = FALSE)
 
-if (!file.exists('../data/raw/tiger_counties.geojson')) {
+if (!file.exists(here('data/raw/tiger_counties.geojson'))) {
   counties_pop <- get_decennial(
     geography = "county",
     variables = "P1_001N", # Total population variable in 2020 Census
@@ -76,12 +77,12 @@ if (!file.exists('../data/raw/tiger_counties.geojson')) {
   ) %>%
     rename(population = P1_001N) %>%
     select(population, geometry)
-  write_sf(counties_pop, '../data/raw/tiger_counties.geojson')
+  write_sf(counties_pop, here('data/raw/tiger_counties.geojson'))
 } else {
-  counties_pop <- '../data/raw/tiger_counties.geojson'
+  counties_pop <- here('data/raw/tiger_counties.geojson')
 }
 
-if (!file.exists('../data/raw/tiger_states.geojson')) {
+if (!file.exists(here('data/raw/tiger_states.geojson'))) {
   states_pop <- get_decennial(
     geography = "state",
     variables = "P1_001N", # Total population variable in 2020 Census
@@ -98,9 +99,9 @@ if (!file.exists('../data/raw/tiger_states.geojson')) {
         distinct()
     ) %>%
     rename(state_name = NAME)
-  write_sf(states_pop, '../data/raw/tiger_states.geojson')
+  write_sf(states_pop, here('data/raw/tiger_states.geojson'))
 } else {
-  states_pop <- read_sf('../data/raw/tiger_states.geojson')
+  states_pop <- read_sf(here('data/raw/tiger_states.geojson'))
 }
 
 # Order regions consistently
@@ -126,7 +127,7 @@ attr(region_colors, "missing") <- NA
 names(region_colors) <- sort(REGION_ORDER$usfs_region)
 
 
-if (!file.exists('../data/processed/regions.geojson')) {
+if (!file.exists(here('data/processed/regions.geojson'))) {
   regions <- read_sf(unzip_url(
     "https://data.fs.usda.gov/geodata/edw/edw_resources/shp/S_USA.AdministrativeRegion.zip",
     dst = tempfile(fileext = ".shp")
@@ -177,9 +178,9 @@ if (!file.exists('../data/processed/regions.geojson')) {
     FUN = sum
   )$population # centroid more or less ensures counties only end up in one region
 
-  write_sf(regions, '../data/processed/regions.geojson')
+  write_sf(regions, here('data/processed/regions.geojson'))
 } else {
-  regions <- read_sf('../data/processed/regions.geojson')
+  regions <- read_sf(here('data/processed/regions.geojson'))
 }
 ```
 
