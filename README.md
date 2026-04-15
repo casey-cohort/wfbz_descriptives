@@ -37,6 +37,7 @@ To build the processed population data, run from the project root:
 Rscript staging/prep_tracts.R
 python staging/prep_whp.py
 Rscript staging/prep_population.R
+Rscript staging/prep_spatial_join.R
 python staging/abstract.py
 ```
 

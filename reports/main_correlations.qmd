@@ -1,0 +1,164 @@
+---
+title: "Correlations"
+toc: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+{{< include _setup.qmd >}}
+
+```{r corr_data}
+library('ggh4x')
+wfbz_lab <- wfbz %>%
+  st_drop_geometry() %>%
+  filter(wildfire_community_intersect) %>%
+  transmute(
+    wildfire_id,
+    `Area (km²)` = wildfire_area,
+    `Fatalities` = wildfire_max_civil_fatalities,
+    `Structures Destroyed` = wildfire_struct_destroyed,
+    `WUI` = if_else(
+      is.na(wildfire_wui),
+      'None',
+      str_replace(wildfire_wui, '\\|', ' & ')
+    ),
+    `FEMA Declarations (n)` = as.character(wildfire_fema_dec),
+    `Population Density (unitless)` = wildfire_buffered_avg_pop_den
+  )
+```
+
+### Numeric Values Compared
+
+```{r corr_numeric, fig.height = 12, fig.width = 12}
+xwfbz_num <- wfbz_lab %>%
+  select(where(is.numeric)) %>%
+  pivot_longer(-wildfire_id)
+xwfbz_num <- inner_join(
+  xwfbz_num,
+  xwfbz_num,
+  by = 'wildfire_id',
+  relationship = 'many-to-many'
+)
+ggplot(xwfbz_num) +
+  geom_jitter(
+    aes(x = value.x, y = value.y),
+    alpha = .1,
+    width = 5 / 247,
+    height = 5 / 247
+  ) +
+  facet_grid2(name.x ~ name.y, scales = 'free', independent = 'all') +
+  scale_x_continuous(
+    trans = 'log',
+    labels = ~ format(.x, digits = 3, scientific = 0)
+  ) +
+  scale_y_continuous(
+    trans = 'log',
+    labels = ~ format(.x, digits = 3, scientific = 0)
+  ) +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, size = .25),
+    plot.title = element_text(size = 14),
+    axis.text.x = element_text(angle = 90, vjust = +.5),
+    axis.ticks = element_line(),
+    plot.margin = unit(c(0, 0, 0, 0), "pt"),
+  ) +
+  xlab('') +
+  ylab('') +
+  ggtitle("Numeric Variables Compared (log-scale)")
+ggsave(here('figures/corr_numeric.png'), last_plot(), width = 12, height = 12)
+```
+
+### Numeric & Categorical Values Compared
+
+
+```{r corr_numcat, fig.height = 8, fig.width = 16}
+xwfbz_numcat <- wfbz_lab %>%
+  pivot_longer(
+    cols = c(where(is.numeric), -wildfire_id),
+    names_to = 'name_num',
+    values_to = 'val_num'
+  ) %>%
+  pivot_longer(
+    cols = c(WUI, `FEMA Declarations (n)`),
+    names_to = 'name_cat',
+    values_to = 'val_cat'
+  ) %>%
+	mutate(val_cat = factor(val_cat, levels = c("None", "FALSE", "TRUE", "interface & intermix", "intermix",
+"interface")))
+
+p1 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'WUI')) +
+  geom_boxplot(aes(
+    x = val_cat,
+    y = val_num,
+    fill = val_cat
+  )) +
+  facet_wrap(~ name_num, scales = 'free', nrow = 1) +
+  scale_y_continuous(
+    trans = 'log',
+    labels = ~scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
+  ) +
+	khroma::scale_fill_bright(guide = 'none') +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, size = .25),
+    plot.title = element_text(size = 14),
+    axis.text.x = element_text(angle = 45, vjust = +1, hjust = 1),
+    axis.ticks = element_line(),
+    plot.margin = unit(c(0, 0, 0, 0), "pt"),
+  ) +
+  #ylab('') +
+  xlab("Wilderness-urban interface and intermix")
+
+p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
+  geom_boxplot(aes(
+    x = val_cat,
+    y = val_num,
+    fill = val_cat
+  )) +
+  facet_wrap(~ name_num, scales = 'free', nrow = 1) +
+  scale_y_continuous(
+    trans = 'log',
+    labels = ~scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
+  ) +
+	khroma::scale_fill_bright(guide = 'none', reverse = TRUE) +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, size = .25),
+    plot.title = element_text(size = 14),
+    axis.text.x = element_text(angle = 45, vjust = +1, hjust = 1),
+    axis.ticks = element_line(),
+    plot.margin = unit(c(0, 0, 0, 0), "pt")
+  ) +
+  #ylab('') +
+  xlab("FEMA disaster declaration")
+
+p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & Categorical Variables Compared (log-scale)")
+ggsave(here('figures/corr_numcat.png'), last_plot(), width = 16, height = 8)
+```
+
+
+### Categorical Values Compared
+
+```{r corr_cat, fig.height = 6, fig.width = 6}
+
+wfbz_lab %>%
+  group_by(`FEMA Declarations (n)`) %>%
+  mutate(n_dec = n()) %>%
+  group_by(WUI = str_to_title(WUI), `FEMA Declarations (n)`, .drop = FALSE) %>%
+  summarize(
+    n = n(),
+    lab = glue('{format(n, big.mark = \',\')}\n({format(100*n()/first(n_dec), digits = 3)}%)')
+  ) %>%
+	ggplot() +
+	geom_tile(aes(x = WUI, y = `FEMA Declarations (n)`, fill = n)) +
+	geom_text(aes(x = WUI, y = `FEMA Declarations (n)`, label = lab, color = n)) +
+	khroma::scale_fill_lapaz(name = '# Wildfire\nDisasters') +
+	khroma::scale_color_lapaz(reverse = TRUE, guide = 'none') +
+	theme(
+  	plot.title = element_text(size = 14),
+  	axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+  	axis.ticks = element_line(),
+  	plot.margin = unit(c(0,0,0,0), "pt")
+	) + coord_equal()
+ggsave(here('figures/corr_cat.png'), last_plot(), width = 6, height = 6)
+```

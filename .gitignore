@@ -13,3 +13,5 @@ docs/
 **/*.quarto_ipynb
 *.html
 rendered/
+.DS_Store
+figures/

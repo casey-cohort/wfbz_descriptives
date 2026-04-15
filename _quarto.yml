@@ -8,9 +8,22 @@ website:
   site-path: "wfbz_descriptives/"
   navbar:
     left:
-      - reports/main.qmd
-      - reports/fema.qmd
-      - reports/population.qmd
+      - text: "Summary Tables"
+        file: reports/main_tables.qmd
+      - text: "Time Series"
+        file: reports/main_timeseries.qmd
+      - text: "Correlations"
+        file: reports/main_correlations.qmd
+      - text: "Geography"
+        file: reports/main_geography.qmd
+      - text: "FEMA"
+        file: reports/fema.qmd
+      - text: "Pop Exposure"
+        file: reports/pop_exposure.qmd
+      - text: "Demographics"
+        file: reports/pop_demographics.qmd
+      - text: "Diverging"
+        file: reports/pop_diverging.qmd
 format:
   html:
     theme: cosmo

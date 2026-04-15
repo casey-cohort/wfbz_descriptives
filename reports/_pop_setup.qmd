@@ -1,0 +1,48 @@
+
+```{r packages}
+library(here)
+library(tidyverse)
+library(sf)
+library(arrow)
+library(patchwork)
+library(showtext)
+
+showtext_auto()
+font_add("Arial", regular = here("assets/LiberationSans-Regular.ttf"))
+
+options(scipen = 9999)
+set.seed(708)
+dir.create(here('figures'), showWarnings = FALSE)
+```
+
+```{r region_setup}
+REGION_ORDER <- tibble(
+  usfs_region = c(
+    "California",
+    "Southern",
+    "Alaska",
+    "Southern Rockies",
+    "Southwestern",
+    "Northern Rockies",
+    "Intermountain",
+    "Pacific Northwest",
+    "Eastern",
+    "Hawaii"
+  ),
+  plot_order = 10:1
+)
+region_colors <- c(khroma::color('light', reverse = FALSE)(9), '#ac87cc')
+region_colors[region_colors == '#dddddd'] <- '#757575'
+attr(region_colors, "missing") <- NA
+names(region_colors) <- sort(REGION_ORDER$usfs_region)
+
+pop_theme <- theme_minimal(base_family = "Arial") +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25),
+    panel.grid = element_blank(),
+    axis.text.x = element_text(angle = 90, vjust = .5),
+    axis.ticks = element_line(),
+    plot.margin = unit(c(0, 0, 0, 0), "pt"),
+    legend.position = 'none'
+  )
+```

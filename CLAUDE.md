@@ -37,17 +37,23 @@ Other data (Census geometry, USFS region shapefiles) is downloaded automatically
 
 ### Quarto site structure
 - `_quarto.yml` — site config; renders everything under `reports/`, outputs to `rendered/`
-- `reports/_setup.qmd` — included by `main.qmd` and `fema.qmd` via `{{< include _setup.qmd >}}`; loads all R packages, sets the global ggplot theme, reads/caches all data, and builds the core aggregated data frames (`wfbz`, `wfbz_crit`, `wfbz_crit_all`, `by_state`, `regions`)
-- `reports/_helpers.qmd` — included by `population.qmd`; provides the `unzip_url()` helper for streaming large downloads
-- `reports/main.qmd` — main descriptive summaries by USFS region and variable over time
+- `reports/_setup.qmd` — included by `main_*.qmd` and `fema.qmd` via `{{< include _setup.qmd >}}`; loads R packages, sets the global ggplot theme, reads/caches all data, defines `plotme()`, and builds core aggregated data frames (`wfbz`, `wfbz_crit`, `wfbz_crit_all`, `by_state`, `regions`)
+- `reports/_pop_setup.qmd` — included by `pop_*.qmd`; loads packages, defines `REGION_ORDER`, `region_colors`, and `pop_theme`
+- `reports/main_tables.qmd` — summary tables by USFS region
+- `reports/main_timeseries.qmd` — stacked bar/line plots of events, fatalities, structures, FEMA, burned area, fire size, WUI over time
+- `reports/main_correlations.qmd` — scatter matrix, boxplots, and heatmap of fire characteristics
+- `reports/main_geography.qmd` — fire season timing boxplots and USFS region reference map
 - `reports/fema.qmd` — FEMA declaration analyses
-- `reports/population.qmd` — population exposure summaries (uses R + Python via `popexposure`)
+- `reports/pop_exposure.qmd` — population exposure over time (log-scale, stacked, area plots)
+- `reports/pop_demographics.qmd` — demographic time series (vehicle access, race, poverty, housing cost) with IQR error bars
+- `reports/pop_diverging.qmd` — diverging bar charts comparing fire-affected vs. high-risk reference populations
 - `staging/abstract.py` — computes population exposure stats and generates abstract text
 
 ### Staging scripts (run before rendering)
 - `staging/prep_tracts.R` — downloads Census tract geometries (2000/2010/2020) via `tigris`
 - `staging/prep_whp.py` — downloads USFS Wildfire Hazard Potential rasters, computes per-tract zonal stats
 - `staging/prep_population.R` — pulls NHGIS Census data via IPUMS API, builds demographic parquets
+- `staging/prep_spatial_join.R` — runs expensive 10km spatial join of fires to tracts, writes `*_by_wf.parquet` files
 - `staging/abstract.py` — computes population exposure via `popexposure`, writes `pop_affected.csv` and abstract text
 
 ### Key data objects (created in `_setup.qmd`)
