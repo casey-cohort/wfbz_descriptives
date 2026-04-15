@@ -133,5 +133,5 @@ p1 +
     "Population within 10km of a WFBZ annually, by region (cumulative) -- but area plot"
   ) +
   plot_layout(ncol = 1, guides = 'collect')
-ggsave(here('figures/pop_affected.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/pop_affected.png'), last_plot(), width = 5.3, height = 2.7)
 ```

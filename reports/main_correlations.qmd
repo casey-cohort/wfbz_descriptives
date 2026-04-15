@@ -67,7 +67,7 @@ ggplot(xwfbz_num) +
   xlab('') +
   ylab('') +
   ggtitle("Numeric Variables Compared (log-scale)")
-ggsave(here('figures/corr_numeric.png'), last_plot(), width = 12, height = 12)
+ggsave(here('figures/corr_numeric.png'), last_plot(), width = 4, height = 4)
 ```
 
 ### Numeric & Categorical Values Compared
@@ -133,7 +133,7 @@ p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
   xlab("FEMA disaster declaration")
 
 p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & Categorical Variables Compared (log-scale)")
-ggsave(here('figures/corr_numcat.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/corr_numcat.png'), last_plot(), width = 5.3, height = 2.7)
 ```
 
 
@@ -160,5 +160,5 @@ wfbz_lab %>%
   	axis.ticks = element_line(),
   	plot.margin = unit(c(0,0,0,0), "pt")
 	) + coord_equal()
-ggsave(here('figures/corr_cat.png'), last_plot(), width = 6, height = 6)
+ggsave(here('figures/corr_cat.png'), last_plot(), width = 2, height = 2)
 ```

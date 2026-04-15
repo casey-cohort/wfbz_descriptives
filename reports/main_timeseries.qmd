@@ -21,7 +21,7 @@ plotme(wfbz_crit, 'Events', rel = FALSE) +
   plotme(wfbz_crit, 'Events', rel = TRUE) +
   plotme(wfbz_crit_all, 'Events', rel = TRUE) +
   plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/events_over_time.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/events_over_time.png'), last_plot(), width = 5.3, height = 2.7)
 ```
 
 
@@ -130,7 +130,7 @@ The five deadliest fires in our data set are labeled.
   plotme(wfbz_crit, 'Fatalities', rel = TRUE) +
   plotme(wfbz_crit_all, 'Fatalities', rel = TRUE) +
   plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/fatalities_over_time.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/fatalities_over_time.png'), last_plot(), width = 5.3, height = 2.7)
 ```
 
 
@@ -238,7 +238,7 @@ The five fires in our data set with the most destroyed structures are labeled.
   plotme(wfbz_crit, 'Structures Destroyed', rel = TRUE) +
   plotme(wfbz_crit_all, 'Structures Destroyed', rel = TRUE) +
   plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/structures_over_time.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/structures_over_time.png'), last_plot(), width = 5.3, height = 2.7)
 ```
 
 
@@ -254,7 +254,7 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
   plotme(wfbz_crit, 'FEMA Declarations (n)', rel = TRUE) +
   plotme(wfbz_crit_all, 'FEMA Declarations (n)', rel = TRUE) +
   plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/fema_over_time.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/fema_over_time.png'), last_plot(), width = 5.3, height = 2.7)
 ```
 
 ### Burned Area over Time
@@ -273,7 +273,7 @@ ggsave(here('figures/fema_over_time.png'), last_plot(), width = 16, height = 8)
   plotme(wfbz_crit, 'Burned Area', rel = TRUE) +
   plotme(wfbz_crit_all, 'Burned Area', rel = TRUE) +
   plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/burned_area_over_time.png'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/burned_area_over_time.png'), last_plot(), width = 5.3, height = 2.7)
 ```
 
 ### Average Fire Size over Time
@@ -289,7 +289,7 @@ ggsave(here('figures/burned_area_over_time.png'), last_plot(), width = 16, heigh
     #scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::scientific) +
     ggtitle('All Disasters')) +
   plot_layout(ncol = 2)
-ggsave(here('figures/fire_size_over_time.png'), last_plot(), width = 16, height = 4)
+ggsave(here('figures/fire_size_over_time.png'), last_plot(), width = 5.3, height = 1.3)
 ```
 
 
@@ -303,7 +303,7 @@ Alaska has quite an outlier for community-intersecting fires in 2004. This was t
 plotme(wfbz_crit, 'WUI-Interface', stack = FALSE) +
   ggtitle('Community-Impacting Disasters') +
   xlab('')
-ggsave(here('figures/wui_interface_over_time.png'), last_plot(), width = 14, height = 12)
+ggsave(here('figures/wui_interface_over_time.png'), last_plot(), width = 4.7, height = 4)
 ```
 
 ### Share of Fires in Wildland-Urban Intermix over Time
@@ -312,5 +312,5 @@ ggsave(here('figures/wui_interface_over_time.png'), last_plot(), width = 14, hei
 plotme(wfbz_crit, 'WUI-Intermix', stack = FALSE) +
   ggtitle('Community-Impacting Disasters') +
   xlab('')
-ggsave(here('figures/wui_intermix_over_time.png'), last_plot(), width = 14, height = 12)
+ggsave(here('figures/wui_intermix_over_time.png'), last_plot(), width = 4.7, height = 4)
 ```

@@ -2,7 +2,7 @@
 # Requires IPUMS_API_KEY set in .Renviron
 #
 # Set FORCE_REBUILD <- TRUE to bypass all caching guards and rebuild from scratch.
-FORCE_REBUILD <- FALSE
+FORCE_REBUILD <- TRUE
 
 library(sf)
 library(tidyverse)
@@ -383,6 +383,7 @@ if (!all(file_exists(census_parquets))) {
         ) &
           str_detect(category, "^Estimates"))
     ) %>%
+    filter(str_detect(category, "percent|Not computed")) %>%
     mutate(
       GEOID,
       category,
@@ -446,7 +447,8 @@ if (!all(file_exists(census_parquets))) {
     group_by(GEOID, YEAR) %>%
     filter(
       str_detect(category, 'Estimates'),
-      !str_detect(category, "Total")
+      !str_detect(category, "Total"),
+      str_detect(category, "vehicle")
     ) %>%
     mutate(
       period = YEAR,

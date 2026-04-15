@@ -105,7 +105,7 @@ wfbz %>%
       panel.spacing = unit(0, 'in'),
       axis.title.y = element_blank()
 		)
-ggsave(here('figures/fire_season_timing.png'), last_plot(), width = 10, height = 12)
+ggsave(here('figures/fire_season_timing.png'), last_plot(), width = 3.3, height = 4)
 ```
 
 ## Reference
@@ -149,5 +149,5 @@ ggplot(regions_cart) +
     axis.title = element_blank(),
     axis.ticks = element_blank()
   )
-ggsave(here('figures/regions_map.png'), last_plot(), width = 8, height = 6)
+ggsave(here('figures/regions_map.png'), last_plot(), width = 2.7, height = 2)
 ```

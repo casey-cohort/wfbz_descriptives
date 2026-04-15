@@ -98,7 +98,7 @@ vehicle_avail_by_region <- vehicle_avail_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(vehicle_avail_by_region, "Share with no vehicle")
-ggsave(here('figures/vehicle_avail_fig.png'), last_plot(), width = 7, height = 16)
+ggsave(here('figures/vehicle_avail_fig.png'), last_plot(), width = 2.3, height = 5.3)
 ```
 
 ## Race
@@ -130,7 +130,7 @@ race_by_region <- race_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(race_by_region, "Share Non-Hispanic White")
-ggsave(here('figures/race_fig.png'), last_plot(), width = 7, height = 16)
+ggsave(here('figures/race_fig.png'), last_plot(), width = 2.3, height = 5.3)
 ```
 
 ## Poverty
@@ -157,7 +157,7 @@ poverty_by_region <- poverty_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(poverty_by_region, "Share below 100% poverty line")
-ggsave(here('figures/poverty_fig.png'), last_plot(), width = 7, height = 16)
+ggsave(here('figures/poverty_fig.png'), last_plot(), width = 2.3, height = 5.3)
 ```
 
 ## Housing Cost Burden
@@ -184,5 +184,5 @@ housing_cost_by_region <- housing_cost_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(housing_cost_by_region, "Share housing cost burdened (>=50%)")
-ggsave(here('figures/housing_cost_fig.png'), last_plot(), width = 7, height = 16)
+ggsave(here('figures/housing_cost_fig.png'), last_plot(), width = 2.3, height = 5.3)
 ```

@@ -14,17 +14,26 @@ execute:
 by_wf_dir <- here('data/processed/nhgis')
 race_by_wf <- read_parquet(file.path(by_wf_dir, 'race_by_wf.parquet'))
 poverty_by_wf <- read_parquet(file.path(by_wf_dir, 'poverty_by_wf.parquet'))
-vehicle_avail_by_wf <- read_parquet(file.path(by_wf_dir, 'vehicle_avail_by_wf.parquet'))
-housing_cost_by_wf <- read_parquet(file.path(by_wf_dir, 'housing_cost_by_wf.parquet'))
+vehicle_avail_by_wf <- read_parquet(file.path(
+  by_wf_dir,
+  'vehicle_avail_by_wf.parquet'
+))
+housing_cost_by_wf <- read_parquet(file.path(
+  by_wf_dir,
+  'housing_cost_by_wf.parquet'
+))
 
 # Tracts with WHP for high-risk identification
 tract_sf <- bind_rows(
   read_sf(here('data/processed/tract_WHP_AK.geojson')) %>%
-    filter(substr(GEOID, 1, 2) == '02'),
+    filter(substr(GEOID, 1, 2) == '02') %>%
+    filter(census_year == 2020),
   read_sf(here('data/processed/tract_WHP_HI.geojson')) %>%
-    filter(substr(GEOID, 1, 2) == '15'),
+    filter(substr(GEOID, 1, 2) == '15') %>%
+    filter(census_year == 2020),
   read_sf(here('data/processed/tract_WHP_CONUS.geojson')) %>%
-    filter(!(substr(GEOID, 1, 2) %in% c('02', '15')))
+    filter(!(substr(GEOID, 1, 2) %in% c('02', '15'))) %>%
+    filter(census_year == 2020)
 )
 
 # Join tract-level population
@@ -64,6 +73,7 @@ tract_risk <- tract_sf %>%
   st_drop_geometry()
 
 high_risk_tracts <- tract_risk %>%
+  distinct(GEOID, .keep_all = TRUE) %>%
   group_by(usfs_region) %>%
   filter(pop_whp >= quantile(pop_whp, 0.9, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -359,7 +369,12 @@ ggplot(diverge_national, aes(x = diff, y = stat)) +
   theme(
     panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
   )
-ggsave(here('figures/diverge_overall_fig.png'), last_plot(), width = 7, height = 2)
+ggsave(
+  here('figures/diverge_overall_fig.png'),
+  last_plot(),
+  width = 2.3,
+  height = 0.7
+)
 ```
 
 ### By Region
@@ -384,7 +399,12 @@ ggplot(
     panel.spacing.y = unit(0, 'pt'),
     panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
   )
-ggsave(here('figures/diverge_regional_fig.png'), last_plot(), width = 14, height = 6)
+ggsave(
+  here('figures/diverge_regional_fig.png'),
+  last_plot(),
+  width = 4.7,
+  height = 2
+)
 ```
 
 ### Race Breakdown
@@ -405,5 +425,5 @@ ggplot(diverge_race, aes(x = diff, y = race_group)) +
   theme(
     panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
   )
-ggsave(here('figures/diverge_race_fig.png'), last_plot(), width = 7, height = 3)
+ggsave(here('figures/diverge_race_fig.png'), last_plot(), width = 2.3, height = 1)
 ```
