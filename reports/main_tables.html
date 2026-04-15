@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Summaries by Variable – WFBZ Descriptives</title>
+<title>Summary Tables – WFBZ Descriptives</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -90,16 +90,36 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="../reports/main.html" aria-current="page"> 
-<span class="menu-text">Summaries by Variable</span></a>
+    <a class="nav-link active" href="../reports/main_tables.html" aria-current="page"> 
+<span class="menu-text">Summary Tables</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/main_timeseries.html"> 
+<span class="menu-text">Time Series</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/main_correlations.html"> 
+<span class="menu-text">Correlations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/main_geography.html"> 
+<span class="menu-text">Geography</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../reports/fema.html"> 
-<span class="menu-text">FEMA Declaration Summaries</span></a>
+<span class="menu-text">FEMA</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../reports/population.html"> 
-<span class="menu-text">Population Summaries</span></a>
+    <a class="nav-link" href="../reports/pop_exposure.html"> 
+<span class="menu-text">Pop Exposure</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/pop_demographics.html"> 
+<span class="menu-text">Demographics</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/pop_diverging.html"> 
+<span class="menu-text">Diverging</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -117,36 +137,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#summary-statistics" id="toc-summary-statistics" class="nav-link active" data-scroll-target="#summary-statistics">Summary Statistics</a>
-  <ul class="collapse">
-  <li><a href="#community-impacting-fires" id="toc-community-impacting-fires" class="nav-link" data-scroll-target="#community-impacting-fires">Community-Impacting Fires</a></li>
+  <li><a href="#community-impacting-fires" id="toc-community-impacting-fires" class="nav-link active" data-scroll-target="#community-impacting-fires">Community-Impacting Fires</a></li>
   <li><a href="#all-fires" id="toc-all-fires" class="nav-link" data-scroll-target="#all-fires">All Fires</a></li>
-  </ul></li>
-  <li><a href="#variables-over-time" id="toc-variables-over-time" class="nav-link" data-scroll-target="#variables-over-time">Variables over Time</a>
-  <ul class="collapse">
-  <li><a href="#number-of-fire-disasters-per-region-over-time" id="toc-number-of-fire-disasters-per-region-over-time" class="nav-link" data-scroll-target="#number-of-fire-disasters-per-region-over-time">Number of Fire Disasters per Region over Time</a></li>
-  <li><a href="#number-of-fatalities-per-region-over-time" id="toc-number-of-fatalities-per-region-over-time" class="nav-link" data-scroll-target="#number-of-fatalities-per-region-over-time">Number of Fatalities per Region over Time</a></li>
-  <li><a href="#number-of-structures-destroyed-per-region-over-time" id="toc-number-of-structures-destroyed-per-region-over-time" class="nav-link" data-scroll-target="#number-of-structures-destroyed-per-region-over-time">Number of Structures Destroyed per Region over Time</a></li>
-  <li><a href="#number-of-fema-declarations-per-region-over-time" id="toc-number-of-fema-declarations-per-region-over-time" class="nav-link" data-scroll-target="#number-of-fema-declarations-per-region-over-time">Number of FEMA Declarations per Region over Time</a></li>
-  <li><a href="#burned-area-over-time" id="toc-burned-area-over-time" class="nav-link" data-scroll-target="#burned-area-over-time">Burned Area over Time</a></li>
-  <li><a href="#average-fire-size-over-time" id="toc-average-fire-size-over-time" class="nav-link" data-scroll-target="#average-fire-size-over-time">Average Fire Size over Time</a></li>
-  </ul></li>
-  <li><a href="#share-of-wui-fires-over-time" id="toc-share-of-wui-fires-over-time" class="nav-link" data-scroll-target="#share-of-wui-fires-over-time">Share of WUI Fires over Time</a>
-  <ul class="collapse">
-  <li><a href="#share-of-fires-in-wildland-urban-interface-over-time" id="toc-share-of-fires-in-wildland-urban-interface-over-time" class="nav-link" data-scroll-target="#share-of-fires-in-wildland-urban-interface-over-time">Share of Fires in Wildland-Urban Interface over Time</a></li>
-  <li><a href="#share-of-fires-in-wildland-urban-intermix-over-time" id="toc-share-of-fires-in-wildland-urban-intermix-over-time" class="nav-link" data-scroll-target="#share-of-fires-in-wildland-urban-intermix-over-time">Share of Fires in Wildland-Urban Intermix over Time</a></li>
-  </ul></li>
-  <li><a href="#correlations" id="toc-correlations" class="nav-link" data-scroll-target="#correlations">Correlations</a>
-  <ul class="collapse">
-  <li><a href="#numeric-values-compared" id="toc-numeric-values-compared" class="nav-link" data-scroll-target="#numeric-values-compared">Numeric Values Compared</a></li>
-  <li><a href="#numeric-categorical-values-compared" id="toc-numeric-categorical-values-compared" class="nav-link" data-scroll-target="#numeric-categorical-values-compared">Numeric &amp; Categorical Values Compared</a></li>
-  <li><a href="#categorical-values-compared" id="toc-categorical-values-compared" class="nav-link" data-scroll-target="#categorical-values-compared">Categorical Values Compared</a></li>
-  </ul></li>
-  <li><a href="#fire-season-timing" id="toc-fire-season-timing" class="nav-link" data-scroll-target="#fire-season-timing">Fire Season Timing</a></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a>
-  <ul class="collapse">
-  <li><a href="#regions-mapped" id="toc-regions-mapped" class="nav-link" data-scroll-target="#regions-mapped">Regions Mapped</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -155,7 +147,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Summaries by Variable</h1>
+<h1 class="title">Summary Tables</h1>
 </div>
 
 
@@ -172,8 +164,6 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="summary-statistics" class="level2">
-<h2 class="anchored" data-anchor-id="summary-statistics">Summary Statistics</h2>
 <section id="community-impacting-fires" class="level3">
 <h3 class="anchored" data-anchor-id="community-impacting-fires">Community-Impacting Fires</h3>
 <div class="cell">
@@ -2713,180 +2703,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-</section>
-</section>
-<section id="variables-over-time" class="level2">
-<h2 class="anchored" data-anchor-id="variables-over-time">Variables over Time</h2>
-<section id="number-of-fire-disasters-per-region-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="number-of-fire-disasters-per-region-over-time">Number of Fire Disasters per Region over Time</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/events_over_time-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="number-of-fatalities-per-region-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="number-of-fatalities-per-region-over-time">Number of Fatalities per Region over Time</h3>
-<p>The five deadliest fires in our data set are labeled.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/fatalities_over_time-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="number-of-structures-destroyed-per-region-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="number-of-structures-destroyed-per-region-over-time">Number of Structures Destroyed per Region over Time</h3>
-<p>The five fires in our data set with the most destroyed structures are labeled.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/structures_over_time-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="number-of-fema-declarations-per-region-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="number-of-fema-declarations-per-region-over-time">Number of FEMA Declarations per Region over Time</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/fema_over_time-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="burned-area-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="burned-area-over-time">Burned Area over Time</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/burned_area_over_time-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="average-fire-size-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="average-fire-size-over-time">Average Fire Size over Time</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/fire_size_over_time-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Alaska has quite an outlier for community-intersecting fires in 2004. This was the year of the Boundary Fire NE of Fairbanks, which reached 912 km<sup>2</sup>. While that’s not the largest fire in our data set, it was the <em>only</em> community-intersecting fire in our data set that year in Alaska.</p>
-</section>
-</section>
-<section id="share-of-wui-fires-over-time" class="level2">
-<h2 class="anchored" data-anchor-id="share-of-wui-fires-over-time">Share of WUI Fires over Time</h2>
-<section id="share-of-fires-in-wildland-urban-interface-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="share-of-fires-in-wildland-urban-interface-over-time">Share of Fires in Wildland-Urban Interface over Time</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/wui_interface_over_time-1.png" class="img-fluid figure-img" width="1344"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="share-of-fires-in-wildland-urban-intermix-over-time" class="level3">
-<h3 class="anchored" data-anchor-id="share-of-fires-in-wildland-urban-intermix-over-time">Share of Fires in Wildland-Urban Intermix over Time</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/wui_intermix_over_time-1.png" class="img-fluid figure-img" width="1344"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="correlations" class="level2">
-<h2 class="anchored" data-anchor-id="correlations">Correlations</h2>
-<section id="numeric-values-compared" class="level3">
-<h3 class="anchored" data-anchor-id="numeric-values-compared">Numeric Values Compared</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/corr_numeric-1.png" class="img-fluid figure-img" width="1152"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="numeric-categorical-values-compared" class="level3">
-<h3 class="anchored" data-anchor-id="numeric-categorical-values-compared">Numeric &amp; Categorical Values Compared</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/corr_numcat-1.png" class="img-fluid figure-img" width="1536"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="categorical-values-compared" class="level3">
-<h3 class="anchored" data-anchor-id="categorical-values-compared">Categorical Values Compared</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/corr_cat-1.png" class="img-fluid figure-img" width="576"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="fire-season-timing" class="level2">
-<h2 class="anchored" data-anchor-id="fire-season-timing">Fire Season Timing</h2>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/fire_season_timing-1.png" class="img-fluid figure-img" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="reference" class="level2">
-<h2 class="anchored" data-anchor-id="reference">Reference</h2>
-<section id="regions-mapped" class="level3">
-<h3 class="anchored" data-anchor-id="regions-mapped">Regions Mapped</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="main_files/figure-html/regions_map-1.png" class="img-fluid figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -2963,7 +2781,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/casey-cohort\.github\.io\/wfbz_descriptives\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

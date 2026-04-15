@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>FEMA Declaration Summaries – WFBZ Descriptives</title>
+<title>Population Summaries – WFBZ Descriptives</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -106,7 +106,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Geography</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../reports/fema.html" aria-current="page"> 
+    <a class="nav-link" href="../reports/fema.html"> 
 <span class="menu-text">FEMA</span></a>
   </li>  
   <li class="nav-item">
@@ -137,9 +137,17 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#fema-declaration-likelihood-by-state" id="toc-fema-declaration-likelihood-by-state" class="nav-link active" data-scroll-target="#fema-declaration-likelihood-by-state">Fema Declaration Likelihood by State</a></li>
-  <li><a href="#variables-vs.-fema-declarations" id="toc-variables-vs.-fema-declarations" class="nav-link" data-scroll-target="#variables-vs.-fema-declarations">Variables vs.&nbsp;FEMA Declarations</a></li>
-  <li><a href="#geographic-distribution-all-years" id="toc-geographic-distribution-all-years" class="nav-link" data-scroll-target="#geographic-distribution-all-years">Geographic Distribution (all years)</a></li>
+  <li><a href="#pop-over-time" id="toc-pop-over-time" class="nav-link active" data-scroll-target="#pop-over-time">Pop over time</a></li>
+  <li><a href="#vehicle-availability" id="toc-vehicle-availability" class="nav-link" data-scroll-target="#vehicle-availability">Vehicle Availability</a></li>
+  <li><a href="#race" id="toc-race" class="nav-link" data-scroll-target="#race">Race</a></li>
+  <li><a href="#poverty" id="toc-poverty" class="nav-link" data-scroll-target="#poverty">Poverty</a></li>
+  <li><a href="#housing-cost-burden" id="toc-housing-cost-burden" class="nav-link" data-scroll-target="#housing-cost-burden">Housing Cost Burden</a></li>
+  <li><a href="#diverging-charts" id="toc-diverging-charts" class="nav-link" data-scroll-target="#diverging-charts">Diverging Charts</a>
+  <ul class="collapse">
+  <li><a href="#overall" id="toc-overall" class="nav-link" data-scroll-target="#overall">Overall</a></li>
+  <li><a href="#by-region" id="toc-by-region" class="nav-link" data-scroll-target="#by-region">By Region</a></li>
+  <li><a href="#race-breakdown" id="toc-race-breakdown" class="nav-link" data-scroll-target="#race-breakdown">Race Breakdown</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -148,7 +156,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">FEMA Declaration Summaries</h1>
+<h1 class="title">Population Summaries</h1>
 </div>
 
 
@@ -165,76 +173,187 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="fema-declaration-likelihood-by-state" class="level3">
-<h3 class="anchored" data-anchor-id="fema-declaration-likelihood-by-state">Fema Declaration Likelihood by State</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variable</th>
+<th style="text-align: right;">n_wildfires</th>
+<th style="text-align: left;">frac_sum_ok</th>
+<th style="text-align: right;">n_all_zero</th>
+<th style="text-align: right;">frac_min</th>
+<th style="text-align: right;">frac_max</th>
+<th style="text-align: left;">count_agree</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">race</td>
+<td style="text-align: right;">6010</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">poverty</td>
+<td style="text-align: right;">6010</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">vehicle_avail</td>
+<td style="text-align: right;">6140</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">housing_cost</td>
+<td style="text-align: right;">6140</td>
+<td style="text-align: left;">TRUE</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="population_files/figure-html/qa_missing-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>QA: fires missing census data (colored) vs.&nbsp;all fires (grey)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="pop-over-time" class="level2">
+<h2 class="anchored" data-anchor-id="pop-over-time">Pop over time</h2>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="864"></p>
+<p><img src="population_files/figure-html/pop_affected-1.png" class="img-fluid figure-img" width="1536"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="variables-vs.-fema-declarations" class="level3">
-<h3 class="anchored" data-anchor-id="variables-vs.-fema-declarations">Variables vs.&nbsp;FEMA Declarations</h3>
+<section id="vehicle-availability" class="level2">
+<h2 class="anchored" data-anchor-id="vehicle-availability">Vehicle Availability</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="384"></p>
+<p><img src="population_files/figure-html/vehicle_avail_fig-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Share of fire-affected households with no vehicle access, by USFS region and year</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em>Note: to show y axis label at each plot will require custom coding – need to jitter y axis values or else create each plot without facet</em></p>
 </section>
-<section id="geographic-distribution-all-years" class="level3">
-<h3 class="anchored" data-anchor-id="geographic-distribution-all-years">Geographic Distribution (all years)</h3>
-<p>Events</p>
+<section id="race" class="level2">
+<h2 class="anchored" data-anchor-id="race">Race</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="population_files/figure-html/race_fig-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Share of fire-affected population that is Non-Hispanic White, by USFS region and year</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>FEMA Declarations</p>
+</section>
+<section id="poverty" class="level2">
+<h2 class="anchored" data-anchor-id="poverty">Poverty</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="population_files/figure-html/poverty_fig-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Population below 100% of poverty line near wildfire burn zones, by USFS region and year</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>Declarations per Event</p>
-<p><em>How to disentangle that FEMA Declarations makes an event?</em></p>
+</section>
+<section id="housing-cost-burden" class="level2">
+<h2 class="anchored" data-anchor-id="housing-cost-burden">Housing Cost Burden</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="population_files/figure-html/housing_cost_fig-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Cost-burdened households (≥50% income on housing) near wildfire burn zones, by USFS region and year</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>Declarations per Event (Scale Shifted)</p>
+</section>
+<section id="diverging-charts" class="level2">
+<h2 class="anchored" data-anchor-id="diverging-charts">Diverging Charts</h2>
+<section id="overall" class="level3">
+<h3 class="anchored" data-anchor-id="overall">Overall</h3>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="population_files/figure-html/diverge_overall_fig-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Difference in fire-affected vs.&nbsp;high-wildfire-risk population shares, pooled 2000–2024</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="by-region" class="level3">
+<h3 class="anchored" data-anchor-id="by-region">By Region</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="population_files/figure-html/diverge_regional_fig-1.png" class="img-fluid figure-img" width="1344"></p>
+<figcaption>Difference in fire-affected vs.&nbsp;high-wildfire-risk population shares by USFS region, pooled 2000–2024</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="race-breakdown" class="level3">
+<h3 class="anchored" data-anchor-id="race-breakdown">Race Breakdown</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="population_files/figure-html/diverge_race_fig-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Race/ethnicity composition: fire-affected minus high-wildfire-risk population share, pooled 2000–2024</figcaption>
 </figure>
 </div>
 </div>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

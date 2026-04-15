@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>FEMA Declaration Summaries – WFBZ Descriptives</title>
+<title>todo – WFBZ Descriptives</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -106,7 +106,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Geography</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../reports/fema.html" aria-current="page"> 
+    <a class="nav-link" href="../reports/fema.html"> 
 <span class="menu-text">FEMA</span></a>
   </li>  
   <li class="nav-item">
@@ -132,110 +132,75 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#fema-declaration-likelihood-by-state" id="toc-fema-declaration-likelihood-by-state" class="nav-link active" data-scroll-target="#fema-declaration-likelihood-by-state">Fema Declaration Likelihood by State</a></li>
-  <li><a href="#variables-vs.-fema-declarations" id="toc-variables-vs.-fema-declarations" class="nav-link" data-scroll-target="#variables-vs.-fema-declarations">Variables vs.&nbsp;FEMA Declarations</a></li>
-  <li><a href="#geographic-distribution-all-years" id="toc-geographic-distribution-all-years" class="nav-link" data-scroll-target="#geographic-distribution-all-years">Geographic Distribution (all years)</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">FEMA Declaration Summaries</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<section id="fema-declaration-likelihood-by-state" class="level3">
-<h3 class="anchored" data-anchor-id="fema-declaration-likelihood-by-state">Fema Declaration Likelihood by State</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="variables-vs.-fema-declarations" class="level3">
-<h3 class="anchored" data-anchor-id="variables-vs.-fema-declarations">Variables vs.&nbsp;FEMA Declarations</h3>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-<p><em>Note: to show y axis label at each plot will require custom coding – need to jitter y axis values or else create each plot without facet</em></p>
-</section>
-<section id="geographic-distribution-all-years" class="level3">
-<h3 class="anchored" data-anchor-id="geographic-distribution-all-years">Geographic Distribution (all years)</h3>
-<p>Events</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>FEMA Declarations</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Declarations per Event</p>
-<p><em>How to disentangle that FEMA Declarations makes an event?</em></p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Declarations per Event (Scale Shifted)</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="fema_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
+<p>Edits</p>
+<ul>
+<li>make table 1: include a combination of variables from the two tables. variables to include:
+<ul>
+<li>count –&gt; “number (%)”</li>
+<li>declared emergency –&gt; “declared emergency, n (%)”</li>
+<li>fatalities –&gt; “fatalities, mean (SD)”</li>
+<li>mean fire size (km2) –&gt; “fire size km2, mean (SD)”</li>
+<li>wui interface and intermix –&gt; WUI, n (%) (this should include anything that is either wui interface or wui intermix or both. all wui stuff!)</li>
+<li>everything from the second table except any evacuation rows</li>
+</ul></li>
+<li>add: “total population exposed, n (%)”</li>
+<li>diverging charts:
+<ul>
+<li>check what is happening with diverging charts ‘overall’ – why is non-hispanic white negative in the overall plot, but in the by region plot it is not ever negative for non-Hispanic white? something seems incorrect.</li>
+<li>for these plots, let’s just have two plots that are in 2 panels beside each other:
+<ul>
+<li>panel 1: the overall plot with the 3 SES vars and ALL races (so a combo of the two overall plots you have now)</li>
+<li>panel 2: the by region plot but include the 3 SES vars (as you do now) and then ALL race categories!</li>
+</ul></li>
+</ul></li>
+<li>Can you clarify which datasets go through 2024 and which through 2025? are we able to update the dataset through 2025 yet? itd be ideal if we could go through 2025 but i think better to be consistent. we can chat more about this in our meeting tomorrow – just try to bring the info on which datasets fall into which year category.</li>
+<li>FEMA declarations likelihood by state plot: -add vertical line showing the mean percent across all states for reference. you can make the line dark gray and just label it</li>
+<li>For the categorical values compared chart: update WUI analyses</li>
+<li>Can you send an updated version with overall WUI (including anything that is interface or intermix or both) and none? so just 2 values across the bottom. we plan to just write about this one not include the plot, so dont worry too much about aesthetics. but would be good to see it as the plot to write it.</li>
+<li>Can you clarify what the difference between burned area and average fire size is?</li>
+<li>For population exposed stuff: are you showing # of people impacted by a community impacting wfbz disaster or just any wfbz disaster in the dataset? let’s do the former if we aren’t already!</li>
+<li>For the pop exposed stuff, we will go with the stacked bar chart. we also need to make a second plot that shows the ‘share’ like you do for number of events, structures destroyed, etc. and this will become part of figure 1.</li>
+<li>Can you add a legend to the sociodemographic line plots? What is the dashed vs solid line? Can you also explain the error bars and what they are? And are there error bars on the dashed line ones that are tiny or are there no bars?</li>
+<li>remake figures into paneled ones: ill create a list of the figures below to compile for the final manuscript into paneled plots, but this list contains edits to the existing figures. then we can compile them into their paneled ‘final’ plots. at that point, itll be good to write them out as pdfs.
+<ul>
+<li>Note, please don’t label them as fig 1, fig 2, etc. — that is just for us. let’s use descriptive labels to call the files! also, no need to add titles, but make sure to add axis labels and legends etc. but i’ll add titles in the captions!</li>
+<li>Figure 1: spatiotemporal distribution of the general attributes of fires 6 (3 col/3 row) panel fig of # of disasters and people exposed over time
+<ul>
+<li>rows are the vars and the three cols are: 1. total and 2. share by year and 3. cumulative across all years map (like the event map) &nbsp;&nbsp;&nbsp;&nbsp;- wfbz disasters over time</li>
+<li>total pop exposed over time</li>
+<li>burned area over time</li>
+</ul></li>
+<li>Figure 2: fire season timing plot as is</li>
+<li>Figure 3: spatiotemporal distribution of the criteria of wfbz disasters 6 (3 col/3 row) panel fig criteria that made up the fires
+<ul>
+<li>rows are the vars and the three cols are: 1. total and 2. share by year and 3. cumulative across all years map (like the event map)</li>
+<li>fatalities over time</li>
+<li>structures over time</li>
+<li>fema over time</li>
+</ul></li>
+<li>Figure 4: 2 panels
+<ul>
+<li>A: percent of fires that received a declaration</li>
+<li>B: FEMA declaration likelihood by state</li>
+</ul></li>
+<li>Figure 5: diverging charts
+<ul>
+<li>panel A: overall</li>
+<li>Panel B: by region</li>
+</ul></li>
+</ul></li>
+</ul>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
