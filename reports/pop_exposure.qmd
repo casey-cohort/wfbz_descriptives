@@ -9,7 +9,7 @@ execute:
 
 {{< include _pop_setup.qmd >}}
 
-```{r pop_affected, fig.height = 8, fig.width = 16}
+```{r pop_over_time, fig.height = 4, fig.width = 8}
 pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
   rename(
     wildfire_year = year,
@@ -18,55 +18,7 @@ pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
   ) %>%
   select(-ID_hazard)
 
-p1 <- ggplot(data = pop) +
-  geom_line(
-    aes(x = wildfire_year, y = `Population Affected`, color = usfs_region),
-    linewidth = 0.4
-  ) +
-  geom_point(
-    aes(x = wildfire_year, y = `Population Affected`, color = usfs_region)
-  ) +
-  geom_text(
-    data = filter(
-      pop,
-      wildfire_year == 2024 |
-        (usfs_region %in% 'Hawaii' & wildfire_year == 2023)
-    ),
-    aes(
-      x = wildfire_year,
-      y = `Population Affected`,
-      label = usfs_region,
-      color = usfs_region
-    ),
-    size = 3,
-    angle = -45,
-    hjust = -.1,
-    vjust = 0
-  ) +
-  scale_color_manual(name = "Region", values = region_colors) +
-  scale_fill_manual(name = "Region", values = region_colors) +
-  scale_x_continuous(
-    breaks = seq(2000, 2024, by = 2),
-    expand = expansion(mult = c(.025, .1))
-  ) +
-  #    coord_cartesian(xlim = c(2000, 2025)) +
-  scale_y_continuous(
-    labels = scales::comma,
-    expand = c(.01, .01),
-    transform = "log"
-  ) +
-  xlab(NULL) +
-  ylab(NULL) +
-  pop_theme +
-  theme(
-    panel.grid.major.y = element_line(color = 'grey75'),
-    panel.grid.minor.y = element_line(color = 'grey90'),
-    #legend.position = 'right',
-    plot.margin = unit(c(1, 5, 1, 5), "cm"),
-  )
-
-
-p2 <- ggplot(data = pop) +
+ggplot(data = pop) +
   geom_col(
     aes(
       x = wildfire_year,
@@ -94,43 +46,5 @@ p2 <- ggplot(data = pop) +
     plot.margin = unit(c(1, 5, 1, 5), "cm"),
   )
 
-
-p3 <- ggplot(data = pop) +
-  geom_area(
-    aes(
-      x = wildfire_year,
-      y = `Population Affected`,
-      fill = usfs_region
-    ),
-    width = 1,
-    linewidth = 0.25,
-    color = 'grey25'
-  ) +
-  scale_fill_manual(name = "Region", values = region_colors) +
-  scale_x_continuous(
-    breaks = seq(2000, 2024, by = 2),
-    expand = expansion(add = c(0, 1.5))
-  ) +
-  #    coord_cartesian(xlim = c(2000, 2025)) +
-  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
-  xlab(NULL) +
-  ylab(NULL) +
-  pop_theme +
-  theme(
-    panel.grid.major.y = element_line(color = 'grey75'),
-    panel.grid.minor.y = element_line(color = 'grey90'),
-    legend.position = 'right',
-    plot.margin = unit(c(1, 5, 1, 5), "cm"),
-  )
-
-p1 +
-  ggtitle("Population within 10km of a WFBZ annually, by region (log-scale)") +
-  p2 +
-  ggtitle("Population within 10km of a WFBZ annually, by region (cumulative)") +
-  p3 +
-  ggtitle(
-    "Population within 10km of a WFBZ annually, by region (cumulative) -- but area plot"
-  ) +
-  plot_layout(ncol = 1, guides = 'collect')
-ggsave(here('figures/pop_affected.pdf'), last_plot(), width = 16, height = 8)
+ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 4)
 ```

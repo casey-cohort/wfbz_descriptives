@@ -93,7 +93,7 @@ ggsave(
 
 The five fires in our data set with the most destroyed structures are labeled.
 
-```{r structures_over_time, fig.height = 8, fig.width = 16}
+```{r structures_over_time, fig.height = 8, fig.width = 8}
 plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
   annotate(
     "text",
@@ -146,7 +146,7 @@ plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
 ggsave(
   here('figures/structures_over_time.pdf'),
   last_plot(),
-  width = 16,
+  width = 8,
   height = 8
 )
 ```
@@ -154,7 +154,7 @@ ggsave(
 
 ### Number of FEMA Declarations per Region over Time
 
-```{r fema_over_time, fig.height = 8, fig.width = 16}
+```{r fema_over_time, fig.height = 8, fig.width = 8}
 plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'FEMA Declarations (n)', rel = TRUE) +
@@ -162,7 +162,7 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
 ggsave(
   here('figures/fema_over_time.pdf'),
   last_plot(),
-  width = 16,
+  width = 8,
   height = 8
 )
 ```
@@ -171,7 +171,7 @@ ggsave(
 
 _i.e. the total area of all wildfire footprints per region/year (even if a fire affected the same spot twice in the year)_
 
-```{r burned_area_over_time, fig.height = 8, fig.width = 16}
+```{r burned_area_over_time, fig.height = 8, fig.width = 8}
 plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
@@ -183,7 +183,7 @@ plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
 ggsave(
   here('figures/burned_area_over_time.pdf'),
   last_plot(),
-  width = 16,
+  width = 8,
   height = 8
 )
 ```
@@ -193,7 +193,7 @@ ggsave(
 _i.e. the mean area of the wildfire footprints in a region/year_
 
 
-```{r fire_size_over_time, fig.height = 4, fig.width = 4}
+```{r fire_size_over_time, fig.height = 4, fig.width = 8}
 plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
@@ -203,7 +203,7 @@ plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
 ggsave(
   here('figures/fire_size_over_time.pdf'),
   last_plot(),
-  width = 4,
+  width = 8,
   height = 4
 )
 ```
