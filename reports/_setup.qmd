@@ -61,7 +61,8 @@ if (!file.exists(here('data/raw/wfbz_disasters_2000-2025.geojson'))) {
 source(here::here('R/utils.R'))
 
 wfbz <- read_sf(here("data/raw/wfbz_disasters_2000-2025.geojson")) %>%
-  filter(!st_is_empty(geometry))
+  filter(!st_is_empty(geometry)) %>%
+  filter(wildfire_year < 2025)
 wfbz <- wfbz %>%
   filter(!str_detect(wildfire_complex_names, '(FLOOD$|FLOOD 2013$)')) # remove some colorado floods that snuck in
 
@@ -232,13 +233,11 @@ plotme <- function(
   # Reassign colors to regions now that they have been updated
   names(region_colors) <- sort(region_label)
 
-
   dat$usfs_region <- factor(
     dat$usfs_region,
     levels = region_order,
     labels = region_label
   )
-
 
   # Summarize and Plot
   if (!stack) {
@@ -254,7 +253,12 @@ plotme <- function(
         values = region_colors,
         guide = 'none'
       ) +
-      facet_wrap(facets = ~fct_rev(usfs_region), ncol = 2, drop = TRUE, scales = 'free') +
+      facet_wrap(
+        facets = ~ fct_rev(usfs_region),
+        ncol = 2,
+        drop = TRUE,
+        scales = 'free'
+      ) +
       scale_x_continuous(
         expand = expansion(mult = c(0, 0)),
         limits = c(1999.5, 2024.5),
@@ -359,7 +363,10 @@ plotme <- function(
         limits = c(1999.5, 2024.5),
         breaks = seq(2000, 2024, by = 2)
       ) +
-      scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::label_comma()) +
+      scale_y_continuous(
+        expand = expansion(mult = c(0, 0)),
+        labels = scales::label_comma()
+      ) +
       xlab(NULL) +
       ylab(glue("{var}{if_else(is.na(unit), '', paste0(' (', unit, ')'))}")) +
       theme(
@@ -454,44 +461,17 @@ wfbz_crit <- wfbz %>%
       sum(wildfire_area / usfs_region_area, na.rm = TRUE),
     `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
     `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
+    `WUI` = sum(str_detect(wildfire_wui, '(intermix|interface)'), na.rm = TRUE),
     `WUI-Intermix Percent` = 100 *
       sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE) /
       n(),
     `WUI-Interface Percent` = 100 *
       sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE) /
       n(),
-    `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
-    .groups = 'drop'
-  )
-
-wfbz_crit_all <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(
-    usfs_region = wfbz_region,
-    usfs_region_area = wfbz_region_area,
-    usfs_region_pop = wfbz_region_pop
-  ) %>%
-  group_by(usfs_region, wildfire_year) %>%
-  summarize(
-    `Events` = n(),
-    `Fatalities` = sum(wildfire_max_civil_fatalities, na.rm = TRUE),
-    `Fatalities per 100K` = 100000 *
-      sum(wildfire_max_civil_fatalities / usfs_region_pop, na.rm = TRUE),
-    `Structures Destroyed` = sum(wildfire_struct_destroyed, na.rm = TRUE),
-    `FEMA Declarations (n)` = sum(wildfire_fema_dec, na.rm = TRUE),
-    `Burned Area` = sum(wildfire_area, na.rm = TRUE),
-    `Burned Area Percent` = 100 *
-      sum(wildfire_area / usfs_region_area, na.rm = TRUE),
-    `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
-    `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
-    `WUI-Intermix Percent` = 100 *
-      sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE) /
-      n(),
-    `WUI-Interface Percent` = 100 *
-      sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE) /
+    `WUI Percent` = 100 *
+      sum(str_detect(wildfire_wui, '(interface|intermix)'), na.rm = TRUE) /
       n(),
     `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
     .groups = 'drop'
   )
-
 ```

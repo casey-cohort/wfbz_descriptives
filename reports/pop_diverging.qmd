@@ -48,7 +48,9 @@ tract_sf <- tract_sf %>%
 
 # Regions + fire-region assignment
 regions <- read_sf(here('data/processed/regions.geojson'))
-wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
+wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson')) %>%
+  filter(wildfire_year < 2025)
+
 wfbz_region <- wfbz %>%
   filter(!st_is_empty(geometry)) %>%
   select(wildfire_id) %>%
@@ -387,8 +389,6 @@ diverge_regional <- bind_rows(
   left_join(REGION_ORDER, by = 'usfs_region') %>%
   replace_na(list(plot_order = 11)) %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
-
-
 ```
 
 ### Overall
@@ -416,10 +416,10 @@ ggplot(diverge_national, aes(x = diff, y = stat)) +
     panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
   )
 ggsave(
-  here('figures/diverge_overall_fig.png'),
+  here('figures/diverge_overall_fig.pdf'),
   last_plot(),
-  width = 2.3,
-  height = 0.7
+  width = 7,
+  height = 2
 )
 ```
 
@@ -446,10 +446,10 @@ ggplot(
     panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
   )
 ggsave(
-  here('figures/diverge_regional_fig.png'),
+  here('figures/diverge_regional_fig.pdf'),
   last_plot(),
-  width = 4.7,
-  height = 4
+  width = 14,
+  height = 12
 )
 ```
 
@@ -470,7 +470,7 @@ ggsave(
 #    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
 #  )
 #ggsave(
-#  here('figures/diverge_race_fig.png'),
+#  here('figures/diverge_race_fig.pdf'),
 #  last_plot(),
 #  width = 2.3,
 #  height = 1

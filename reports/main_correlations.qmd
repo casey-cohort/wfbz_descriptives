@@ -67,7 +67,7 @@ ggplot(xwfbz_num) +
   xlab('') +
   ylab('') +
   ggtitle("Numeric Variables Compared (log-scale)")
-ggsave(here('figures/corr_numeric.png'), last_plot(), width = 4, height = 4)
+ggsave(here('figures/corr_numeric.pdf'), last_plot(), width = 12, height = 12)
 ```
 
 ### Numeric & Categorical Values Compared
@@ -85,8 +85,19 @@ xwfbz_numcat <- wfbz_lab %>%
     names_to = 'name_cat',
     values_to = 'val_cat'
   ) %>%
-	mutate(val_cat = factor(val_cat, levels = c("None", "FALSE", "TRUE", "interface & intermix", "intermix",
-"interface")))
+  mutate(
+    val_cat = factor(
+      val_cat,
+      levels = c(
+        "None",
+        "FALSE",
+        "TRUE",
+        "interface & intermix",
+        "intermix",
+        "interface"
+      )
+    )
+  )
 
 p1 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'WUI')) +
   geom_boxplot(aes(
@@ -94,12 +105,12 @@ p1 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'WUI')) +
     y = val_num,
     fill = val_cat
   )) +
-  facet_wrap(~ name_num, scales = 'free', nrow = 1) +
+  facet_wrap(~name_num, scales = 'free', nrow = 1) +
   scale_y_continuous(
     trans = 'log',
-    labels = ~scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
+    labels = ~ scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
   ) +
-	khroma::scale_fill_bright(guide = 'none') +
+  khroma::scale_fill_bright(guide = 'none') +
   theme(
     panel.border = element_rect(color = "grey25", fill = NA, size = .25),
     plot.title = element_text(size = 14),
@@ -116,12 +127,12 @@ p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
     y = val_num,
     fill = val_cat
   )) +
-  facet_wrap(~ name_num, scales = 'free', nrow = 1) +
+  facet_wrap(~name_num, scales = 'free', nrow = 1) +
   scale_y_continuous(
     trans = 'log',
-    labels = ~scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
+    labels = ~ scales::comma(.x, accuracy = .1) #~ format(.x, digits = 3, scientific = 0)
   ) +
-	khroma::scale_fill_bright(guide = 'none', reverse = TRUE) +
+  khroma::scale_fill_bright(guide = 'none', reverse = TRUE) +
   theme(
     panel.border = element_rect(color = "grey25", fill = NA, size = .25),
     plot.title = element_text(size = 14),
@@ -132,33 +143,40 @@ p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
   #ylab('') +
   xlab("FEMA disaster declaration")
 
-p1 + p2 + plot_layout(ncol = 1) + patchwork::plot_annotation(title = "Numeric & Categorical Variables Compared (log-scale)")
-ggsave(here('figures/corr_numcat.png'), last_plot(), width = 5.3, height = 2.7)
+p1 +
+  p2 +
+  plot_layout(ncol = 1) +
+  patchwork::plot_annotation(
+    title = "Numeric & Categorical Variables Compared (log-scale)"
+  )
+ggsave(here('figures/corr_numcat.pdf'), last_plot(), width = 16, height = 8)
 ```
 
 
 ### Categorical Values Compared
 
 ```{r corr_cat, fig.height = 6, fig.width = 6}
-
 wfbz_lab %>%
   group_by(`FEMA Declarations (n)`) %>%
   mutate(n_dec = n()) %>%
   group_by(WUI = str_to_title(WUI), `FEMA Declarations (n)`, .drop = FALSE) %>%
   summarize(
     n = n(),
-    lab = glue('{format(n, big.mark = \',\')}\n({format(100*n()/first(n_dec), digits = 3)}%)')
+    lab = glue(
+      '{format(n, big.mark = \',\')}\n({format(100*n()/first(n_dec), digits = 3)}%)'
+    )
   ) %>%
-	ggplot() +
-	geom_tile(aes(x = WUI, y = `FEMA Declarations (n)`, fill = n)) +
-	geom_text(aes(x = WUI, y = `FEMA Declarations (n)`, label = lab, color = n)) +
-	khroma::scale_fill_lapaz(name = '# Wildfire\nDisasters') +
-	khroma::scale_color_lapaz(reverse = TRUE, guide = 'none') +
-	theme(
-  	plot.title = element_text(size = 14),
-  	axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
-  	axis.ticks = element_line(),
-  	plot.margin = unit(c(0,0,0,0), "pt")
-	) + coord_equal()
-ggsave(here('figures/corr_cat.png'), last_plot(), width = 2, height = 2)
+  ggplot() +
+  geom_tile(aes(x = WUI, y = `FEMA Declarations (n)`, fill = n)) +
+  geom_text(aes(x = WUI, y = `FEMA Declarations (n)`, label = lab, color = n)) +
+  khroma::scale_fill_lapaz(name = '# Wildfire\nDisasters') +
+  khroma::scale_color_lapaz(reverse = TRUE, guide = 'none') +
+  theme(
+    plot.title = element_text(size = 14),
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+    axis.ticks = element_line(),
+    plot.margin = unit(c(0, 0, 0, 0), "pt")
+  ) +
+  coord_equal()
+ggsave(here('figures/corr_cat.pdf'), last_plot(), width = 6, height = 6)
 ```

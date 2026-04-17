@@ -14,17 +14,33 @@ execute:
 by_wf_dir <- here('data/processed/nhgis')
 race_by_wf <- read_parquet(file.path(by_wf_dir, 'race_by_wf.parquet'))
 poverty_by_wf <- read_parquet(file.path(by_wf_dir, 'poverty_by_wf.parquet'))
-vehicle_avail_by_wf <- read_parquet(file.path(by_wf_dir, 'vehicle_avail_by_wf.parquet'))
-housing_cost_by_wf <- read_parquet(file.path(by_wf_dir, 'housing_cost_by_wf.parquet'))
+vehicle_avail_by_wf <- read_parquet(file.path(
+  by_wf_dir,
+  'vehicle_avail_by_wf.parquet'
+))
+housing_cost_by_wf <- read_parquet(file.path(
+  by_wf_dir,
+  'housing_cost_by_wf.parquet'
+))
 
 # Regional population reference fracs
-region_pop_vehicle <- read_parquet(here('data/processed/nhgis/region_pop_vehicle.parquet'))
-region_pop_race <- read_parquet(here('data/processed/nhgis/region_pop_race.parquet'))
-region_pop_poverty <- read_parquet(here('data/processed/nhgis/region_pop_poverty.parquet'))
-region_pop_housing <- read_parquet(here('data/processed/nhgis/region_pop_housing.parquet'))
+region_pop_vehicle <- read_parquet(here(
+  'data/processed/nhgis/region_pop_vehicle.parquet'
+))
+region_pop_race <- read_parquet(here(
+  'data/processed/nhgis/region_pop_race.parquet'
+))
+region_pop_poverty <- read_parquet(here(
+  'data/processed/nhgis/region_pop_poverty.parquet'
+))
+region_pop_housing <- read_parquet(here(
+  'data/processed/nhgis/region_pop_housing.parquet'
+))
 
 # Region assignment for each fire
-wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
+wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson')) %>%
+  filter(wildfire_year < 2025)
+
 regions <- read_sf(here('data/processed/regions.geojson'))
 wfbz_region <- wfbz %>%
   filter(!st_is_empty(geometry)) %>%
@@ -98,7 +114,12 @@ vehicle_avail_by_region <- vehicle_avail_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(vehicle_avail_by_region, "Share with no vehicle")
-ggsave(here('figures/vehicle_avail_fig.png'), last_plot(), width = 2.3, height = 5.3)
+ggsave(
+  here('figures/vehicle_avail_fig.pdf'),
+  last_plot(),
+  width = 7,
+  height = 16
+)
 ```
 
 ## Race
@@ -130,7 +151,7 @@ race_by_region <- race_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(race_by_region, "Share Non-Hispanic White")
-ggsave(here('figures/race_fig.png'), last_plot(), width = 2.3, height = 5.3)
+ggsave(here('figures/race_fig.pdf'), last_plot(), width = 7, height = 16)
 ```
 
 ## Poverty
@@ -157,7 +178,7 @@ poverty_by_region <- poverty_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(poverty_by_region, "Share below 100% poverty line")
-ggsave(here('figures/poverty_fig.png'), last_plot(), width = 2.3, height = 5.3)
+ggsave(here('figures/poverty_fig.pdf'), last_plot(), width = 7, height = 16)
 ```
 
 ## Housing Cost Burden
@@ -184,5 +205,10 @@ housing_cost_by_region <- housing_cost_by_wf %>%
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 
 plot_pop_var(housing_cost_by_region, "Share housing cost burdened (>=50%)")
-ggsave(here('figures/housing_cost_fig.png'), last_plot(), width = 2.3, height = 5.3)
+ggsave(
+  here('figures/housing_cost_fig.pdf'),
+  last_plot(),
+  width = 7,
+  height = 16
+)
 ```

@@ -64,7 +64,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![QA: fires missing census data (colored) vs. all fires (grey)](population_files/figure-html/qa_missing-1.png){width=672}
+![QA: fires missing census data (colored) vs. all fires (grey)](population_files/figure-html/qa_missing-1.pdf){width=672}
 :::
 :::
 
@@ -87,7 +87,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![](population_files/figure-html/pop_affected-1.png){width=1536}
+![](population_files/figure-html/pop_affected-1.pdf){width=1536}
 :::
 :::
 
@@ -98,7 +98,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Share of fire-affected households with no vehicle access, by USFS region and year](population_files/figure-html/vehicle_avail_fig-1.png){width=672}
+![Share of fire-affected households with no vehicle access, by USFS region and year](population_files/figure-html/vehicle_avail_fig-1.pdf){width=672}
 :::
 :::
 
@@ -108,7 +108,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Share of fire-affected population that is Non-Hispanic White, by USFS region and year](population_files/figure-html/race_fig-1.png){width=672}
+![Share of fire-affected population that is Non-Hispanic White, by USFS region and year](population_files/figure-html/race_fig-1.pdf){width=672}
 :::
 :::
 
@@ -118,7 +118,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Population below 100% of poverty line near wildfire burn zones, by USFS region and year](population_files/figure-html/poverty_fig-1.png){width=672}
+![Population below 100% of poverty line near wildfire burn zones, by USFS region and year](population_files/figure-html/poverty_fig-1.pdf){width=672}
 :::
 :::
 
@@ -128,7 +128,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Cost-burdened households (≥50% income on housing) near wildfire burn zones, by USFS region and year](population_files/figure-html/housing_cost_fig-1.png){width=672}
+![Cost-burdened households (≥50% income on housing) near wildfire burn zones, by USFS region and year](population_files/figure-html/housing_cost_fig-1.pdf){width=672}
 :::
 :::
 
@@ -152,7 +152,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Difference in fire-affected vs. high-wildfire-risk population shares, pooled 2000–2024](population_files/figure-html/diverge_overall_fig-1.png){width=672}
+![Difference in fire-affected vs. high-wildfire-risk population shares, pooled 2000–2024](population_files/figure-html/diverge_overall_fig-1.pdf){width=672}
 :::
 :::
 
@@ -162,7 +162,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Difference in fire-affected vs. high-wildfire-risk population shares by USFS region, pooled 2000–2024](population_files/figure-html/diverge_regional_fig-1.png){width=1344}
+![Difference in fire-affected vs. high-wildfire-risk population shares by USFS region, pooled 2000–2024](population_files/figure-html/diverge_regional_fig-1.pdf){width=1344}
 :::
 :::
 
@@ -172,7 +172,7 @@ execute:
 
 ::: {.cell}
 ::: {.cell-output-display}
-![Race/ethnicity composition: fire-affected minus high-wildfire-risk population share, pooled 2000–2024](population_files/figure-html/diverge_race_fig-1.png){width=672}
+![Race/ethnicity composition: fire-affected minus high-wildfire-risk population share, pooled 2000–2024](population_files/figure-html/diverge_race_fig-1.pdf){width=672}
 :::
 :::
 

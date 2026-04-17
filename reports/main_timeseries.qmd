@@ -11,17 +11,17 @@ execute:
 
 ### Number of Fire Disasters per Region over Time
 
-```{r events_over_time, fig.height = 8, fig.width = 16}
+```{r events_over_time, fig.height = 8, fig.width = 8}
 plotme(wfbz_crit, 'Events', rel = FALSE) +
-  ggtitle('Community-Impacting Disasters') +
-  plotme(wfbz_crit_all, 'Events', rel = FALSE) +
-  ggtitle('All Disasters') +
-  plot_spacer() +
   plot_spacer() +
   plotme(wfbz_crit, 'Events', rel = TRUE) +
-  plotme(wfbz_crit_all, 'Events', rel = TRUE) +
-  plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/events_over_time.png'), last_plot(), width = 5.3, height = 2.7)
+  plot_layout(ncol = 1, heights = c(5, 1, 5), guides = 'collect')
+ggsave(
+  here('figures/events_over_time.pdf'),
+  last_plot(),
+  width = 8,
+  height = 8
+)
 ```
 
 
@@ -30,8 +30,8 @@ ggsave(here('figures/events_over_time.png'), last_plot(), width = 5.3, height = 
 The five deadliest fires in our data set are labeled.
 
 
-```{r fatalities_over_time, fig.height = 8, fig.width = 16}
-(plotme(wfbz_crit, 'Fatalities', rel = FALSE) +
+```{r fatalities_over_time, fig.height = 8, fig.width = 8}
+plotme(wfbz_crit, 'Fatalities', rel = FALSE) +
   annotate(
     "text",
     x = 2023,
@@ -77,60 +77,15 @@ The five deadliest fires in our data set are labeled.
     hjust = 'right',
     label = "North Complex Fire (CA) ———"
   ) +
-  ggtitle('Community-Impacting Disasters')) +
-  (plotme(wfbz_crit_all, 'Fatalities', rel = FALSE) +
-    ggtitle('All Disasters') +
-    annotate(
-      "text",
-      x = 2023,
-      y = 50,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Lahaina Fire (HI) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2018,
-      y = 80,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Camp Fire (CA) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2017,
-      y = 50,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Tubbs Fire (CA) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2013,
-      y = 19,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Yarnell Hill Fire (AZ) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2020,
-      y = 20,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "North Complex Fire (CA) ———"
-    )) +
-  plot_spacer() +
   plot_spacer() +
   plotme(wfbz_crit, 'Fatalities', rel = TRUE) +
-  plotme(wfbz_crit_all, 'Fatalities', rel = TRUE) +
-  plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/fatalities_over_time.png'), last_plot(), width = 5.3, height = 2.7)
+  plot_layout(ncol = 1, heights = c(5, 1, 5))
+ggsave(
+  here('figures/fatalities_over_time.pdf'),
+  last_plot(),
+  width = 8,
+  height = 8
+)
 ```
 
 
@@ -139,7 +94,7 @@ ggsave(here('figures/fatalities_over_time.png'), last_plot(), width = 5.3, heigh
 The five fires in our data set with the most destroyed structures are labeled.
 
 ```{r structures_over_time, fig.height = 8, fig.width = 16}
-(plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
+plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
   annotate(
     "text",
     x = 2018,
@@ -185,60 +140,15 @@ The five fires in our data set with the most destroyed structures are labeled.
     hjust = 'right',
     label = "Woolsey (CA) ———"
   ) +
-  ggtitle('Community-Impacting Disasters')) +
-  (plotme(wfbz_crit_all, 'Structures Destroyed', rel = FALSE) +
-    ggtitle('All Disasters') +
-    annotate(
-    "text",
-    x = 2018,
-    y = 154 * 100,
-    size = 2,
-    angle = -45,
-    hjust = 'right',
-    label = "Camp Fire (CA) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2017,
-      y = 85 * 100,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Tubbs Fire (CA) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2023,
-      y = 22 * 100,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Lahaina Fire (HI) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2015,
-      y = 25 * 100,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Valley Fire (CA) ———"
-    ) +
-    annotate(
-      "text",
-      x = 2018,
-      y = 140 * 100,
-      size = 2,
-      angle = -45,
-      hjust = 'right',
-      label = "Woolsey (CA) ———"
-    )) +
-  plot_spacer() +
   plot_spacer() +
   plotme(wfbz_crit, 'Structures Destroyed', rel = TRUE) +
-  plotme(wfbz_crit_all, 'Structures Destroyed', rel = TRUE) +
-  plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/structures_over_time.png'), last_plot(), width = 5.3, height = 2.7)
+  plot_layout(ncol = 1, heights = c(5, 1, 5))
+ggsave(
+  here('figures/structures_over_time.pdf'),
+  last_plot(),
+  width = 16,
+  height = 8
+)
 ```
 
 
@@ -246,71 +156,69 @@ ggsave(here('figures/structures_over_time.png'), last_plot(), width = 5.3, heigh
 
 ```{r fema_over_time, fig.height = 8, fig.width = 16}
 plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
-  ggtitle('Community-Impacting Disasters') +
-  plotme(wfbz_crit_all, 'FEMA Declarations (n)', rel = FALSE) +
-  ggtitle('All Disasters') +
-  plot_spacer() +
   plot_spacer() +
   plotme(wfbz_crit, 'FEMA Declarations (n)', rel = TRUE) +
-  plotme(wfbz_crit_all, 'FEMA Declarations (n)', rel = TRUE) +
-  plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/fema_over_time.png'), last_plot(), width = 5.3, height = 2.7)
+  plot_layout(ncol = 1, heights = c(5, 1, 5))
+ggsave(
+  here('figures/fema_over_time.pdf'),
+  last_plot(),
+  width = 16,
+  height = 8
+)
 ```
 
 ### Burned Area over Time
 
+_i.e. the total area of all wildfire footprints per region/year (even if a fire affected the same spot twice in the year)_
+
 ```{r burned_area_over_time, fig.height = 8, fig.width = 16}
-(plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
-  scale_y_continuous(
-    expand = expansion(mult = c(0, 0)), labels = scales::comma
-  ) +
-  ggtitle('Community-Impacting Disasters')) +
-  (plotme(wfbz_crit_all, 'Burned Area', rel = FALSE, unit = 'km²') +
-    #scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::scientific) +
-    ggtitle('All Disasters')) +
-  plot_spacer() +
-  plot_spacer() +
-  plotme(wfbz_crit, 'Burned Area', rel = TRUE) +
-  plotme(wfbz_crit_all, 'Burned Area', rel = TRUE) +
-  plot_layout(ncol = 2, heights = c(5, 1, 5))
-ggsave(here('figures/burned_area_over_time.png'), last_plot(), width = 5.3, height = 2.7)
-```
-
-### Average Fire Size over Time
-
-```{r fire_size_over_time, fig.height = 4, fig.width = 16}
-(plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
+plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
     labels = scales::comma
   ) +
-  ggtitle('Community-Impacting Disasters')) +
-  (plotme(wfbz_crit_all, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
-    #scale_y_continuous(expand = expansion(mult = c(0, 0)), labels = scales::scientific) +
-    ggtitle('All Disasters')) +
-  plot_layout(ncol = 2)
-ggsave(here('figures/fire_size_over_time.png'), last_plot(), width = 5.3, height = 1.3)
+  plot_spacer() +
+  plotme(wfbz_crit, 'Burned Area', rel = TRUE) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5))
+ggsave(
+  here('figures/burned_area_over_time.pdf'),
+  last_plot(),
+  width = 16,
+  height = 8
+)
 ```
 
+### Average Fire Size over Time
 
-Alaska has quite an outlier for community-intersecting fires in 2004. This was the year of the Boundary Fire NE of Fairbanks, which reached 912 km<sup>2</sup>. While that's not the largest fire in our data set, it was the _only_ community-intersecting fire in our data set that year in Alaska.
+_i.e. the mean area of the wildfire footprints in a region/year_
+
+
+```{r fire_size_over_time, fig.height = 4, fig.width = 4}
+plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0)),
+    labels = scales::comma
+  ) +
+  plot_layout(ncol = 1)
+ggsave(
+  here('figures/fire_size_over_time.pdf'),
+  last_plot(),
+  width = 4,
+  height = 4
+)
+```
 
 ## Share of WUI Fires over Time
 
 ### Share of Fires in Wildland-Urban Interface over Time
 
 ```{r wui_interface_over_time, fig.height = 12, fig.width = 14}
-plotme(wfbz_crit, 'WUI-Interface', stack = FALSE) +
-  ggtitle('Community-Impacting Disasters') +
+plotme(wfbz_crit, 'WUI', stack = FALSE) +
   xlab('')
-ggsave(here('figures/wui_interface_over_time.png'), last_plot(), width = 4.7, height = 4)
-```
-
-### Share of Fires in Wildland-Urban Intermix over Time
-
-```{r wui_intermix_over_time, fig.height = 12, fig.width = 14}
-plotme(wfbz_crit, 'WUI-Intermix', stack = FALSE) +
-  ggtitle('Community-Impacting Disasters') +
-  xlab('')
-ggsave(here('figures/wui_intermix_over_time.png'), last_plot(), width = 4.7, height = 4)
+ggsave(
+  here('figures/wui_interface_over_time.pdf'),
+  last_plot(),
+  width = 14,
+  height = 12
+)
 ```
