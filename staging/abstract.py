@@ -105,7 +105,7 @@ wildfire burn zone disasters [WFBZ disasters]). Here, we leverage a novel datase
 disasters by harmonizing six existing national or California-specific datasets to
 characterize spatiotemporal trends in WFBZ disaster occurrence, size, and severity,
 populations impacted, intersection with the wildland-urban interface, and FEMA disaster
-declarations. Between 2000-2025, we identified {len(wfbz_all):,.0f} WFBZ disasters in the United States.
+declarations. Between 2000-2024, we identified {len(wfbz_all):,.0f} WFBZ disasters in the United States.
 These WFBZ disasters burned a cumulative {burned_km2:,.0f} km2, with the burned area exceeding
 20,000km2 in Texas, Idaho, Oregon, and California. On average, {mean_exposed:,.0f} people lived within 10km
 of a WFBZ annually, with a {pct_increase:,.0f}% average increase in count annually during the study

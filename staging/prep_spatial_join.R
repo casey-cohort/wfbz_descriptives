@@ -26,11 +26,17 @@ tract_sf <- bind_rows(
 cat("Loading census parquets...\n")
 race <- read_parquet(here('data/processed/nhgis/race.parquet'))
 poverty <- read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet'))
-vehicle_avail <- read_parquet(here('data/processed/nhgis/vehicle_avail.parquet'))
-housing_cost <- read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet'))
+vehicle_avail <- read_parquet(here(
+  'data/processed/nhgis/vehicle_avail.parquet'
+))
+housing_cost <- read_parquet(here(
+  'data/processed/nhgis/housing_cost_burden.parquet'
+))
 
 cat("Loading WFBZ data...\n")
-wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
+wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson')) %>%
+  filter(wildfire_year < 2025)
+
 
 # ── Spatial join: wildfire_id -> GEOID mappings ──────────────────────────────
 
@@ -82,7 +88,10 @@ housing_cost_by_wf <- join_census(wf_tract_matches, housing_cost)
 dst <- here('data/processed/nhgis')
 write_parquet(race_by_wf, file.path(dst, 'race_by_wf.parquet'))
 write_parquet(poverty_by_wf, file.path(dst, 'poverty_by_wf.parquet'))
-write_parquet(vehicle_avail_by_wf, file.path(dst, 'vehicle_avail_by_wf.parquet'))
+write_parquet(
+  vehicle_avail_by_wf,
+  file.path(dst, 'vehicle_avail_by_wf.parquet')
+)
 write_parquet(housing_cost_by_wf, file.path(dst, 'housing_cost_by_wf.parquet'))
 
 cat("Done. Wrote *_by_wf.parquet files to", dst, "\n")

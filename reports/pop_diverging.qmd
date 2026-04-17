@@ -62,22 +62,21 @@ wfbz_region <- wfbz %>%
 
 ```{r high_risk_tracts}
 # Assign USFS regions to tracts; identify high-risk tracts
-# (>= 90th percentile of pop * whp_mean within each region)
+# (>= 90th percentile of whp_mean within each region, unweighted)
 tract_risk <- tract_sf %>%
   filter(!is.na(whp_mean), !is.na(pop), pop > 0) %>%
   mutate(
     usfs_region = regions$usfs_region[st_nearest_feature(
       geometry,
       st_transform(regions, 4326)
-    )],
-    pop_whp = pop * whp_mean
+    )]
   ) %>%
   st_drop_geometry()
 
 high_risk_tracts <- tract_risk %>%
   distinct(GEOID, .keep_all = TRUE) %>%
   group_by(usfs_region) %>%
-  filter(pop_whp >= quantile(pop_whp, 0.9, na.rm = TRUE)) %>%
+  filter(whp_mean >= quantile(whp_mean, 0.9, na.rm = TRUE)) %>%
   ungroup() %>%
   select(GEOID, usfs_region)
 
@@ -119,7 +118,7 @@ fire_housing <- housing_cost_by_wf %>%
 #  ) %>%
 #  mutate(stat = "Non-Hispanic White")
 
-# Reference population fracs: high-risk tracts (>= 90th pctl pop*whp by region)
+# Reference population fracs: high-risk tracts (>= 90th pctl whp by region)
 most_recent_period <- function(dat) {
   dat %>%
     group_by(GEOID) %>%
