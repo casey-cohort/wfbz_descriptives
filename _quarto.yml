@@ -9,8 +9,8 @@ website:
   navbar:
     left:
       - text: "Summary Tables"
-        file: reports/main_tables.qmd
-      - text: "Time Series"
+        file: reports/table1.qmd
+      - text: "Table 1"
         file: reports/main_timeseries.qmd
       - text: "Correlations"
         file: reports/main_correlations.qmd
