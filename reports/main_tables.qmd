@@ -105,8 +105,8 @@ tbl_counts <- wfbz_by_region_agg %>%
     `Fatalities per 100K (total)` = 100000 *
       sum(wildfire_max_civil_fatalities, na.rm = TRUE) /
       first(usfs_region_pop),
-    `Mean Fire Size km², mean (SD)` = mean(wildfire_area, na.rm = TRUE),
-    `Mean Fire Size (sd)` = sd(wildfire_area, na.rm = TRUE),
+    `Fire Size km², mean (SD)` = mean(wildfire_area, na.rm = TRUE),
+    `Fire Size (sd)` = sd(wildfire_area, na.rm = TRUE),
     `WUI (%)` = sum(
       str_detect(wildfire_wui, '(interface|intermix)'),
       na.rm = TRUE
@@ -123,7 +123,7 @@ tbl_counts <- wfbz_by_region_agg %>%
     .groups = 'drop'
   ) %>%
   select(-usfs_region_area, -usfs_region_pop) %>%
-  pivot_longer(c(-agg, -usfs_region, -N, -`Mean Fire Size (sd)`)) %>%
+  pivot_longer(c(-agg, -usfs_region, -N, -`Fire Size (sd)`)) %>%
   mutate(
     value = case_when(
       name == 'Number' ~ glue(
@@ -132,8 +132,8 @@ tbl_counts <- wfbz_by_region_agg %>%
       name == 'Fatalities per 100K (total)' ~ glue(
         '{format(value, digits = 2)}'
       ),
-      name == 'Mean Fire Size km², mean (SD)' ~ glue(
-        '{sprintf("%.1f", value)} ({sprintf("%.1f", `Mean Fire Size (sd)`)})'
+      name == 'Fire Size km², mean (SD)' ~ glue(
+        '{sprintf("%.1f", value)} ({sprintf("%.1f", `Fire Size (sd)`)})'
       ),
       name == 'Mean Projected Cost' ~ glue(
         '${format(round(value), big.mark = \',\')}'
@@ -141,11 +141,26 @@ tbl_counts <- wfbz_by_region_agg %>%
       TRUE ~ format_tot_percent(value, N)
     )
   ) %>%
-  select(-N, -`Mean Fire Size (sd)`) %>%
+  select(-N, -`Fire Size (sd)`) %>%
   pivot_wider(names_from = c(usfs_region), values_from = c(value)) %>%
   select(order(colnames(.))) %>%
   relocate(Nationwide) %>%
   relocate(name)
+
+pop_affected_row <- read_csv(here('data/processed/pop_affected.csv')) %>%
+  bind_rows(., mutate(., region = 'Nationwide')) %>%
+  group_by(usfs_region = region) %>%
+  summarize(
+    value = glue(
+      '{format(round(mean(exposed_10km)), big.mark = \',\')}, ({format(round(sd(exposed_10km)), big.mark = \',\')})'
+    ),
+    name = 'Population Affected Annually, mean (SD)',
+    agg = 'Community-Impacting Fires',
+    .groups = 'drop'
+  ) %>%
+  pivot_wider(names_from = usfs_region, values_from = value)
+
+tbl_counts <- bind_rows(tbl_counts, pop_affected_row)
 ```
 
 ### Community-Impacting Fires
