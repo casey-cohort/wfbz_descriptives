@@ -20,9 +20,10 @@ wfbz_lab <- wfbz %>%
     `Fatalities` = wildfire_max_civil_fatalities,
     `Structures Destroyed` = wildfire_struct_destroyed,
     `WUI` = if_else(
-      is.na(wildfire_wui),
+      is.na(wildfire_wui) |
+        !str_detect(wildfire_wui, '(interface|intermix)'),
       'None',
-      str_replace(wildfire_wui, '\\|', ' & ')
+      'WUI'
     ),
     `FEMA Declarations (n)` = as.character(wildfire_fema_dec),
     `Population Density (unitless)` = wildfire_buffered_avg_pop_den
@@ -88,14 +89,7 @@ xwfbz_numcat <- wfbz_lab %>%
   mutate(
     val_cat = factor(
       val_cat,
-      levels = c(
-        "None",
-        "FALSE",
-        "TRUE",
-        "interface & intermix",
-        "intermix",
-        "interface"
-      )
+      levels = c("None", "WUI", "FALSE", "TRUE")
     )
   )
 
@@ -119,7 +113,7 @@ p1 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'WUI')) +
     plot.margin = unit(c(0, 0, 0, 0), "pt"),
   ) +
   #ylab('') +
-  xlab("Wilderness-urban interface and intermix")
+  xlab("Wildland-urban interface or intermix")
 
 p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
   geom_boxplot(aes(

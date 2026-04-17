@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Quarto website project producing descriptive visualizations of U.S. wildfire burn zone disasters (WFBZ) from 2000–2025, published at https://casey-cohort.github.io/wfbz_descriptives/. The site is organized around USFS regions and analyzes metrics like fatalities, structures destroyed, burned area, FEMA declarations, and WUI (wildland-urban interface) intersections.
+This is a Quarto website project producing descriptive visualizations of U.S. wildfire burn zone disasters (WFBZ) from 2000–2024, published at https://casey-cohort.github.io/wfbz_descriptives/. The site is organized around USFS regions and analyzes metrics like fatalities, structures destroyed, burned area, FEMA declarations, and WUI (wildland-urban interface) intersections.
 
 ## Commands
 

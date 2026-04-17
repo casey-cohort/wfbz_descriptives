@@ -174,8 +174,10 @@ hex_summary <- hexgrid %>%
     `Structures Destroyed` = sum(wildfire_struct_destroyed, na.rm = TRUE),
     `FEMA Declarations` = sum(wildfire_fema_dec, na.rm = TRUE),
     `Burned Area` = sum(wildfire_area, na.rm = TRUE),
-    `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
-    `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
+    `WUI` = sum(
+      str_detect(wildfire_wui, '(intermix|interface)'),
+      na.rm = TRUE
+    ),
     .groups = 'drop'
   ) %>%
   st_shift_longitude()

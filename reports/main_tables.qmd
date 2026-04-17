@@ -106,17 +106,8 @@ tbl_counts <- wfbz_by_region_agg %>%
       sum(wildfire_max_civil_fatalities, na.rm = TRUE) /
       first(usfs_region_pop),
     `Mean Fire Size (km²)` = mean(wildfire_area, na.rm = TRUE),
-    `WUI Interface Fires` = sum(
-      str_detect(wildfire_wui, 'interface'),
-      na.rm = TRUE
-    ),
-    `WUI Intermix Fires` = sum(
-      str_detect(wildfire_wui, 'intermix'),
-      na.rm = TRUE
-    ),
-    `WUI Any Fires` = sum(
-      str_detect(wildfire_wui, 'interface') &
-        str_detect(wildfire_wui, 'intermix'),
+    `WUI Fires` = sum(
+      str_detect(wildfire_wui, '(interface|intermix)'),
       na.rm = TRUE
     ),
     `Missing WUI` = 0,

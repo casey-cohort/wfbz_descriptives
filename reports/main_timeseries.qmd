@@ -210,13 +210,11 @@ ggsave(
 
 ## Share of WUI Fires over Time
 
-### Share of Fires in Wildland-Urban Interface over Time
-
-```{r wui_interface_over_time, fig.height = 12, fig.width = 14}
+```{r wui_over_time, fig.height = 12, fig.width = 14}
 plotme(wfbz_crit, 'WUI', stack = FALSE) +
   xlab('')
 ggsave(
-  here('figures/wui_interface_over_time.pdf'),
+  here('figures/wui_over_time.pdf'),
   last_plot(),
   width = 14,
   height = 12

@@ -424,8 +424,10 @@ by_state <- wfbz %>%
     `FEMA Declarations` = sum(wildfire_fema_dec, na.rm = TRUE),
     `FEMA Declaration Percent` = `FEMA Declarations` / `Events`,
     `Burned Area` = sum(wildfire_area, na.rm = TRUE),
-    `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
-    `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
+    `WUI` = sum(
+      str_detect(wildfire_wui, '(intermix|interface)'),
+      na.rm = TRUE
+    ),
     .groups = 'drop'
   )
 by_state <- by_state %>%
@@ -459,15 +461,7 @@ wfbz_crit <- wfbz %>%
     `Burned Area` = sum(wildfire_area, na.rm = TRUE),
     `Burned Area Percent` = 100 *
       sum(wildfire_area / usfs_region_area, na.rm = TRUE),
-    `WUI-Intermix` = sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE),
-    `WUI-Interface` = sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE),
     `WUI` = sum(str_detect(wildfire_wui, '(intermix|interface)'), na.rm = TRUE),
-    `WUI-Intermix Percent` = 100 *
-      sum(str_detect(wildfire_wui, 'intermix'), na.rm = TRUE) /
-      n(),
-    `WUI-Interface Percent` = 100 *
-      sum(str_detect(wildfire_wui, 'interface'), na.rm = TRUE) /
-      n(),
     `WUI Percent` = 100 *
       sum(str_detect(wildfire_wui, '(interface|intermix)'), na.rm = TRUE) /
       n(),
