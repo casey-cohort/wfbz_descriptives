@@ -90,12 +90,12 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../reports/main_tables.html"> 
+    <a class="nav-link" href="../reports/table1.html"> 
 <span class="menu-text">Summary Tables</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../reports/main_timeseries.html"> 
-<span class="menu-text">Time Series</span></a>
+<span class="menu-text">Table 1</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../reports/main_correlations.html"> 
@@ -311,7 +311,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/casey-cohort\.github\.io\/wfbz_descriptives\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
