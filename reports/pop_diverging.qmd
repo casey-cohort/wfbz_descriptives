@@ -475,3 +475,23 @@ ggsave(
 #  height = 1
 #)
 ```
+
+
+## Debug
+
+```{r}
+race_high_risk <- read_parquet(here(
+  'data/processed/nhgis/race.parquet'
+)) %>%
+  most_recent_period() %>%
+  inner_join(high_risk_tracts, by = 'GEOID') %>%
+  inner_join(tracts(year = 2020, state = 'CA'), .)
+
+
+race_fire <- read_parquet(here(
+  'data/processed/nhgis/race_by_wf.parquet'
+)) %>%
+  most_recent_period() %>%
+  inner_join(high_risk_tracts, by = 'GEOID') %>%
+  inner_join(tracts(year = 2020, state = 'CA'), .)
+```

@@ -153,7 +153,7 @@ pop_affected_row <- read_csv(here('data/processed/pop_affected.csv')) %>%
   group_by(usfs_region = region) %>%
   summarize(
     value = glue(
-      '{format(round(mean(exposed_10km)), big.mark = \',\')}, ({format(round(sd(exposed_10km)), big.mark = \',\')})'
+      '{format(round(mean(exposed_10km)), big.mark = \',\')} ({format(round(sd(exposed_10km)), big.mark = \',\')})'
     ),
     name = 'Population Affected Annually, mean (SD)',
     agg = 'Community-Impacting Fires',
