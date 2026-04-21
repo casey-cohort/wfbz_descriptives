@@ -104,7 +104,7 @@ fire_housing <- housing_cost_by_wf %>%
     frac = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
       sum(count, na.rm = TRUE)
   ) %>%
-  mutate(stat = "Housing cost burdened")
+  mutate(stat = "Housing cost\nburdened")
 
 #fire_white <- race_by_wf %>%
 #  summarize(
@@ -157,7 +157,7 @@ pop_housing_all <- read_parquet(here(
     frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
       sum(count, na.rm = TRUE)
   ) %>%
-  mutate(stat = "Housing cost burdened")
+  mutate(stat = "Housing cost\nburdened")
 
 #pop_white_all <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
 #  most_recent_period() %>%
@@ -177,13 +177,13 @@ pop_housing_all <- read_parquet(here(
 stat_order <- c(
   "No vehicle",
   "Below poverty line",
-  "Housing cost burdened",
-  "Race - Other",
-  "Race - Two or More Races",
-  "Race - White",
-  "Race - Hispanic (any)",
-  "Race - Black",
-  "Race - AIAN, Asian, or Pacific Islander"
+  "Housing cost\nburdened",
+  "NH Other",
+  "NH Two or\nMore Races",
+  "NH White",
+  "Hispanic (any)",
+  "NH Black",
+  "NH AIAN, Asian,\nor Pacific Islander"
 )
 
 # Regional diverging data: fire side
@@ -215,7 +215,7 @@ fire_housing_reg <- housing_cost_by_wf %>%
     frac = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
       sum(count, na.rm = TRUE)
   ) %>%
-  mutate(stat = "Housing cost burdened")
+  mutate(stat = "Housing cost\nburdened")
 
 #fire_white_reg <- race_by_wf %>%
 #  inner_join(wfbz_region, by = 'wildfire_id') %>%
@@ -270,20 +270,21 @@ pop_housing_reg <- read_parquet(here(
     frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
       sum(count, na.rm = TRUE)
   ) %>%
-  mutate(stat = "Housing cost burdened")
+  mutate(stat = "Housing cost\nburdened")
 
 # Race diverging data — shared collapsing helper
 collapse_race <- function(df) {
   df %>%
     mutate(
       stat = case_when(
-        str_detect(race_group, "Black or African American") ~ "Race - Black",
+        str_detect(race_group, "Black or African American") ~ "NH Black",
         str_detect(
           race_group,
           "American Indian"
-        ) ~ "Race - AIAN, Asian, or Pacific Islander",
-        str_detect(race_group, "Some Other Race") ~ "Race - Other",
-        str_detect(race_group, "White") ~ "Race - White",
+        ) ~ "NH AIAN, Asian,\nor Pacific Islander",
+        str_detect(race_group, "Some Other Race") ~ "NH Other",
+        str_detect(race_group, "White") ~ "NH White",
+        str_detect(race_group, "Two or More Races") ~ "NH Two or\nMore Races",
         TRUE ~ race_group
       )
     )
@@ -292,9 +293,10 @@ collapse_race <- function(df) {
 # National fire race
 fire_race <- race_by_wf %>%
   mutate(
-    race_group = paste0(
-      "Race - ",
-      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
+    race_group = if_else(
+      ethnicity == "Hispanic or Latino",
+      "Hispanic (any)",
+      race
     )
   ) %>%
   group_by(race_group) %>%
@@ -307,9 +309,10 @@ pop_race <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
   most_recent_period() %>%
   filter(GEOID %in% high_risk_geoids) %>%
   mutate(
-    race_group = paste0(
-      "Race - ",
-      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
+    race_group = if_else(
+      ethnicity == "Hispanic or Latino",
+      "Hispanic (any)",
+      race
     )
   ) %>%
   group_by(race_group) %>%
@@ -328,9 +331,10 @@ fire_race_reg <- race_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
   mutate(
-    race_group = paste0(
-      "Race - ",
-      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
+    race_group = if_else(
+      ethnicity == "Hispanic or Latino",
+      "Hispanic (any)",
+      race
     )
   ) %>%
   collapse_race() %>%
@@ -349,9 +353,10 @@ pop_race_reg <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
   inner_join(high_risk_tracts, by = 'GEOID') %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
   mutate(
-    race_group = paste0(
-      "Race - ",
-      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
+    race_group = if_else(
+      ethnicity == "Hispanic or Latino",
+      "Hispanic (any)",
+      race
     )
   ) %>%
   collapse_race() %>%
@@ -399,57 +404,152 @@ div_theme <- pop_theme +
     axis.text.x = element_text(angle = 0, vjust = 0.5),
     axis.ticks.y = element_blank()
   )
-
-ggplot(diverge_national, aes(x = diff, y = stat)) +
-  geom_col(
-    fill = khroma::color('light', reverse = FALSE)(1),
-    color = "grey25",
-    linewidth = .1
-  ) +
-  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
-  xlab("Fire-affected minus high-risk reference (percentage points)") +
-  ylab(NULL) +
-  div_theme +
-  theme(
-    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+dat <- diverge_national %>%
+  mutate(
+    race_var = if_else(
+      str_detect(stat, '(^NH|Hispanic)'),
+      'Race & Ethnicity',
+      'SES'
+    )
   )
+plotme <- function(dat) {
+  ggplot(
+    dat,
+    aes(x = diff, y = stat)
+  ) +
+    geom_col(
+      fill = khroma::color('light', reverse = FALSE)(1),
+      color = "grey25",
+      linewidth = .1
+    ) +
+    geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+    geom_text(
+      aes(
+        x = 0,
+        label = stat,
+        hjust = (.6 * diff / abs(diff)) + .5,
+      ),
+      size = 2
+    ) +
+    scale_x_continuous(
+      labels = scales::percent_format(accuracy = .1),
+      n.breaks = 6,
+      expand = c(.004, 0)
+    ) +
+    xlab("Fire-affected minus high-risk reference (percentage points)") +
+    ylab(NULL) +
+    div_theme +
+    theme(
+      strip.text.y = element_text(
+        angle = 0,
+        hjust = .5,
+        size = 8,
+        lineheight = .75
+      ),
+      #axis.text.y = element_text(angle = 90, hjust = .5),
+      axis.text.y = element_blank(),
+      panel.spacing.y = unit(0, 'pt'),
+      panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+    )
+}
+
+
+p_ses <- plotme(filter(dat, race_var == 'SES'))
+p_race <- plotme(filter(dat, race_var == 'Race & Ethnicity'))
+
 ggsave(
-  here('figures/diverge_overall_fig.pdf'),
-  last_plot(),
-  width = 7,
+  here('figures/diverge_national_ses.pdf'),
+  p_ses,
+  width = 8,
   height = 2
 )
+
+ggsave(
+  here('figures/diverge_national_race_ethn.pdf'),
+  p_race,
+  width = 8,
+  height = 3
+)
+
+p_ses
+```
+
+```{r, fig.height = 3, fig.width = 8}
+p_race
 ```
 
 ### By Region
 
-```{r diverge_regional_fig, fig.height = 12, fig.width = 14}
+```{r diverge_regional_fig, fig.height = 4, fig.width = 8}
 #| fig-cap: "Difference in fire-affected vs. high-wildfire-risk population shares by USFS region, pooled 2000-2024"
-ggplot(
-  diverge_regional,
-  aes(x = diff, y = usfs_region, fill = usfs_region)
-) +
-  geom_col(width = 1, color = "grey25", linewidth = .1) +
-  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
-  scale_fill_manual(values = c('black', rev(region_colors))) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
-  facet_grid(stat ~ ., scales = 'fixed') +
-  xlab("Fire-affected minus high-risk reference (percentage points)") +
-  ylab(NULL) +
-  div_theme +
-  theme(
-    strip.text.y = element_text(angle = 0, hjust = 0, size = 8),
-    axis.text.y = element_text(angle = 45, hjust = 1),
-    panel.spacing.y = unit(0, 'pt'),
-    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+dat <- diverge_regional %>%
+  mutate(
+    race_var = if_else(
+      str_detect(stat, '(^NH|Hispanic)'),
+      'Race & Ethnicity',
+      'SES'
+    )
   )
+plotme <- function(dat) {
+  ggplot(
+    dat,
+    aes(x = diff, y = usfs_region, fill = usfs_region)
+  ) +
+    geom_col(width = 1, color = "grey25", linewidth = .1) +
+    geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
+    geom_text(
+      aes(
+        x = 0,
+        label = usfs_region,
+        hjust = (.6 * diff / abs(diff)) + .5,
+      ),
+      size = 2
+    ) +
+    scale_fill_manual(values = c('black', rev(region_colors))) +
+    scale_x_continuous(
+      labels = scales::percent_format(accuracy = 1),
+      n.breaks = 8
+    ) +
+    facet_wrap(~stat, ncol = 1, scale = 'fixed', strip.position = 'left') +
+    xlab("Fire-affected minus high-risk reference (percentage points)") +
+    ylab(NULL) +
+    div_theme +
+    theme(
+      strip.text.y = element_text(
+        angle = 0,
+        hjust = .5,
+        size = 8,
+        lineheight = .75
+      ),
+      #  axis.text.y = element_text(angle = 45, hjust = 1),
+      axis.text.y = element_blank(),
+      panel.spacing.y = unit(0, 'pt'),
+      panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+    )
+}
+
+p_ses <- plotme(filter(dat, race_var == 'SES'))
+p_race <- plotme(filter(dat, race_var == 'Race & Ethnicity'))
+
 ggsave(
-  here('figures/diverge_regional_fig.pdf'),
-  last_plot(),
-  width = 14,
-  height = 12
+  here('figures/diverge_regional_ses.pdf'),
+  p_ses,
+  width = 8,
+  height = 4
 )
+
+ggsave(
+  here('figures/diverge_regional_race_ethn.pdf'),
+  p_race,
+  width = 8,
+  height = 6
+)
+
+p_ses
+```
+
+```{r, fig.height = 6, fig.width = 8}
+p_race
 ```
 
 ```{r diverge_race_fig, fig.height = 3}
@@ -485,7 +585,7 @@ ggsave(
 #  inner_join(high_risk_tracts, by = 'GEOID') %>%
 #  mutate(
 #    race_group = paste0(
-#      "Race - ",
+#      "NH ",
 #      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
 #    )
 #  ) %>%
