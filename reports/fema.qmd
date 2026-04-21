@@ -13,11 +13,26 @@ execute:
 
 ```{r, fig.height = 9, fig.width = 9}
 ggplot() +
+  geom_vline(
+    xintercept = mean(by_state$`FEMA Declaration Percent`),
+    color = 'grey25',
+    linetype = 'dashed'
+  ) +
+  annotate(
+    geom = 'text',
+    x = mean(by_state$`FEMA Declaration Percent`),
+    y = 'Ohio',
+    color = 'grey25',
+    label = 'Mean',
+    angle = -90,
+    vjust = -.5,
+    color = 'grey25'
+  ) +
   geom_col(
     data = by_state,
     aes(y = state_name, x = `FEMA Declaration Percent`),
     fill = khroma::color('light', reverse = FALSE)(1),
-    color = 'white',
+    color = NA #'white',
   ) +
   geom_text(
     data = by_state,
@@ -39,9 +54,9 @@ ggplot() +
           glue(' ({`FEMA Declarations`})')
         )
       ),
-      hjust = -.1
     ),
-    color = 'grey10'
+    color = 'grey10',
+    hjust = -.1
   ) +
   scale_x_continuous(
     labels = scales::percent,
@@ -56,11 +71,18 @@ ggplot() +
     panel.grid.major.x = element_line(linewidth = .25, color = 'grey25'),
     panel.grid.minor.x = element_line(linewidth = .25, color = 'grey75')
   )
+
+ggsave(
+  here('figures/fema_decs_ranked_by_state.pdf'),
+  last_plot(),
+  width = 9,
+  height = 9
+)
 ```
 
 ### Variables vs. FEMA Declarations
 
-```{r, fig.height = 30, fig.width = 4}
+```{r, fig.height = 40, fig.width = 10}
 by_state_long <- by_state %>%
   select(-`FEMA Declaration Percent`) %>%
   pivot_longer(-c(usfs_region, state_abb, state_name, `FEMA Declarations`))
@@ -137,7 +159,7 @@ all_plots <- c(
   #list(header_log), scatters$p_log
 )
 
-wrap_plots(
+p <- wrap_plots(
   all_plots,
   ncol = 1,
   byrow = FALSE,
@@ -154,6 +176,13 @@ wrap_plots(
 #   guides = 'collect'
 # )# +
 #   plot_annotation(theme = theme(legend.position = 'bottom'))
+ggsave(
+  here('figures/fema_decs_scatters_INTERNAL.pdf'),
+  p,
+  width = 10,
+  height = 40
+)
+p
 ```
 
 _Note: to show y axis label at each plot will require custom coding -- need to jitter y axis values
@@ -204,7 +233,12 @@ ggplot() +
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
   scale_fill_distiller(palette = 'Spectral', name = '')
-
+ggsave(
+  here('figures/map_events.pdf'),
+  last_plot(),
+  width = 8,
+  height = 8
+)
 ```
 
 FEMA Declarations
@@ -219,6 +253,12 @@ ggplot() +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
   scale_fill_distiller(palette = 'Spectral', name = '')
 
+ggsave(
+  here('figures/map_decs.pdf'),
+  last_plot(),
+  width = 8,
+  height = 8
+)
 ```
 
 Declarations per Event
@@ -238,6 +278,12 @@ ggplot() +
     name = '',
     labels = scales::percent
   )
+ggsave(
+  here('figures/maps_decs_per_event.pdf'),
+  last_plot(),
+  width = 8,
+  height = 8
+)
 ```
 
 Declarations per Event (Scale Shifted)
@@ -256,4 +302,10 @@ ggplot() +
     name = '',
     values = c(0, scales::breaks_log()(c(.0001, 1)))
   )
+ggsave(
+  here('figures/maps_decs_per_event_log.pdf'),
+  last_plot(),
+  width = 8,
+  height = 8
+)
 ```
