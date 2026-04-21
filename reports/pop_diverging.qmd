@@ -480,18 +480,32 @@ ggsave(
 ## Debug
 
 ```{r}
-race_high_risk <- read_parquet(here(
-  'data/processed/nhgis/race.parquet'
-)) %>%
-  most_recent_period() %>%
-  inner_join(high_risk_tracts, by = 'GEOID') %>%
-  inner_join(tracts(year = 2020, state = 'CA'), .)
-
-
-race_fire <- read_parquet(here(
-  'data/processed/nhgis/race_by_wf.parquet'
-)) %>%
-  most_recent_period() %>%
-  inner_join(high_risk_tracts, by = 'GEOID') %>%
-  inner_join(tracts(year = 2020, state = 'CA'), .)
+#race_high_risk <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+#  most_recent_period() %>%
+#  inner_join(high_risk_tracts, by = 'GEOID') %>%
+#  mutate(
+#    race_group = paste0(
+#      "Race - ",
+#      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
+#    )
+#  ) %>%
+#  collapse_race() %>%
+#  inner_join(tracts(year = 2020, state = 'CA'), .)
+#
+#
+#race_fire <- read_parquet(here(
+#  'data/processed/nhgis/race_by_wf.parquet'
+#)) %>%
+#  most_recent_period() %>%
+#  inner_join(high_risk_tracts, by = 'GEOID') %>%
+#  inner_join(tracts(year = 2020, state = 'CA'), .)
+#
+#race <- bind_rows(
+#  fire_affected = race_fire,
+#  high_risk = race_high_risk,
+#  .id = 'type'
+#)
+#
+#ggplot(data = race) +
+#  geom_sf(fill = )
 ```

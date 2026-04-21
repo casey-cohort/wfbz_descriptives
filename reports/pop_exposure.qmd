@@ -9,7 +9,9 @@ execute:
 
 {{< include _pop_setup.qmd >}}
 
-```{r pop_over_time, fig.height = 4, fig.width = 8}
+
+
+```{r pop_over_time, fig.height = 8, fig.width = 8}
 pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
   rename(
     wildfire_year = year,
@@ -18,33 +20,114 @@ pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
   ) %>%
   select(-ID_hazard)
 
-ggplot(data = pop) +
+pop_labels <- pop %>%
+  left_join(REGION_ORDER) %>%
+  mutate(
+    tot = sum(
+      `Population Affected`,
+      na.rm = TRUE
+    )
+  ) %>%
+  group_by(usfs_region, plot_order, tot) %>%
+  reframe(
+    label_abs = paste0(
+      usfs_region,
+      ' (',
+      scales::comma(
+        mean(
+          `Population Affected`,
+          na.rm = TRUE
+        )
+      ),
+      ')'
+    ),
+    label_rel = paste0(
+      usfs_region,
+      ' (',
+      scales::percent(
+        sum(
+          `Population Affected`,
+          na.rm = TRUE
+        ) /
+          tot,
+        accuracy = .1
+      ),
+      ')'
+    )
+  ) %>%
+  distinct() %>%
+  mutate(label_abs = fct_reorder(label_abs, plot_order)) %>%
+  mutate(label_rel = fct_reorder(label_rel, plot_order))
+
+pop <- pop %>% left_join(pop_labels)
+
+names(region_colors) <- sort(as.character(pop_labels$label_abs))
+
+p_abs <- ggplot(data = pop) +
   geom_col(
     aes(
       x = wildfire_year,
       y = `Population Affected`,
-      fill = usfs_region
+      fill = label_abs
     ),
     width = 1,
     linewidth = 0.25,
     color = 'grey25'
   ) +
-  scale_fill_manual(name = "Region", values = region_colors) +
+  scale_fill_manual(
+    name = "Region (Overall Annual Mean)",
+    values = region_colors
+  ) +
   scale_x_continuous(
     breaks = seq(2000, 2024, by = 2),
-    expand = expansion(add = c(0, 1.5))
+    expand = expansion(add = c(0, 0))
   ) +
   #    coord_cartesian(xlim = c(2000, 2025)) +
   scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
   xlab(NULL) +
-  ylab(NULL) +
+  ylab('Population Affected') +
   pop_theme +
   theme(
     panel.grid.major.y = element_line(color = 'grey75'),
     panel.grid.minor.y = element_line(color = 'grey90'),
-    legend.position = 'right',
-    plot.margin = unit(c(1, 5, 1, 5), "cm"),
+    legend.position = 'right' #,
+    #plot.margin = unit(c(1, 5, 1, 5), "cm"),
   )
 
-ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 4)
+names(region_colors) <- sort(as.character(pop_labels$label_rel))
+
+p_rel <- ggplot(data = pop) +
+  geom_col(
+    aes(
+      x = wildfire_year,
+      y = `Population Affected`,
+      fill = label_rel
+    ),
+    width = 1,
+    linewidth = 0.25,
+    color = 'grey25',
+    position = position_fill()
+  ) +
+  scale_fill_manual(name = "Region (Overall Share)", values = region_colors) +
+  scale_x_continuous(
+    breaks = seq(2000, 2024, by = 2),
+    expand = expansion(add = c(0, 0))
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0)),
+    labels = scales::percent
+  ) +
+  xlab(NULL) +
+  ylab(glue("Population Affected (Share of Total)")) +
+  pop_theme +
+  theme(
+    panel.grid.major.y = element_line(color = 'grey75'),
+    panel.grid.minor.y = element_line(color = 'grey90'),
+    legend.position = 'right' #,
+    #plot.margin = unit(c(1, 5, 1, 5), "cm"),
+  )
+
+p <- p_abs + plot_spacer() + p_rel + plot_layout(ncol = 1, heights = c(5, 1, 5))
+p
+ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 8)
 ```

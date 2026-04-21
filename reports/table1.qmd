@@ -45,8 +45,10 @@ wfbz_by_region_agg <-
 tbl_summaries <- wfbz_by_region_agg %>%
   group_by(agg) %>%
   mutate(
+    ct = 1,
     across(
       c(
+        ct,
         wildfire_struct_destroyed,
         wildfire_struct_threatened,
         wildfire_max_civil_fatalities,
@@ -64,12 +66,13 @@ tbl_summaries <- wfbz_by_region_agg %>%
   summarize(
     across(
       c(
+        ct,
         wildfire_struct_destroyed,
-        wildfire_struct_threatened,
-        wildfire_max_civil_fatalities,
-        wildfire_total_fatalities,
-        wildfire_civil_injuries,
-        wildfire_total_injuries
+        # wildfire_struct_threatened,
+        wildfire_max_civil_fatalities #,
+        # wildfire_total_fatalities,
+        #wildfire_civil_injuries,
+        #wildfire_total_injuries
       ),
       ~ format_tot_percent(
         sum(.x, na.rm = TRUE),
@@ -79,12 +82,13 @@ tbl_summaries <- wfbz_by_region_agg %>%
     .groups = 'drop'
   ) %>%
   rename(
+    `Number` = ct,
     `Structures destroyed` = wildfire_struct_destroyed,
-    `Structures threatened` = wildfire_struct_threatened,
-    `Civilian fatalities (best estimate)` = wildfire_max_civil_fatalities,
-    `Total fatalities` = wildfire_total_fatalities,
-    `Civilian injuries` = wildfire_civil_injuries,
-    `Total injuries` = wildfire_total_injuries #,
+    #`Structures threatened` = wildfire_struct_threatened,
+    `Civilian fatalities` = wildfire_max_civil_fatalities
+    #`Total fatalities` = wildfire_total_fatalities,
+    #`Civilian injuries` = wildfire_civil_injuries,
+    #`Total injuries` = wildfire_total_injuries #,
     #`Civilian evacuations` = wildfire_civil_evacuation,
     #`Total evacuations` = wildfire_total_evacuation
   ) %>%
@@ -98,7 +102,6 @@ tbl_summaries <- wfbz_by_region_agg %>%
 tbl_counts <- wfbz_by_region_agg %>%
   group_by(agg, usfs_region, usfs_region_area, usfs_region_pop) %>%
   summarize(
-    `Number` = n(),
     `FMAG Declared (% of total in region)` = sum(
       wildfire_fema_dec,
       na.rm = TRUE
@@ -108,7 +111,7 @@ tbl_counts <- wfbz_by_region_agg %>%
       first(usfs_region_pop),
     `Fire Size km², mean (SD)` = mean(wildfire_area, na.rm = TRUE),
     `Fire Size (sd)` = sd(wildfire_area, na.rm = TRUE),
-    `WUI (%)` = sum(
+    `WUI (% of total in region)` = sum(
       str_detect(wildfire_wui, '(interface|intermix)'),
       na.rm = TRUE
     ),
@@ -153,11 +156,7 @@ pop_affected_row <- read_csv(here('data/processed/pop_affected.csv')) %>%
   group_by(usfs_region = region) %>%
   summarize(
     value = glue(
-<<<<<<< HEAD:reports/table1.qmd
       '{format(round(mean(exposed_10km)), big.mark = \',\')} ({format(round(sd(exposed_10km)), big.mark = \',\')})'
-=======
-      '{format(round(mean(exposed_10km)), big.mark = \',\')}, ({format(round(sd(exposed_10km)), big.mark = \',\')})'
->>>>>>> ce5efa5fffeba43ca9c04eb2d4825f8c36e25402:reports/main_tables.qmd
     ),
     name = 'Population Affected Annually, mean (SD)',
     agg = 'Community-Impacting Fires',
@@ -181,13 +180,13 @@ bind_rows(tbl_counts, tbl_summaries) %>%
   gt(rowname_col = 'name') %>%
   tab_row_group(
     label = 'Counts, N (% of national)',
-    rows = 7:12
+    rows = 6:8
   ) %>%
-  row_group_order(c(NA, 'Counts, N (% of national)')) %>%
+  row_group_order(c('Counts, N (% of national)', NA)) %>%
   tab_options(table.width = px(1800)) %>%
   cols_hide(agg) %>%
   tab_stub_indent(
-    rows = 7:12,
+    rows = 6:8,
     indent = 4
   )
 ```

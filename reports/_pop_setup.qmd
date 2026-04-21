@@ -6,6 +6,7 @@ library(sf)
 library(arrow)
 library(patchwork)
 library(showtext)
+library(glue)
 
 showtext_auto()
 font_add("Arial", regular = here("assets/LiberationSans-Regular.ttf"))
