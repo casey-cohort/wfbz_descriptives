@@ -2,7 +2,7 @@
 # Requires IPUMS_API_KEY set in .Renviron
 #
 # Set FORCE_REBUILD <- TRUE to bypass all caching guards and rebuild from scratch.
-FORCE_REBUILD <- TRUE
+FORCE_REBUILD <- FALSE
 
 library(sf)
 library(tidyverse)
@@ -555,9 +555,16 @@ region_pop_by_year <- function(dat, num_expr) {
   dat %>%
     inner_join(tract_region, by = 'GEOID') %>%
     inner_join(ypm, by = 'period', relationship = 'many-to-many') %>%
-    group_by(wildfire_year, usfs_region) %>%
+    group_by(wildfire_year, usfs_region, GEOID) %>%
     summarize(
       frac_pop = {{ num_expr }} / sum(count, na.rm = TRUE),
+      .groups = 'drop'
+    ) %>%
+    group_by(wildfire_year, usfs_region) %>%
+    summarize(
+      frac_pop_p25 = quantile(frac_pop, .25, na.rm = TRUE),
+      frac_pop_median = median(frac_pop, na.rm = TRUE),
+      frac_pop_p75 = quantile(frac_pop, .75, na.rm = TRUE),
       .groups = 'drop'
     )
 }
