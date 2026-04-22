@@ -9,6 +9,12 @@ execute:
 
 {{< include _pop_setup.qmd >}}
 
+In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts.
+The colored ribbon ranges from the 25th to the 75th percentile for that metric.
+
+The same is show for "at risk" census tracts (the 90th percentile of tracts nationally by WHP) in grey, with the dashed
+line showing the median.
+
 ```{r load_data}
 # Fire-tract census joins (built by staging/prep_spatial_join.R)
 by_wf_dir <- here('data/processed/nhgis')
@@ -60,10 +66,11 @@ plot_pop_var <- function(df, label) {
       aes(
         x = wildfire_year,
         ymin = frac_pop_p25,
-        ymax = frac_pop_p75,
-        fill = 'grey75',
-        color = 'grey25'
+        ymax = frac_pop_p75
       ),
+      fill = 'grey50',
+      color = 'grey25',
+      linewidth = 0.25,
       alpha = .05
     ) +
     geom_line(
@@ -94,7 +101,10 @@ plot_pop_var <- function(df, label) {
     ) +
     scale_color_manual(name = "Region", values = region_colors) +
     scale_fill_manual(name = "Region", values = region_colors) +
-    scale_x_continuous(breaks = seq(2000, 2024, by = 2)) +
+    scale_x_continuous(
+      breaks = seq(2000, 2024, by = 2),
+      expand = expansion(add = c(.25, .25))
+    ) +
     coord_cartesian(xlim = c(2000, 2024)) +
     scale_y_continuous(labels = scales::percent) +
     facet_wrap(~usfs_region, ncol = 1, scales = 'free_y') +
