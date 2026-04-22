@@ -32,14 +32,14 @@
     "href": "reports/pop_demographics.html",
     "title": "Demographic Time Series",
     "section": "",
-    "text": "Share of fire-affected households with no vehicle access, by USFS region and year"
+    "text": "In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts. The colored ribbon ranges from the 25th to the 75th percentile for that metric.\nThe same is show for “at risk” census tracts (the 90th percentile of tracts nationally by WHP) in grey, with the dashed line showing the median."
   },
   {
     "objectID": "reports/pop_demographics.html#vehicle-availability",
     "href": "reports/pop_demographics.html#vehicle-availability",
     "title": "Demographic Time Series",
-    "section": "",
-    "text": "Share of fire-affected households with no vehicle access, by USFS region and year"
+    "section": "Vehicle Availability",
+    "text": "Vehicle Availability\n\n\n\n\n\nShare of fire-affected households with no vehicle access, by USFS region and year"
   },
   {
     "objectID": "reports/pop_demographics.html#race",
