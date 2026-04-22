@@ -14,6 +14,13 @@
     "text": "Difference in fire-affected vs. high-wildfire-risk population shares, pooled 2000-2024"
   },
   {
+    "objectID": "reports/pop_diverging.html#debug",
+    "href": "reports/pop_diverging.html#debug",
+    "title": "Diverging Demographic Charts",
+    "section": "Debug",
+    "text": "Debug"
+  },
+  {
     "objectID": "reports/main_timeseries.html#share-of-wui-fires-over-time",
     "href": "reports/main_timeseries.html#share-of-wui-fires-over-time",
     "title": "Variables over Time",
@@ -75,12 +82,5 @@
     "title": "FEMA Declaration Summaries",
     "section": "",
     "text": "Fema Declaration Likelihood by State\n\n\n\n\n\n\n\n\n\n\n\nVariables vs. FEMA Declarations\n\n\n\n\n\n\n\n\n\nNote: to show y axis label at each plot will require custom coding – need to jitter y axis values or else create each plot without facet\n\n\nGeographic Distribution (all years)\nEvents\n\n\n\n\n\n\n\n\n\nFEMA Declarations\n\n\n\n\n\n\n\n\n\nDeclarations per Event\nHow to disentangle that FEMA Declarations makes an event?\n\n\n\n\n\n\n\n\n\nDeclarations per Event (Scale Shifted)"
-  },
-  {
-    "objectID": "reports/pop_diverging.html#debug",
-    "href": "reports/pop_diverging.html#debug",
-    "title": "Diverging Demographic Charts",
-    "section": "Debug",
-    "text": "Debug"
   }
 ]
