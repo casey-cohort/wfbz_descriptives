@@ -24,7 +24,6 @@ wfbz_by_region_agg <- wfbz %>%
   )
 wfbz_by_region_agg <-
   bind_rows(
-    `All Fires` = wfbz_by_region_agg,
     `Community-Impacting Fires` = filter(
       wfbz_by_region_agg,
       wildfire_community_intersect
@@ -175,7 +174,7 @@ _Note: percents represent percentage of fires that met this criteria within the 
 _Therefore, the counts do not have a percentage provided._
 
 ```{r tbl_crit_counts}
-bind_rows(tbl_counts, tbl_summaries) %>%
+t1 <- bind_rows(tbl_counts, tbl_summaries) %>%
   filter(agg == "Community-Impacting Fires") %>%
   gt(rowname_col = 'name') %>%
   tab_row_group(
@@ -189,4 +188,7 @@ bind_rows(tbl_counts, tbl_summaries) %>%
     rows = 6:8,
     indent = 4
   )
+
+write_lines(as.character(as_latex(t1)), file = 'figures/t1.tex')
+t1
 ```
