@@ -121,6 +121,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="../reports/pop_diverging.html"> 
 <span class="menu-text">Demographic Diverging Charts</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/wui_tables.html"> 
+<span class="menu-text">WUI Tables</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -839,7 +843,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/casey-cohort\.github\.io\/wfbz_descriptives\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

@@ -21,11 +21,18 @@
     "text": "Debug"
   },
   {
-    "objectID": "reports/main_timeseries.html#share-of-wui-fires-over-time",
-    "href": "reports/main_timeseries.html#share-of-wui-fires-over-time",
-    "title": "Variables over Time",
-    "section": "Share of WUI Fires over Time",
-    "text": "Share of WUI Fires over Time"
+    "objectID": "reports/main_correlations.html",
+    "href": "reports/main_correlations.html",
+    "title": "Correlations",
+    "section": "",
+    "text": "Numeric Values Compared\n\n\n\n\n\n\n\n\n\n\n\nNumeric & Categorical Values Compared\n\n\n\n\n\n\n\n\n\n\n\nCategorical Values Compared"
+  },
+  {
+    "objectID": "reports/main_geography.html#reference",
+    "href": "reports/main_geography.html#reference",
+    "title": "Fire Season & Geography",
+    "section": "Reference",
+    "text": "Reference\n\nRegions Mapped"
   },
   {
     "objectID": "reports/pop_demographics.html",
@@ -63,18 +70,18 @@
     "text": "Housing Cost Burden\n\n\n\n\n\nCost-burdened households (&gt;=50% income on housing) near wildfire burn zones, by USFS region and year"
   },
   {
-    "objectID": "reports/main_geography.html#reference",
-    "href": "reports/main_geography.html#reference",
-    "title": "Fire Season & Geography",
-    "section": "Reference",
-    "text": "Reference\n\nRegions Mapped"
+    "objectID": "reports/main_timeseries.html#share-of-wui-fires-over-time",
+    "href": "reports/main_timeseries.html#share-of-wui-fires-over-time",
+    "title": "Variables over Time",
+    "section": "Share of WUI Fires over Time",
+    "text": "Share of WUI Fires over Time"
   },
   {
-    "objectID": "reports/main_correlations.html",
-    "href": "reports/main_correlations.html",
-    "title": "Correlations",
+    "objectID": "reports/wui_tables.html",
+    "href": "reports/wui_tables.html",
+    "title": "WUI Tables",
     "section": "",
-    "text": "Numeric Values Compared\n\n\n\n\n\n\n\n\n\n\n\nNumeric & Categorical Values Compared\n\n\n\n\n\n\n\n\n\n\n\nCategorical Values Compared"
+    "text": "wui_binary\nnumeric.mean\nnumeric.sd\nnumeric.p0\nnumeric.p25\nnumeric.p50\nnumeric.p75\nnumeric.p100\n\n\n\n\nwildfire_struct_destroyed\n\n\nNon-WUI\n27.3426901\n363.925290\n0\n1\n2\n4\n18804\n\n\nWUI\n3.0693669\n9.788082\n0\n1\n1\n2\n200\n\n\nwildfire_civil_fatalities\n\n\nNon-WUI\n2.0681818\n9.980318\n0\n0\n0\n1\n98\n\n\nWUI\n0.3521127\n0.537151\n0\n0\n0\n1\n2\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nusfs_region\nwui_binary\nnumeric.mean\nnumeric.sd\nnumeric.p0\nnumeric.p25\nnumeric.p50\nnumeric.p75\nnumeric.p100\nplot_order\n\n\n\n\nwildfire_struct_destroyed\n\n\nCalifornia\nNon-WUI\n120.54130053\n875.7367354\n0\n2.00\n6.0\n29.00\n18804\n10\n\n\nCalifornia\nWUI\n5.59388646\n14.4254331\n0\n1.00\n2.0\n4.00\n135\n10\n\n\nSouthern\nNon-WUI\n5.80496829\n47.1773269\n0\n1.00\n1.0\n2.00\n1669\n9\n\n\nSouthern\nWUI\n2.44754572\n9.6018469\n0\n1.00\n1.0\n2.00\n200\n9\n\n\nAlaska\nNon-WUI\n29.00000000\nNA\n29\n29.00\n29.0\n29.00\n29\n8\n\n\nAlaska\nWUI\n11.34375000\n24.9898165\n0\n1.00\n2.0\n6.50\n109\n8\n\n\nSouthern Rockies\nNon-WUI\n22.87096774\n73.2529827\n0\n1.00\n3.0\n13.00\n509\n7\n\n\nSouthern Rockies\nWUI\n3.14754098\n5.4797480\n0\n1.00\n2.0\n3.00\n50\n7\n\n\nSouthwestern\nNon-WUI\n17.23157895\n49.0285311\n0\n1.00\n3.0\n10.00\n322\n6\n\n\nSouthwestern\nWUI\n2.65333333\n7.5184338\n0\n1.00\n1.0\n2.00\n64\n6\n\n\nNorthern Rockies\nNon-WUI\n11.07317073\n19.4915496\n0\n2.00\n4.0\n11.50\n150\n5\n\n\nNorthern Rockies\nWUI\n3.25203252\n4.9631321\n0\n1.00\n2.0\n3.00\n36\n5\n\n\nIntermountain\nNon-WUI\n11.25373134\n34.6611278\n0\n1.00\n3.0\n8.75\n363\n4\n\n\nIntermountain\nWUI\n3.44720497\n8.3298414\n0\n1.00\n1.0\n3.00\n81\n4\n\n\nPacific Northwest\nNon-WUI\n20.15432099\n61.3810591\n0\n2.00\n4.0\n12.00\n600\n3\n\n\nPacific Northwest\nWUI\n4.11538462\n12.2484853\n0\n1.00\n2.0\n4.00\n123\n3\n\n\nEastern\nNon-WUI\n4.04843305\n19.2285633\n0\n1.00\n1.0\n2.00\n332\n2\n\n\nEastern\nWUI\n1.67300380\n2.0470406\n0\n1.00\n1.0\n2.00\n24\n2\n\n\nHawaii\nNon-WUI\n233.70000000\n720.7798323\n1\n2.25\n3.0\n12.50\n2285\n1\n\n\nHawaii\nWUI\nNaN\nNA\nNA\nNA\nNA\nNA\nNA\n1\n\n\nNationwide\nNon-WUI\n27.34269006\n363.9252903\n0\n1.00\n2.0\n4.00\n18804\nNA\n\n\nNationwide\nWUI\n3.06936685\n9.7880821\n0\n1.00\n1.0\n2.00\n200\nNA\n\n\nwildfire_civil_fatalities\n\n\nCalifornia\nNon-WUI\n1.64444444\n7.7666208\n0\n0.00\n0.0\n1.00\n85\n10\n\n\nCalifornia\nWUI\n0.04761905\n0.2155403\n0\n0.00\n0.0\n0.00\n1\n10\n\n\nSouthern\nNon-WUI\n1.38888889\n2.1182370\n0\n0.25\n1.0\n1.00\n8\n9\n\n\nSouthern\nWUI\n0.90000000\n0.3162278\n0\n1.00\n1.0\n1.00\n1\n9\n\n\nAlaska\nNon-WUI\nNaN\nNA\nNA\nNA\nNA\nNA\nNA\n8\n\n\nAlaska\nWUI\n0.00000000\nNA\n0\n0.00\n0.0\n0.00\n0\n8\n\n\nSouthern Rockies\nNon-WUI\n0.33333333\n0.5773503\n0\n0.00\n0.0\n0.50\n1\n7\n\n\nSouthern Rockies\nWUI\n2.00000000\nNA\n2\n2.00\n2.0\n2.00\n2\n7\n\n\nSouthwestern\nNon-WUI\nNaN\nNA\nNA\nNA\nNA\nNA\nNA\n6\n\n\nSouthwestern\nWUI\n0.00000000\nNA\n0\n0.00\n0.0\n0.00\n0\n6\n\n\nNorthern Rockies\nNon-WUI\nNaN\nNA\nNA\nNA\nNA\nNA\nNA\n5\n\n\nNorthern Rockies\nWUI\nNaN\nNA\nNA\nNA\nNA\nNA\nNA\n5\n\n\nIntermountain\nNon-WUI\n0.33333333\n0.5773503\n0\n0.00\n0.0\n0.50\n1\n4\n\n\nIntermountain\nWUI\n1.50000000\n0.7071068\n1\n1.25\n1.5\n1.75\n2\n4\n\n\nPacific Northwest\nNon-WUI\n1.25000000\n0.5000000\n1\n1.00\n1.0\n1.25\n2\n3\n\n\nPacific Northwest\nWUI\n0.28571429\n0.4879500\n0\n0.00\n0.0\n0.50\n1\n3\n\n\nEastern\nNon-WUI\n1.00000000\n0.0000000\n1\n1.00\n1.0\n1.00\n1\n2\n\n\nEastern\nWUI\n1.00000000\n0.0000000\n1\n1.00\n1.0\n1.00\n1\n2\n\n\nHawaii\nNon-WUI\n98.00000000\nNA\n98\n98.00\n98.0\n98.00\n98\n1\n\n\nHawaii\nWUI\nNaN\nNA\nNA\nNA\nNA\nNA\nNA\n1\n\n\nNationwide\nNon-WUI\n2.06818182\n9.9803183\n0\n0.00\n0.0\n1.00\n98\nNA\n\n\nNationwide\nWUI\n0.35211268\n0.5371510\n0\n0.00\n0.0\n1.00\n2\nNA"
   },
   {
     "objectID": "reports/fema.html",
