@@ -12,100 +12,128 @@ execute:
 ## Fire Season Timing
 
 ```{r fire_season_timing, fig.height = 12, fig.width = 10}
-
 # Determine order to plot in
 #region_summary <- wfbz %>%
-  #st_drop_geometry() %>%
- 	#mutate(usfs_region = wfbz_region) %>%
-  #ungroup() %>%
-  #filter(wildfire_year < 2003) %>%
-  #group_by(usfs_region) %>%
-  #summarize(medstart = yday(median(wildfire_ignition_date_max, na.rm = TRUE)), .groups = 'drop') %>%
-  #arrange(medstart)
+#st_drop_geometry() %>%
+#mutate(usfs_region = wfbz_region) %>%
+#ungroup() %>%
+#filter(wildfire_year < 2003) %>%
+#group_by(usfs_region) %>%
+#summarize(medstart = yday(median(wildfire_ignition_date_max, na.rm = TRUE)), .groups = 'drop') %>%
+#arrange(medstart)
 
 region_order <- as.character(REGION_ORDER$usfs_region)
 region_label <- REGION_ORDER$usfs_region
 
 wfbz %>%
   mutate(usfs_region = wfbz_region) %>%
-	mutate(
+  mutate(
     usfs_region = factor(
       wfbz_region,
       levels = region_order,
       labels = region_label
     )
   ) %>%
-	st_drop_geometry() %>%
-	filter(wildfire_community_intersect) %>%
-	filter(between(wildfire_year, 2000, 2024)) %>%
-	mutate(wildfire_states = str_split(wildfire_states, '\\|')) %>%
-	unnest(wildfire_states) %>% # pull out multiple rows from fires that cross state lines
-	transmute(
-		usfs_region,
-		wildfire_state = wildfire_states,
-		wildfire_year,
-		wildfire_containment_date,
-		wildfire_ignition_date_max,
-		wildfire_fema_dec_date
-	) %>%
-	ggplot() +
-    #annotate('rect', xmin = ymd('2099-05-01'), xmax = ymd('2099-11-30'), ymin = -Inf, ymax = Inf, color = '#fa0000', fill = '#fce3e3',  alpha = .5) +
-    # Two boxplots are layered to get a custom look -- whiskers belong to the bottom plot
-		geom_boxplot(
-			aes(x =  as.Date('2099-01-01') + yday(wildfire_ignition_date_max), group = wildfire_year, y = wildfire_year, fill = usfs_region),
-			orientation = 'y',
-      lwd = .1,
-      color = 'black',
-			outliers = FALSE
-		) +
-    # Top Boxplot
-		geom_boxplot(
-			aes(x =  as.Date('2099-01-01') + yday(wildfire_ignition_date_max), group = wildfire_year, y = wildfire_year, fill = usfs_region, color = usfs_region),
-      outlier.shape = NA, coef = 0, # hide all but the box body on top layer
-			orientation = 'y',
-			outliers = FALSE
-		) +
-    geom_point( # replace hidden median bar with a dot
-      aes(x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max), y = wildfire_year),
-      stat = 'summary',
-      fun = 'median',
-      orientation = 'y',
-      size = .25
-    ) +
-		geom_smooth(
-			aes(x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max), y = wildfire_year),
-			orientation = 'y',
-			method = 'lm',
-			linetype = 'longdash',
-			color = 'grey15',
-			fill = 'grey90',
-      linewidth = .5,
-      se = FALSE
-		) +
-		facet_wrap(~usfs_region, ncol = 2) +
-		scale_fill_manual(
-	  	values = region_colors,
-	  	guide = 'none'
-	  ) +
-    scale_color_manual(
-	  	values = region_colors,
-	  	guide = 'none'
-	  ) +
-	  #scale_x_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 366)) +
-	  scale_x_date(date_breaks = "1 month", date_labels = "%b", limits = as.Date(c('2099-01-01', '2099-12-31')), expand = c(0,0)) +
-	  scale_y_continuous(transform = 'reverse') +
-	  ylab("Year") +
-	  xlab("") + #xlab("Month of Year") +
-		ggtitle("Ignition Dates of Disaster Fires by Year") +
-	  theme(
-	  	panel.border = element_rect(color = "grey25", fill = NA, size = .25),
-	  	plot.title = element_text(size = 18),
-			axis.text.x = element_text(angle = 90, vjust = +.5),
-	  	axis.ticks = element_line(),
-      panel.spacing = unit(0, 'in'),
-      axis.title.y = element_blank()
-		)
-ggsave(here('figures/fire_season_timing.pdf'), last_plot(), width = 10, height = 12)
+  st_drop_geometry() %>%
+  filter(wildfire_community_intersect) %>%
+  filter(between(wildfire_year, 2000, 2024)) %>%
+  mutate(wildfire_states = str_split(wildfire_states, '\\|')) %>%
+  unnest(wildfire_states) %>% # pull out multiple rows from fires that cross state lines
+  transmute(
+    usfs_region,
+    wildfire_state = wildfire_states,
+    wildfire_year,
+    wildfire_containment_date,
+    wildfire_ignition_date_max,
+    wildfire_fema_dec_date
+  ) %>%
+  ggplot() +
+  #annotate('rect', xmin = ymd('2099-05-01'), xmax = ymd('2099-11-30'), ymin = -Inf, ymax = Inf, color = '#fa0000', fill = '#fce3e3',  alpha = .5) +
+  # Two boxplots are layered to get a custom look -- whiskers belong to the bottom plot
+  geom_boxplot(
+    aes(
+      x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max),
+      group = wildfire_year,
+      y = wildfire_year,
+      fill = usfs_region
+    ),
+    orientation = 'y',
+    lwd = .1,
+    color = 'black',
+    outliers = FALSE
+  ) +
+  # Top Boxplot
+  geom_boxplot(
+    aes(
+      x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max),
+      group = wildfire_year,
+      y = wildfire_year,
+      fill = usfs_region,
+      color = usfs_region
+    ),
+    outlier.shape = NA,
+    coef = 0, # hide all but the box body on top layer
+    orientation = 'y',
+    outliers = FALSE
+  ) +
+  geom_point(
+    # replace hidden median bar with a dot
+    aes(
+      x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max),
+      y = wildfire_year
+    ),
+    stat = 'summary',
+    fun = 'median',
+    orientation = 'y',
+    size = .25
+  ) +
+  geom_smooth(
+    aes(
+      x = as.Date('2099-01-01') + yday(wildfire_ignition_date_max),
+      y = wildfire_year
+    ),
+    orientation = 'y',
+    method = 'lm',
+    linetype = 'longdash',
+    color = 'grey15',
+    fill = 'grey90',
+    linewidth = .5,
+    se = FALSE
+  ) +
+  facet_wrap(~usfs_region, ncol = 2) +
+  scale_fill_manual(
+    values = region_colors,
+    guide = 'none'
+  ) +
+  scale_color_manual(
+    values = region_colors,
+    guide = 'none'
+  ) +
+  #scale_x_continuous(expand = expansion(mult = c(0, 0)), limits = c(0, 366)) +
+  scale_x_date(
+    date_breaks = "1 month",
+    date_labels = "%b",
+    limits = as.Date(c('2099-01-01', '2099-12-31')),
+    expand = c(0, 0)
+  ) +
+  scale_y_continuous(transform = 'reverse') +
+  ylab("Year") +
+  xlab("") + #xlab("Month of Year") +
+  #ggtitle("Ignition Dates of Disaster Fires by Year") +
+  theme(
+    panel.border = element_rect(color = "grey25", fill = NA, size = .25),
+    plot.title = element_text(size = 18),
+    axis.text.x = element_text(angle = 90, vjust = +.5),
+    axis.ticks = element_line(),
+    panel.spacing = unit(0, 'in'),
+    axis.title.y = element_blank()
+  )
+ggsave(
+  here('figures/fire_season_timing.pdf'),
+  last_plot(),
+  width = 10,
+  height = 12
+)
 ```
 
 ## Reference

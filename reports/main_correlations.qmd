@@ -66,8 +66,8 @@ ggplot(xwfbz_num) +
     plot.margin = unit(c(0, 0, 0, 0), "pt"),
   ) +
   xlab('') +
-  ylab('') +
-  ggtitle("Numeric Variables Compared (log-scale)")
+  ylab('') #+
+#ggtitle("Numeric Variables Compared (log-scale)")
 ggsave(here('figures/corr_numeric.pdf'), last_plot(), width = 12, height = 12)
 ```
 
@@ -111,9 +111,9 @@ p1 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'WUI')) +
     axis.text.x = element_text(angle = 45, vjust = +1, hjust = 1),
     axis.ticks = element_line(),
     plot.margin = unit(c(0, 0, 0, 0), "pt"),
-  ) +
-  #ylab('') +
-  xlab("Wildland-urban interface or intermix")
+  ) #+
+#ylab('') +
+#xlab("Wildland-urban interface or intermix")
 
 p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
   geom_boxplot(aes(
@@ -139,10 +139,10 @@ p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
 
 p1 +
   p2 +
-  plot_layout(ncol = 1) +
-  patchwork::plot_annotation(
-    title = "Numeric & Categorical Variables Compared (log-scale)"
-  )
+  plot_layout(ncol = 1) #+
+  #patchwork::plot_annotation(
+    #title = "Numeric & Categorical Variables Compared (log-scale)"
+  )#
 ggsave(here('figures/corr_numcat.pdf'), last_plot(), width = 16, height = 8)
 ```
 

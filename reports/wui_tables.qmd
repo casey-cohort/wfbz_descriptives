@@ -9,67 +9,93 @@ execute:
 
 {{< include _setup.qmd >}}
 
+```{r}
+pop_affected_annual <- bind_rows(
+  'WUI' = read_csv(here('data/processed/pop_affected_wui.csv')),
+  'non-WUI' = read_csv(here('data/processed/pop_affected_non_wui.csv')),
+  .id = 'pop_wui'
+) %>%
+  select(-ID_hazard) %>%
+  rename(wildfire_year = year)
+pop_affected_per_fire <- bind_rows(
+  'WUI' = read_csv(here('data/processed/pop_affected_per_fire_non_wui.csv')),
+  'non-WUI' = read_csv(here('data/processed/pop_affected_per_fire_wui.csv')),
+  .id = 'pop_wui'
+) %>%
+  mutate(ID_hazard = as.integer(ID_hazard)) %>%
+  rename(wildfire_id = ID_hazard, wildfire_year = year)
+```
+
+Important to note here that we don't acually know where fatalities happened or structures were
+destoryed, so we can only categorize those by whether the wildfire burn zone itself occurred in
+the WUI.
+
+Population affected, however, is categorized by whether the population itself was in the WUI
+regarless of the fire's designation.
+
+## Structures destroyed and fatalities
+
+Summarized according to whether fire was in WUI.
+
 ```{r table}
-format_med <- function(value, N) {
-  glue(
-    '{format(round(value), big.mark = ",")} ({trim(format(round(100 * value / N, 1), nsmall = 1))}%)'
-  )
-}
-wfbz_by_region_agg <- wfbz %>%
+wfbz_by_region <- wfbz %>%
   st_drop_geometry() %>%
   mutate(
     usfs_region = wfbz_region,
-    usfs_region_area = wfbz_region_area,
-    usfs_region_pop = wfbz_region_pop,
-    wui_binary = if_else(!is.na(wildfire_wui), "Non-WUI", "WUI")
+    wildfire_wui = if_else(is.na(wildfire_wui), 'non-WUI', 'WUI')
   ) %>%
   filter(
     wildfire_community_intersect
-  )
+  ) %>%
+  bind_rows(., mutate(., usfs_region = 'Nationwide'))
 
-# add nationwide
-wfbz_by_region_agg <-
-  bind_rows(
-    wfbz_by_region_agg,
-    mutate(
-      wfbz_by_region_agg,
-      usfs_region = 'Nationwide',
-      usfs_region_area = sum(as.numeric(st_area(regions)) / 1000 / 1000),
-      usfs_region_pop = sum(regions$usfs_region_pop)
+summ_by_region <- wfbz_by_region %>%
+  group_by(usfs_region, wildfire_wui) %>%
+  summarize(
+    across(
+      c(wildfire_struct_destroyed, wildfire_civil_fatalities),
+      .fns = c(
+        `mean` = \(.x) mean(.x, na.rm = TRUE),
+        `SD` = \(.x) sd(.x, na.rm = TRUE),
+        `25th pctl.` = \(.x) quantile(.x, .25, na.rm = TRUE),
+        `median` = \(.x) quantile(.x, .5, na.rm = TRUE),
+        `75th pctl.` = \(.x) quantile(.x, .75, na.rm = TRUE)
+      ),
+      .names = '{.fn} {.col}'
     )
-  )
-
-
-regional <- wfbz_by_region_agg %>%
-  select(
-    usfs_region,
-    wui_binary,
-    wildfire_struct_destroyed,
-    wildfire_civil_fatalities
   ) %>%
-  group_by(usfs_region, wui_binary) %>%
-  skimr::skim_without_charts() %>%
-  select(skim_variable, usfs_region, wui_binary, matches('numeric')) %>%
   left_join(REGION_ORDER) %>%
-  arrange(desc(plot_order)) %>%
-  gt(groupname_col = c('skim_variable'))
+  arrange(usfs_region != 'Nationwide', desc(plot_order)) %>%
+  select(-plot_order)
 
-nationwide <- wfbz_by_region_agg %>%
-  filter(usfs_region == 'Nationwide') %>%
-  select(
-    wui_binary,
-    wildfire_struct_destroyed,
-    wildfire_civil_fatalities
+gt(summ_by_region)
+```
+
+
+## Population Affected
+
+All community-intersecting fires regardless of WFBZ's WUI designation.
+
+```{r}
+summ_by_region <- wfbz_by_region %>%
+  left_join(pop_affected_per_fire) %>%
+  group_by(usfs_region, pop_wui) %>%
+  summarize(
+    across(
+      c(`Pop. exposed` = exposed_10km),
+      .fns = c(
+        `mean` = \(.x) mean(.x, na.rm = TRUE),
+        `SD` = \(.x) sd(.x, na.rm = TRUE),
+        `25th pctl.` = \(.x) quantile(.x, .25, na.rm = TRUE),
+        `median` = \(.x) quantile(.x, .5, na.rm = TRUE),
+        `75th pctl.` = \(.x) quantile(.x, .75, na.rm = TRUE)
+      ),
+      .names = '{.fn} {.col}'
+    )
   ) %>%
-  group_by(wui_binary) %>%
-  skimr::skim_without_charts() %>%
-  select(skim_variable, wui_binary, matches('numeric')) %>%
-  gt(groupname_col = c('skim_variable'))
-```
+  left_join(REGION_ORDER) %>%
+  arrange(usfs_region != 'Nationwide', desc(plot_order)) %>%
+  select(-plot_order)
 
-```{r}
-nationwide
-```
-```{r}
-regional
+gt(summ_by_region)
 ```
