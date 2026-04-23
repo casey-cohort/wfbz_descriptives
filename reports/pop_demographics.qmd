@@ -45,7 +45,8 @@ region_pop_housing <- read_parquet(here(
 
 # Region assignment for each fire
 wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson')) %>%
-  filter(wildfire_year < 2025)
+  filter(wildfire_year < 2025) %>%
+  filter(wildfire_community_intersect)
 
 regions <- read_sf(here('data/processed/regions.geojson'))
 wfbz_region <- wfbz %>%

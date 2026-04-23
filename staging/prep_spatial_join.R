@@ -35,7 +35,8 @@ housing_cost <- read_parquet(here(
 
 cat("Loading WFBZ data...\n")
 wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson')) %>%
-  filter(wildfire_year < 2025)
+  filter(wildfire_year < 2025) %>%
+  filter(wildfire_community_intersect)
 
 
 # ── Spatial join: wildfire_id -> GEOID mappings ──────────────────────────────
@@ -52,14 +53,32 @@ wf_tract_matches <- st_join(
 
 # ── Join census data to matched tracts ───────────────────────────────────────
 
+# NHGIS nominal geography: each row's GEOIDs come from the boundaries in use
+# when the data were tabulated. Decennial 2000 → 2000 boundaries; decennial 2010
+# and ACS 2006-2010 through 2015-2019 → 2010 boundaries; decennial 2020 and
+# ACS 2016-2020 onward → 2020 boundaries. Joining a tract GEOID from one
+# vintage to NHGIS rows from another vintage silently drops any tract that was
+# re-drawn, so we constrain period selection to the fire's tract vintage.
+period_vintage <- function(end_year) {
+  dplyr::case_when(
+    end_year < 2010 ~ 2000L,
+    end_year < 2020 ~ 2010L,
+    TRUE ~ 2020L
+  )
+}
+
 join_census <- function(matches, census_data) {
+  periods <- census_data %>%
+    distinct(period, start_year, end_year) %>%
+    mutate(vintage = period_vintage(end_year))
+
   best_period_by_year <- matches %>%
-    left_join(
-      census_data %>% distinct(GEOID, period, start_year, end_year),
-      by = 'GEOID',
+    distinct(wildfire_year, census_year) %>%
+    inner_join(
+      periods,
+      by = c('census_year' = 'vintage'),
       relationship = 'many-to-many'
     ) %>%
-    distinct(wildfire_year, period, start_year, end_year) %>%
     group_by(wildfire_year) %>%
     slice_min(
       abs(wildfire_year - (start_year + end_year) / 2),

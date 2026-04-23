@@ -62,7 +62,8 @@ source(here::here('R/utils.R'))
 
 wfbz <- read_sf(here("data/raw/wfbz_disasters_2000-2025.geojson")) %>%
   filter(!st_is_empty(geometry)) %>%
-  filter(wildfire_year < 2025)
+  filter(wildfire_year < 2025) %>%
+  filter(wildfire_community_intersect)
 wfbz <- wfbz %>%
   filter(!str_detect(wildfire_complex_names, '(FLOOD$|FLOOD 2013$)')) # remove some colorado floods that snuck in
 

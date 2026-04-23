@@ -24,6 +24,8 @@ website:
         file: reports/pop_demographics.qmd
       - text: "Demographic Diverging Charts"
         file: reports/pop_diverging.qmd
+      - text: "WUI Tables"
+        file: reports/wui_tables.qmd
 format:
   html:
     theme: cosmo

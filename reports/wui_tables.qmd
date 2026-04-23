@@ -1,0 +1,75 @@
+---
+title: "WUI Tables"
+toc: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+{{< include _setup.qmd >}}
+
+```{r table}
+format_med <- function(value, N) {
+  glue(
+    '{format(round(value), big.mark = ",")} ({trim(format(round(100 * value / N, 1), nsmall = 1))}%)'
+  )
+}
+wfbz_by_region_agg <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(
+    usfs_region = wfbz_region,
+    usfs_region_area = wfbz_region_area,
+    usfs_region_pop = wfbz_region_pop,
+    wui_binary = if_else(!is.na(wildfire_wui), "Non-WUI", "WUI")
+  ) %>%
+  filter(
+    wildfire_community_intersect
+  )
+
+# add nationwide
+wfbz_by_region_agg <-
+  bind_rows(
+    wfbz_by_region_agg,
+    mutate(
+      wfbz_by_region_agg,
+      usfs_region = 'Nationwide',
+      usfs_region_area = sum(as.numeric(st_area(regions)) / 1000 / 1000),
+      usfs_region_pop = sum(regions$usfs_region_pop)
+    )
+  )
+
+
+regional <- wfbz_by_region_agg %>%
+  select(
+    usfs_region,
+    wui_binary,
+    wildfire_struct_destroyed,
+    wildfire_civil_fatalities
+  ) %>%
+  group_by(usfs_region, wui_binary) %>%
+  skimr::skim_without_charts() %>%
+  select(skim_variable, usfs_region, wui_binary, matches('numeric')) %>%
+  left_join(REGION_ORDER) %>%
+  arrange(desc(plot_order)) %>%
+  gt(groupname_col = c('skim_variable'))
+
+nationwide <- wfbz_by_region_agg %>%
+  filter(usfs_region == 'Nationwide') %>%
+  select(
+    wui_binary,
+    wildfire_struct_destroyed,
+    wildfire_civil_fatalities
+  ) %>%
+  group_by(wui_binary) %>%
+  skimr::skim_without_charts() %>%
+  select(skim_variable, wui_binary, matches('numeric')) %>%
+  gt(groupname_col = c('skim_variable'))
+```
+
+```{r}
+nationwide
+```
+```{r}
+regional
+```

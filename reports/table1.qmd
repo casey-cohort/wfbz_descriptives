@@ -189,6 +189,6 @@ t1 <- bind_rows(tbl_counts, tbl_summaries) %>%
     indent = 4
   )
 
-write_lines(as.character(as_latex(t1)), file = 'figures/t1.tex')
+#write_lines(as.character(as_latex(t1)), file = 'figures/t1.tex')
 t1
 ```

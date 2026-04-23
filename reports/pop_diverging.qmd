@@ -10,7 +10,10 @@ execute:
 {{< include _pop_setup.qmd >}}
 
 ```{r load_data}
-# Fire-tract census joins (built by staging/prep_spatial_join.R)
+# Fire-tract census joins (built by staging/prep_spatial_join.R). Each row is
+# (wildfire_id × tract-at-fire's-vintage × census-period-closest-to-fire-year ×
+# category). Fire side uses these directly; reference side below pools
+# contemporaneous high-risk tracts to match.
 by_wf_dir <- here('data/processed/nhgis')
 race_by_wf <- read_parquet(file.path(by_wf_dir, 'race_by_wf.parquet'))
 poverty_by_wf <- read_parquet(file.path(by_wf_dir, 'poverty_by_wf.parquet'))
@@ -23,23 +26,23 @@ housing_cost_by_wf <- read_parquet(file.path(
   'housing_cost_by_wf.parquet'
 ))
 
-# Tracts with WHP for high-risk identification
+# Tracts with WHP for high-risk identification — all vintages kept so we can
+# build a reference set at each fire's contemporaneous tract vintage.
 tract_sf <- bind_rows(
   read_sf(here('data/processed/tract_WHP_AK.geojson')) %>%
-    filter(substr(GEOID, 1, 2) == '02') %>%
-    filter(census_year == 2020),
+    filter(substr(GEOID, 1, 2) == '02'),
   read_sf(here('data/processed/tract_WHP_HI.geojson')) %>%
-    filter(substr(GEOID, 1, 2) == '15') %>%
-    filter(census_year == 2020),
+    filter(substr(GEOID, 1, 2) == '15'),
   read_sf(here('data/processed/tract_WHP_CONUS.geojson')) %>%
-    filter(!(substr(GEOID, 1, 2) %in% c('02', '15'))) %>%
-    filter(census_year == 2020)
+    filter(!(substr(GEOID, 1, 2) %in% c('02', '15')))
 )
 
-# Join tract-level population
+# Join tract-level population (most recent period per GEOID, ACS-preferred at
+# ties). Used only for pop > 0 filter before the whp quantile cut.
 tract_pop <- read_parquet(here('data/processed/nhgis/population.parquet')) %>%
   group_by(GEOID) %>%
   filter(start_year == max(start_year)) %>%
+  filter(end_year == max(end_year)) %>%
   ungroup() %>%
   select(GEOID, pop)
 
@@ -49,7 +52,8 @@ tract_sf <- tract_sf %>%
 # Regions + fire-region assignment
 regions <- read_sf(here('data/processed/regions.geojson'))
 wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson')) %>%
-  filter(wildfire_year < 2025)
+  filter(wildfire_year < 2025) %>%
+  filter(wildfire_community_intersect)
 
 wfbz_region <- wfbz %>%
   filter(!st_is_empty(geometry)) %>%
@@ -61,8 +65,10 @@ wfbz_region <- wfbz %>%
 ```
 
 ```{r high_risk_tracts}
-# Assign USFS regions to tracts; identify high-risk tracts
-# (>= 90th percentile of whp_mean within each region, unweighted)
+# Assign USFS regions to tracts (by nearest-feature on tract geometry), then
+# identify high-risk tracts per vintage: top 10% of whp_mean within each
+# (usfs_region, census_year) group. Keeping census_year lets us build a
+# reference set that matches each fire's contemporaneous tract vintage.
 tract_risk <- tract_sf %>%
   filter(!is.na(whp_mean), !is.na(pop), pop > 0) %>%
   mutate(
@@ -74,17 +80,30 @@ tract_risk <- tract_sf %>%
   st_drop_geometry()
 
 high_risk_tracts <- tract_risk %>%
-  distinct(GEOID, .keep_all = TRUE) %>%
-  group_by(usfs_region) %>%
+  group_by(usfs_region, census_year) %>%
   filter(whp_mean >= quantile(whp_mean, 0.9, na.rm = TRUE)) %>%
   ungroup() %>%
-  select(GEOID, usfs_region)
+  distinct(GEOID, census_year, usfs_region)
 
-high_risk_geoids <- high_risk_tracts$GEOID
+# Fire counts per (census_year, period) bin — used to weight the reference
+# composition so it matches the fire side's temporal mix. Same set of fires
+# joins every demographic, so one `_by_wf` is sufficient.
+fire_weights <- race_by_wf %>%
+  distinct(wildfire_id, census_year, period)
+
+fire_weights_overall <- fire_weights %>%
+  count(census_year, period, name = 'n_fires')
+
+fire_weights_reg <- fire_weights %>%
+  inner_join(wfbz_region, by = 'wildfire_id') %>%
+  bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  distinct(wildfire_id, usfs_region, census_year, period) %>%
+  count(usfs_region, census_year, period, name = 'n_fires')
 ```
 
 ```{r diverge_data}
-# Pool all years: fire-affected fracs
+# Fire-affected fracs: pool every (fire × nearby-tract-at-fire's-vintage ×
+# category) row, using contemporaneous census/ACS data per fire.
 fire_vehicle <- vehicle_avail_by_wf %>%
   summarize(
     frac = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
@@ -106,56 +125,46 @@ fire_housing <- housing_cost_by_wf %>%
   ) %>%
   mutate(stat = "Housing cost\nburdened")
 
-#fire_white <- race_by_wf %>%
-#  summarize(
-#    frac = sum(
-#      count[
-#        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
-#      ],
-#      na.rm = TRUE
-#    ) /
-#      sum(count, na.rm = TRUE)
-#  ) %>%
-#  mutate(stat = "Non-Hispanic White")
-
-# Reference population fracs: high-risk tracts (>= 90th pctl whp by region)
-most_recent_period <- function(dat) {
-  dat %>%
-    group_by(GEOID) %>%
-    filter(start_year == max(start_year)) %>%
-    ungroup()
-}
-
-pop_vehicle_all <- read_parquet(here(
-  'data/processed/nhgis/vehicle_avail.parquet'
-)) %>%
-  most_recent_period() %>%
-  filter(GEOID %in% high_risk_geoids) %>%
+# Reference population fracs: high-risk tracts at the same (census_year,
+# period) the fire side is pulling from. Each fire contributes its vintage's
+# full high-risk set once, via `fire_weights_overall`, so the reference is
+# period-matched to the fire side.
+pop_vehicle_all <- high_risk_tracts %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/vehicle_avail.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(fire_weights_overall, by = c('census_year', 'period')) %>%
   summarize(
-    frac_pop = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
-      sum(count, na.rm = TRUE)
+    frac_pop = sum(n_fires * count * (no_vehicle == TRUE), na.rm = TRUE) /
+      sum(n_fires * count, na.rm = TRUE)
   ) %>%
   mutate(stat = "No vehicle")
 
-pop_poverty_all <- read_parquet(here(
-  'data/processed/nhgis/poverty_lt_100.parquet'
-)) %>%
-  most_recent_period() %>%
-  filter(GEOID %in% high_risk_geoids) %>%
+pop_poverty_all <- high_risk_tracts %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(fire_weights_overall, by = c('census_year', 'period')) %>%
   summarize(
-    frac_pop = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
-      sum(count, na.rm = TRUE)
+    frac_pop = sum(n_fires * count * (poverty_lt_100 == TRUE), na.rm = TRUE) /
+      sum(n_fires * count, na.rm = TRUE)
   ) %>%
   mutate(stat = "Below poverty line")
 
-pop_housing_all <- read_parquet(here(
-  'data/processed/nhgis/housing_cost_burden.parquet'
-)) %>%
-  most_recent_period() %>%
-  filter(GEOID %in% high_risk_geoids) %>%
+pop_housing_all <- high_risk_tracts %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(fire_weights_overall, by = c('census_year', 'period')) %>%
   summarize(
-    frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
-      sum(count, na.rm = TRUE)
+    frac_pop = sum(n_fires * count * (cost_burdened == TRUE), na.rm = TRUE) /
+      sum(n_fires * count, na.rm = TRUE)
   ) %>%
   mutate(stat = "Housing cost\nburdened")
 
@@ -186,7 +195,7 @@ stat_order <- c(
   "NH AIAN, Asian,\nor Pacific Islander"
 )
 
-# Regional diverging data: fire side
+# Regional diverging data: fire side (pool of fire × tract × category rows)
 fire_vehicle_reg <- vehicle_avail_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
@@ -232,43 +241,61 @@ fire_housing_reg <- housing_cost_by_wf %>%
 #  ) %>%
 #  mutate(stat = "Non-Hispanic White")
 
-# Regional pop side: high-risk tracts per region
-pop_vehicle_reg <- read_parquet(here(
-  'data/processed/nhgis/vehicle_avail.parquet'
-)) %>%
-  most_recent_period() %>%
-  inner_join(high_risk_tracts, by = 'GEOID') %>%
+# Regional pop side: high-risk tracts per region, weighted by fires per
+# (usfs_region, census_year, period) so the reference matches the fire side's
+# region- and vintage-specific mix. 'Overall' is materialized on both sides
+# via the `bind_rows` above / fire_weights_reg construction.
+pop_vehicle_reg <- high_risk_tracts %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/vehicle_avail.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(
+    fire_weights_reg,
+    by = c('usfs_region', 'census_year', 'period')
+  ) %>%
   group_by(usfs_region) %>%
   summarize(
-    frac_pop = sum(count[no_vehicle == TRUE], na.rm = TRUE) /
-      sum(count, na.rm = TRUE)
+    frac_pop = sum(n_fires * count * (no_vehicle == TRUE), na.rm = TRUE) /
+      sum(n_fires * count, na.rm = TRUE)
   ) %>%
   mutate(stat = "No vehicle")
 
-pop_poverty_reg <- read_parquet(here(
-  'data/processed/nhgis/poverty_lt_100.parquet'
-)) %>%
-  most_recent_period() %>%
-  inner_join(high_risk_tracts, by = 'GEOID') %>%
+pop_poverty_reg <- high_risk_tracts %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/poverty_lt_100.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(
+    fire_weights_reg,
+    by = c('usfs_region', 'census_year', 'period')
+  ) %>%
   group_by(usfs_region) %>%
   summarize(
-    frac_pop = sum(count[poverty_lt_100 == TRUE], na.rm = TRUE) /
-      sum(count, na.rm = TRUE)
+    frac_pop = sum(n_fires * count * (poverty_lt_100 == TRUE), na.rm = TRUE) /
+      sum(n_fires * count, na.rm = TRUE)
   ) %>%
   mutate(stat = "Below poverty line")
 
-pop_housing_reg <- read_parquet(here(
-  'data/processed/nhgis/housing_cost_burden.parquet'
-)) %>%
-  most_recent_period() %>%
-  inner_join(high_risk_tracts, by = 'GEOID') %>%
+pop_housing_reg <- high_risk_tracts %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/housing_cost_burden.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(
+    fire_weights_reg,
+    by = c('usfs_region', 'census_year', 'period')
+  ) %>%
   group_by(usfs_region) %>%
   summarize(
-    frac_pop = sum(count[cost_burdened == TRUE], na.rm = TRUE) /
-      sum(count, na.rm = TRUE)
+    frac_pop = sum(n_fires * count * (cost_burdened == TRUE), na.rm = TRUE) /
+      sum(n_fires * count, na.rm = TRUE)
   ) %>%
   mutate(stat = "Housing cost\nburdened")
 
@@ -280,7 +307,7 @@ collapse_race <- function(df) {
         str_detect(race_group, "Black or African American") ~ "NH Black",
         str_detect(
           race_group,
-          "American Indian"
+          "American Indian|Asian|Pacific Islander|Native Hawaiian"
         ) ~ "NH AIAN, Asian,\nor Pacific Islander",
         str_detect(race_group, "Some Other Race") ~ "NH Other",
         str_detect(race_group, "White") ~ "NH White",
@@ -290,7 +317,7 @@ collapse_race <- function(df) {
     )
 }
 
-# National fire race
+# National fire race (pool of fire × tract × category rows)
 fire_race <- race_by_wf %>%
   mutate(
     race_group = if_else(
@@ -300,14 +327,19 @@ fire_race <- race_by_wf %>%
     )
   ) %>%
   group_by(race_group) %>%
-  summarize(
-    frac = sum(count, na.rm = TRUE) / sum(race_by_wf$count, na.rm = TRUE)
-  )
+  summarize(count = sum(count, na.rm = TRUE)) %>%
+  mutate(frac = count / sum(count)) %>%
+  select(race_group, frac)
 
-# National pop race
-pop_race <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
-  most_recent_period() %>%
-  filter(GEOID %in% high_risk_geoids) %>%
+# National pop race — high-risk tracts at fire-matched vintage/period,
+# weighted by n_fires per (census_year, period).
+pop_race <- high_risk_tracts %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/race.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(fire_weights_overall, by = c('census_year', 'period')) %>%
   mutate(
     race_group = if_else(
       ethnicity == "Hispanic or Latino",
@@ -316,7 +348,7 @@ pop_race <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
     )
   ) %>%
   group_by(race_group) %>%
-  summarize(count = sum(count, na.rm = TRUE)) %>%
+  summarize(count = sum(n_fires * count, na.rm = TRUE)) %>%
   mutate(frac_pop = count / sum(count)) %>%
   select(race_group, frac_pop)
 
@@ -326,7 +358,7 @@ diverge_race_national <- left_join(fire_race, pop_race, by = 'race_group') %>%
   summarize(frac = sum(frac), frac_pop = sum(frac_pop), .groups = 'drop') %>%
   mutate(diff = frac - frac_pop)
 
-# Regional fire race
+# Regional fire race (pool of fire × tract × category rows)
 fire_race_reg <- race_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
@@ -347,11 +379,19 @@ fire_race_reg <- race_by_wf %>%
   mutate(frac = frac / sum(frac)) %>%
   ungroup()
 
-# Regional pop race
-pop_race_reg <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
-  most_recent_period() %>%
-  inner_join(high_risk_tracts, by = 'GEOID') %>%
+# Regional pop race — high-risk tracts at fire-matched vintage/period,
+# weighted by n_fires per (usfs_region, census_year, period).
+pop_race_reg <- high_risk_tracts %>%
   bind_rows(., mutate(., usfs_region = 'Overall')) %>%
+  inner_join(
+    read_parquet(here('data/processed/nhgis/race.parquet')),
+    by = 'GEOID',
+    relationship = 'many-to-many'
+  ) %>%
+  inner_join(
+    fire_weights_reg,
+    by = c('usfs_region', 'census_year', 'period')
+  ) %>%
   mutate(
     race_group = if_else(
       ethnicity == "Hispanic or Latino",
@@ -361,7 +401,7 @@ pop_race_reg <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
   ) %>%
   collapse_race() %>%
   group_by(usfs_region, stat) %>%
-  summarize(count = sum(count, na.rm = TRUE), .groups = 'drop') %>%
+  summarize(count = sum(n_fires * count, na.rm = TRUE), .groups = 'drop') %>%
   group_by(usfs_region) %>%
   mutate(frac_pop = count / sum(count)) %>%
   ungroup() %>%
