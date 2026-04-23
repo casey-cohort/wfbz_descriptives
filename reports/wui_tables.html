@@ -136,8 +136,15 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#structures-destroyed-and-fatalities" id="toc-structures-destroyed-and-fatalities" class="nav-link active" data-scroll-target="#structures-destroyed-and-fatalities">Structures destroyed and fatalities</a></li>
+  <li><a href="#population-affected" id="toc-population-affected" class="nav-link" data-scroll-target="#population-affected">Population Affected</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -161,6 +168,11 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p>Important to note here that we don’t acually know where fatalities happened or structures were destoryed, so we can only categorize those by whether the wildfire burn zone itself occurred in the WUI.</p>
+<p>Population affected, however, is categorized by whether the population itself was in the WUI regarless of the fire’s designation.</p>
+<section id="structures-destroyed-and-fatalities" class="level2">
+<h2 class="anchored" data-anchor-id="structures-destroyed-and-fatalities">Structures destroyed and fatalities</h2>
+<p>Summarized according to whether fire was in WUI.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="lexxnmsodo" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
@@ -616,62 +628,338 @@ ul.task-list li input[type="checkbox"] {
 <table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <thead>
 <tr class="gt_col_headings header">
-<th id="wui_binary" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">wui_binary</th>
-<th id="numeric.mean" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.mean</th>
-<th id="numeric.sd" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.sd</th>
-<th id="numeric.p0" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p0</th>
-<th id="numeric.p25" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p25</th>
-<th id="numeric.p50" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p50</th>
-<th id="numeric.p75" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p75</th>
-<th id="numeric.p100" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p100</th>
+<th id="wildfire_wui" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">wildfire_wui</th>
+<th id="mean-wildfire_struct_destroyed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mean wildfire_struct_destroyed</th>
+<th id="SD-wildfire_struct_destroyed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">SD wildfire_struct_destroyed</th>
+<th id="a25th-pctl.-wildfire_struct_destroyed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">25th pctl. wildfire_struct_destroyed</th>
+<th id="median-wildfire_struct_destroyed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">median wildfire_struct_destroyed</th>
+<th id="a75th-pctl.-wildfire_struct_destroyed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">75th pctl. wildfire_struct_destroyed</th>
+<th id="mean-wildfire_civil_fatalities" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mean wildfire_civil_fatalities</th>
+<th id="SD-wildfire_civil_fatalities" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">SD wildfire_civil_fatalities</th>
+<th id="a25th-pctl.-wildfire_civil_fatalities" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">25th pctl. wildfire_civil_fatalities</th>
+<th id="median-wildfire_civil_fatalities" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">median wildfire_civil_fatalities</th>
+<th id="a75th-pctl.-wildfire_civil_fatalities" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">75th pctl. wildfire_civil_fatalities</th>
 </tr>
 </thead>
 <tbody class="gt_table_body">
 <tr class="gt_group_heading_row odd">
-<th colspan="8" id="wildfire_struct_destroyed" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">wildfire_struct_destroyed</th>
+<th colspan="11" id="Nationwide" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Nationwide</th>
 </tr>
 <tr class="gt_row_group_first even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">27.3426901</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">363.925290</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">4</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">18804</td>
+<td class="gt_row gt_left" headers="Nationwide  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Nationwide  mean wildfire_struct_destroyed">27.342690</td>
+<td class="gt_row gt_right" headers="Nationwide  SD wildfire_struct_destroyed">363.925290</td>
+<td class="gt_row gt_right" headers="Nationwide  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Nationwide  median wildfire_struct_destroyed">2</td>
+<td class="gt_row gt_right" headers="Nationwide  75th pctl. wildfire_struct_destroyed">4.00</td>
+<td class="gt_row gt_right" headers="Nationwide  mean wildfire_civil_fatalities">2.06818182</td>
+<td class="gt_row gt_right" headers="Nationwide  SD wildfire_civil_fatalities">9.9803183</td>
+<td class="gt_row gt_right" headers="Nationwide  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Nationwide  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Nationwide  75th pctl. wildfire_civil_fatalities">1.00</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">3.0693669</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">9.788082</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">200</td>
+<td class="gt_row gt_left" headers="Nationwide  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Nationwide  mean wildfire_struct_destroyed">3.069367</td>
+<td class="gt_row gt_right" headers="Nationwide  SD wildfire_struct_destroyed">9.788082</td>
+<td class="gt_row gt_right" headers="Nationwide  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Nationwide  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Nationwide  75th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Nationwide  mean wildfire_civil_fatalities">0.35211268</td>
+<td class="gt_row gt_right" headers="Nationwide  SD wildfire_civil_fatalities">0.5371510</td>
+<td class="gt_row gt_right" headers="Nationwide  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Nationwide  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Nationwide  75th pctl. wildfire_civil_fatalities">1.00</td>
 </tr>
 <tr class="gt_group_heading_row even">
-<th colspan="8" id="wildfire_civil_fatalities" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">wildfire_civil_fatalities</th>
+<th colspan="11" id="California" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">California</th>
 </tr>
 <tr class="gt_row_group_first odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">2.0681818</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">9.980318</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">98</td>
+<td class="gt_row gt_left" headers="California  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="California  mean wildfire_struct_destroyed">120.541301</td>
+<td class="gt_row gt_right" headers="California  SD wildfire_struct_destroyed">875.736735</td>
+<td class="gt_row gt_right" headers="California  25th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="California  median wildfire_struct_destroyed">6</td>
+<td class="gt_row gt_right" headers="California  75th pctl. wildfire_struct_destroyed">29.00</td>
+<td class="gt_row gt_right" headers="California  mean wildfire_civil_fatalities">1.64444444</td>
+<td class="gt_row gt_right" headers="California  SD wildfire_civil_fatalities">7.7666208</td>
+<td class="gt_row gt_right" headers="California  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="California  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="California  75th pctl. wildfire_civil_fatalities">1.00</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.3521127</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.537151</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">2</td>
+<td class="gt_row gt_left" headers="California  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="California  mean wildfire_struct_destroyed">5.593886</td>
+<td class="gt_row gt_right" headers="California  SD wildfire_struct_destroyed">14.425433</td>
+<td class="gt_row gt_right" headers="California  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="California  median wildfire_struct_destroyed">2</td>
+<td class="gt_row gt_right" headers="California  75th pctl. wildfire_struct_destroyed">4.00</td>
+<td class="gt_row gt_right" headers="California  mean wildfire_civil_fatalities">0.04761905</td>
+<td class="gt_row gt_right" headers="California  SD wildfire_civil_fatalities">0.2155403</td>
+<td class="gt_row gt_right" headers="California  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="California  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="California  75th pctl. wildfire_civil_fatalities">0.00</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="11" id="Southern" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Southern</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Southern  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Southern  mean wildfire_struct_destroyed">5.804968</td>
+<td class="gt_row gt_right" headers="Southern  SD wildfire_struct_destroyed">47.177327</td>
+<td class="gt_row gt_right" headers="Southern  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Southern  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Southern  75th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Southern  mean wildfire_civil_fatalities">1.38888889</td>
+<td class="gt_row gt_right" headers="Southern  SD wildfire_civil_fatalities">2.1182370</td>
+<td class="gt_row gt_right" headers="Southern  25th pctl. wildfire_civil_fatalities">0.25</td>
+<td class="gt_row gt_right" headers="Southern  median wildfire_civil_fatalities">1.0</td>
+<td class="gt_row gt_right" headers="Southern  75th pctl. wildfire_civil_fatalities">1.00</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Southern  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Southern  mean wildfire_struct_destroyed">2.447546</td>
+<td class="gt_row gt_right" headers="Southern  SD wildfire_struct_destroyed">9.601847</td>
+<td class="gt_row gt_right" headers="Southern  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Southern  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Southern  75th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Southern  mean wildfire_civil_fatalities">0.90000000</td>
+<td class="gt_row gt_right" headers="Southern  SD wildfire_civil_fatalities">0.3162278</td>
+<td class="gt_row gt_right" headers="Southern  25th pctl. wildfire_civil_fatalities">1.00</td>
+<td class="gt_row gt_right" headers="Southern  median wildfire_civil_fatalities">1.0</td>
+<td class="gt_row gt_right" headers="Southern  75th pctl. wildfire_civil_fatalities">1.00</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="11" id="Alaska" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Alaska</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Alaska  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Alaska  mean wildfire_struct_destroyed">29.000000</td>
+<td class="gt_row gt_right" headers="Alaska  SD wildfire_struct_destroyed">NA</td>
+<td class="gt_row gt_right" headers="Alaska  25th pctl. wildfire_struct_destroyed">29.00</td>
+<td class="gt_row gt_right" headers="Alaska  median wildfire_struct_destroyed">29</td>
+<td class="gt_row gt_right" headers="Alaska  75th pctl. wildfire_struct_destroyed">29.00</td>
+<td class="gt_row gt_right" headers="Alaska  mean wildfire_civil_fatalities">NaN</td>
+<td class="gt_row gt_right" headers="Alaska  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Alaska  25th pctl. wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Alaska  median wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Alaska  75th pctl. wildfire_civil_fatalities">NA</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Alaska  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Alaska  mean wildfire_struct_destroyed">11.343750</td>
+<td class="gt_row gt_right" headers="Alaska  SD wildfire_struct_destroyed">24.989816</td>
+<td class="gt_row gt_right" headers="Alaska  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Alaska  median wildfire_struct_destroyed">2</td>
+<td class="gt_row gt_right" headers="Alaska  75th pctl. wildfire_struct_destroyed">6.50</td>
+<td class="gt_row gt_right" headers="Alaska  mean wildfire_civil_fatalities">0.00000000</td>
+<td class="gt_row gt_right" headers="Alaska  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Alaska  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Alaska  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Alaska  75th pctl. wildfire_civil_fatalities">0.00</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="11" id="Southern Rockies" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Southern Rockies</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Southern Rockies  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Southern Rockies  mean wildfire_struct_destroyed">22.870968</td>
+<td class="gt_row gt_right" headers="Southern Rockies  SD wildfire_struct_destroyed">73.252983</td>
+<td class="gt_row gt_right" headers="Southern Rockies  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  median wildfire_struct_destroyed">3</td>
+<td class="gt_row gt_right" headers="Southern Rockies  75th pctl. wildfire_struct_destroyed">13.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  mean wildfire_civil_fatalities">0.33333333</td>
+<td class="gt_row gt_right" headers="Southern Rockies  SD wildfire_civil_fatalities">0.5773503</td>
+<td class="gt_row gt_right" headers="Southern Rockies  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Southern Rockies  75th pctl. wildfire_civil_fatalities">0.50</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Southern Rockies  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Southern Rockies  mean wildfire_struct_destroyed">3.147541</td>
+<td class="gt_row gt_right" headers="Southern Rockies  SD wildfire_struct_destroyed">5.479748</td>
+<td class="gt_row gt_right" headers="Southern Rockies  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  median wildfire_struct_destroyed">2</td>
+<td class="gt_row gt_right" headers="Southern Rockies  75th pctl. wildfire_struct_destroyed">3.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  mean wildfire_civil_fatalities">2.00000000</td>
+<td class="gt_row gt_right" headers="Southern Rockies  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Southern Rockies  25th pctl. wildfire_civil_fatalities">2.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  median wildfire_civil_fatalities">2.0</td>
+<td class="gt_row gt_right" headers="Southern Rockies  75th pctl. wildfire_civil_fatalities">2.00</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="11" id="Southwestern" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Southwestern</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Southwestern  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Southwestern  mean wildfire_struct_destroyed">17.231579</td>
+<td class="gt_row gt_right" headers="Southwestern  SD wildfire_struct_destroyed">49.028531</td>
+<td class="gt_row gt_right" headers="Southwestern  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Southwestern  median wildfire_struct_destroyed">3</td>
+<td class="gt_row gt_right" headers="Southwestern  75th pctl. wildfire_struct_destroyed">10.00</td>
+<td class="gt_row gt_right" headers="Southwestern  mean wildfire_civil_fatalities">NaN</td>
+<td class="gt_row gt_right" headers="Southwestern  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Southwestern  25th pctl. wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Southwestern  median wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Southwestern  75th pctl. wildfire_civil_fatalities">NA</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Southwestern  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Southwestern  mean wildfire_struct_destroyed">2.653333</td>
+<td class="gt_row gt_right" headers="Southwestern  SD wildfire_struct_destroyed">7.518434</td>
+<td class="gt_row gt_right" headers="Southwestern  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Southwestern  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Southwestern  75th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Southwestern  mean wildfire_civil_fatalities">0.00000000</td>
+<td class="gt_row gt_right" headers="Southwestern  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Southwestern  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Southwestern  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Southwestern  75th pctl. wildfire_civil_fatalities">0.00</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="11" id="Northern Rockies" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Northern Rockies</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Northern Rockies  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Northern Rockies  mean wildfire_struct_destroyed">11.073171</td>
+<td class="gt_row gt_right" headers="Northern Rockies  SD wildfire_struct_destroyed">19.491550</td>
+<td class="gt_row gt_right" headers="Northern Rockies  25th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Northern Rockies  median wildfire_struct_destroyed">4</td>
+<td class="gt_row gt_right" headers="Northern Rockies  75th pctl. wildfire_struct_destroyed">11.50</td>
+<td class="gt_row gt_right" headers="Northern Rockies  mean wildfire_civil_fatalities">NaN</td>
+<td class="gt_row gt_right" headers="Northern Rockies  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Northern Rockies  25th pctl. wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Northern Rockies  median wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Northern Rockies  75th pctl. wildfire_civil_fatalities">NA</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Northern Rockies  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Northern Rockies  mean wildfire_struct_destroyed">3.252033</td>
+<td class="gt_row gt_right" headers="Northern Rockies  SD wildfire_struct_destroyed">4.963132</td>
+<td class="gt_row gt_right" headers="Northern Rockies  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Northern Rockies  median wildfire_struct_destroyed">2</td>
+<td class="gt_row gt_right" headers="Northern Rockies  75th pctl. wildfire_struct_destroyed">3.00</td>
+<td class="gt_row gt_right" headers="Northern Rockies  mean wildfire_civil_fatalities">NaN</td>
+<td class="gt_row gt_right" headers="Northern Rockies  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Northern Rockies  25th pctl. wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Northern Rockies  median wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Northern Rockies  75th pctl. wildfire_civil_fatalities">NA</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="11" id="Intermountain" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Intermountain</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Intermountain  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Intermountain  mean wildfire_struct_destroyed">11.253731</td>
+<td class="gt_row gt_right" headers="Intermountain  SD wildfire_struct_destroyed">34.661128</td>
+<td class="gt_row gt_right" headers="Intermountain  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Intermountain  median wildfire_struct_destroyed">3</td>
+<td class="gt_row gt_right" headers="Intermountain  75th pctl. wildfire_struct_destroyed">8.75</td>
+<td class="gt_row gt_right" headers="Intermountain  mean wildfire_civil_fatalities">0.33333333</td>
+<td class="gt_row gt_right" headers="Intermountain  SD wildfire_civil_fatalities">0.5773503</td>
+<td class="gt_row gt_right" headers="Intermountain  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Intermountain  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Intermountain  75th pctl. wildfire_civil_fatalities">0.50</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Intermountain  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Intermountain  mean wildfire_struct_destroyed">3.447205</td>
+<td class="gt_row gt_right" headers="Intermountain  SD wildfire_struct_destroyed">8.329841</td>
+<td class="gt_row gt_right" headers="Intermountain  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Intermountain  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Intermountain  75th pctl. wildfire_struct_destroyed">3.00</td>
+<td class="gt_row gt_right" headers="Intermountain  mean wildfire_civil_fatalities">1.50000000</td>
+<td class="gt_row gt_right" headers="Intermountain  SD wildfire_civil_fatalities">0.7071068</td>
+<td class="gt_row gt_right" headers="Intermountain  25th pctl. wildfire_civil_fatalities">1.25</td>
+<td class="gt_row gt_right" headers="Intermountain  median wildfire_civil_fatalities">1.5</td>
+<td class="gt_row gt_right" headers="Intermountain  75th pctl. wildfire_civil_fatalities">1.75</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="11" id="Pacific Northwest" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Pacific Northwest</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Pacific Northwest  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  mean wildfire_struct_destroyed">20.154321</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  SD wildfire_struct_destroyed">61.381059</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  25th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  median wildfire_struct_destroyed">4</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  75th pctl. wildfire_struct_destroyed">12.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  mean wildfire_civil_fatalities">1.25000000</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  SD wildfire_civil_fatalities">0.5000000</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  25th pctl. wildfire_civil_fatalities">1.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  median wildfire_civil_fatalities">1.0</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  75th pctl. wildfire_civil_fatalities">1.25</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Pacific Northwest  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  mean wildfire_struct_destroyed">4.115385</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  SD wildfire_struct_destroyed">12.248485</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  median wildfire_struct_destroyed">2</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  75th pctl. wildfire_struct_destroyed">4.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  mean wildfire_civil_fatalities">0.28571429</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  SD wildfire_civil_fatalities">0.4879500</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  25th pctl. wildfire_civil_fatalities">0.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  median wildfire_civil_fatalities">0.0</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  75th pctl. wildfire_civil_fatalities">0.50</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="11" id="Eastern" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Eastern</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Eastern  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Eastern  mean wildfire_struct_destroyed">4.048433</td>
+<td class="gt_row gt_right" headers="Eastern  SD wildfire_struct_destroyed">19.228563</td>
+<td class="gt_row gt_right" headers="Eastern  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Eastern  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Eastern  75th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Eastern  mean wildfire_civil_fatalities">1.00000000</td>
+<td class="gt_row gt_right" headers="Eastern  SD wildfire_civil_fatalities">0.0000000</td>
+<td class="gt_row gt_right" headers="Eastern  25th pctl. wildfire_civil_fatalities">1.00</td>
+<td class="gt_row gt_right" headers="Eastern  median wildfire_civil_fatalities">1.0</td>
+<td class="gt_row gt_right" headers="Eastern  75th pctl. wildfire_civil_fatalities">1.00</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Eastern  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Eastern  mean wildfire_struct_destroyed">1.673004</td>
+<td class="gt_row gt_right" headers="Eastern  SD wildfire_struct_destroyed">2.047041</td>
+<td class="gt_row gt_right" headers="Eastern  25th pctl. wildfire_struct_destroyed">1.00</td>
+<td class="gt_row gt_right" headers="Eastern  median wildfire_struct_destroyed">1</td>
+<td class="gt_row gt_right" headers="Eastern  75th pctl. wildfire_struct_destroyed">2.00</td>
+<td class="gt_row gt_right" headers="Eastern  mean wildfire_civil_fatalities">1.00000000</td>
+<td class="gt_row gt_right" headers="Eastern  SD wildfire_civil_fatalities">0.0000000</td>
+<td class="gt_row gt_right" headers="Eastern  25th pctl. wildfire_civil_fatalities">1.00</td>
+<td class="gt_row gt_right" headers="Eastern  median wildfire_civil_fatalities">1.0</td>
+<td class="gt_row gt_right" headers="Eastern  75th pctl. wildfire_civil_fatalities">1.00</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="11" id="Hawaii" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Hawaii</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Hawaii  wildfire_wui">WUI</td>
+<td class="gt_row gt_right" headers="Hawaii  mean wildfire_struct_destroyed">233.700000</td>
+<td class="gt_row gt_right" headers="Hawaii  SD wildfire_struct_destroyed">720.779832</td>
+<td class="gt_row gt_right" headers="Hawaii  25th pctl. wildfire_struct_destroyed">2.25</td>
+<td class="gt_row gt_right" headers="Hawaii  median wildfire_struct_destroyed">3</td>
+<td class="gt_row gt_right" headers="Hawaii  75th pctl. wildfire_struct_destroyed">12.50</td>
+<td class="gt_row gt_right" headers="Hawaii  mean wildfire_civil_fatalities">98.00000000</td>
+<td class="gt_row gt_right" headers="Hawaii  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  25th pctl. wildfire_civil_fatalities">98.00</td>
+<td class="gt_row gt_right" headers="Hawaii  median wildfire_civil_fatalities">98.0</td>
+<td class="gt_row gt_right" headers="Hawaii  75th pctl. wildfire_civil_fatalities">98.00</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Hawaii  wildfire_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Hawaii  mean wildfire_struct_destroyed">NaN</td>
+<td class="gt_row gt_right" headers="Hawaii  SD wildfire_struct_destroyed">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  25th pctl. wildfire_struct_destroyed">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  median wildfire_struct_destroyed">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  75th pctl. wildfire_struct_destroyed">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  mean wildfire_civil_fatalities">NaN</td>
+<td class="gt_row gt_right" headers="Hawaii  SD wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  25th pctl. wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  median wildfire_civil_fatalities">NA</td>
+<td class="gt_row gt_right" headers="Hawaii  75th pctl. wildfire_civil_fatalities">NA</td>
 </tr>
 </tbody>
 </table>
@@ -679,6 +967,10 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
+</section>
+<section id="population-affected" class="level2">
+<h2 class="anchored" data-anchor-id="population-affected">Population Affected</h2>
+<p>All community-intersecting fires regardless of WFBZ’s WUI designation.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="cqwtexfqki" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
@@ -1134,552 +1426,223 @@ ul.task-list li input[type="checkbox"] {
 <table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
 <thead>
 <tr class="gt_col_headings header">
-<th id="usfs_region" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">usfs_region</th>
-<th id="wui_binary" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">wui_binary</th>
-<th id="numeric.mean" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.mean</th>
-<th id="numeric.sd" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.sd</th>
-<th id="numeric.p0" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p0</th>
-<th id="numeric.p25" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p25</th>
-<th id="numeric.p50" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p50</th>
-<th id="numeric.p75" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p75</th>
-<th id="numeric.p100" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">numeric.p100</th>
-<th id="plot_order" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">plot_order</th>
+<th id="pop_wui" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">pop_wui</th>
+<th id="mean-Pop.-exposed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mean Pop. exposed</th>
+<th id="SD-Pop.-exposed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">SD Pop. exposed</th>
+<th id="a25th-pctl.-Pop.-exposed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">25th pctl. Pop. exposed</th>
+<th id="median-Pop.-exposed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">median Pop. exposed</th>
+<th id="a75th-pctl.-Pop.-exposed" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">75th pctl. Pop. exposed</th>
 </tr>
 </thead>
 <tbody class="gt_table_body">
 <tr class="gt_group_heading_row odd">
-<th colspan="10" id="wildfire_struct_destroyed" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">wildfire_struct_destroyed</th>
+<th colspan="6" id="Nationwide" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Nationwide</th>
 </tr>
 <tr class="gt_row_group_first even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">California</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">120.54130053</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">875.7367354</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">6.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">29.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">18804</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">10</td>
+<td class="gt_row gt_left" headers="Nationwide  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Nationwide  mean Pop. exposed">7428.7591</td>
+<td class="gt_row gt_right" headers="Nationwide  SD Pop. exposed">46391.003</td>
+<td class="gt_row gt_right" headers="Nationwide  25th pctl. Pop. exposed">222.00</td>
+<td class="gt_row gt_right" headers="Nationwide  median Pop. exposed">478.5</td>
+<td class="gt_row gt_right" headers="Nationwide  75th pctl. Pop. exposed">834.75</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">California</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">5.59388646</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">14.4254331</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">4.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">135</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">10</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Southern</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">5.80496829</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">47.1773269</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">1669</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">9</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Southern</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">2.44754572</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">9.6018469</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">200</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">9</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Alaska</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">29.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">29</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">29.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">29.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">29.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">29</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">8</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Alaska</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">11.34375000</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">24.9898165</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">6.50</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">109</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">8</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Southern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">22.87096774</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">73.2529827</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">3.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">13.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">509</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">7</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Southern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">3.14754098</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">5.4797480</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">3.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">50</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">7</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Southwestern</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">17.23157895</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">49.0285311</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">3.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">10.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">322</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">6</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Southwestern</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">2.65333333</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">7.5184338</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">64</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">6</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Northern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">11.07317073</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">19.4915496</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">4.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">11.50</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">150</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">5</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Northern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">3.25203252</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">4.9631321</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">3.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">36</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">5</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Intermountain</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">11.25373134</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">34.6611278</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">3.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">8.75</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">363</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">4</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Intermountain</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">3.44720497</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">8.3298414</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">3.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">81</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">4</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Pacific Northwest</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">20.15432099</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">61.3810591</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">4.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">12.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">600</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">3</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Pacific Northwest</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">4.11538462</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">12.2484853</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">4.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">123</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">3</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Eastern</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">4.04843305</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">19.2285633</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">332</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">2</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Eastern</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">1.67300380</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">2.0470406</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">24</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">2</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Hawaii</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">233.70000000</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">720.7798323</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">1</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">2.25</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">3.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">12.50</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">2285</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">1</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Hawaii</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">NaN</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">NA</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">1</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Nationwide</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">27.34269006</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">363.9252903</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">4.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">18804</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">NA</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  usfs_region">Nationwide</td>
-<td class="gt_row gt_left" headers="wildfire_struct_destroyed  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.mean">3.06936685</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.sd">9.7880821</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  numeric.p100">200</td>
-<td class="gt_row gt_right" headers="wildfire_struct_destroyed  plot_order">NA</td>
+<td class="gt_row gt_left" headers="Nationwide  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Nationwide  mean Pop. exposed">16059.2871</td>
+<td class="gt_row gt_right" headers="Nationwide  SD Pop. exposed">38346.667</td>
+<td class="gt_row gt_right" headers="Nationwide  25th pctl. Pop. exposed">991.25</td>
+<td class="gt_row gt_right" headers="Nationwide  median Pop. exposed">4173.5</td>
+<td class="gt_row gt_right" headers="Nationwide  75th pctl. Pop. exposed">12756.50</td>
 </tr>
 <tr class="gt_group_heading_row even">
-<th colspan="10" id="wildfire_civil_fatalities" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">wildfire_civil_fatalities</th>
+<th colspan="6" id="California" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">California</th>
 </tr>
 <tr class="gt_row_group_first odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">California</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">1.64444444</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">7.7666208</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">85</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">10</td>
+<td class="gt_row gt_left" headers="California  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="California  mean Pop. exposed">36226.4253</td>
+<td class="gt_row gt_right" headers="California  SD Pop. exposed">112157.516</td>
+<td class="gt_row gt_right" headers="California  25th pctl. Pop. exposed">217.25</td>
+<td class="gt_row gt_right" headers="California  median Pop. exposed">513.0</td>
+<td class="gt_row gt_right" headers="California  75th pctl. Pop. exposed">6908.75</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">California</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.04761905</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.2155403</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">10</td>
+<td class="gt_row gt_left" headers="California  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="California  mean Pop. exposed">43975.4361</td>
+<td class="gt_row gt_right" headers="California  SD Pop. exposed">81406.020</td>
+<td class="gt_row gt_right" headers="California  25th pctl. Pop. exposed">1212.75</td>
+<td class="gt_row gt_right" headers="California  median Pop. exposed">7956.0</td>
+<td class="gt_row gt_right" headers="California  75th pctl. Pop. exposed">47590.25</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="6" id="Southern" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Southern</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Southern  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Southern  mean Pop. exposed">2574.1226</td>
+<td class="gt_row gt_right" headers="Southern  SD Pop. exposed">15160.546</td>
+<td class="gt_row gt_right" headers="Southern  25th pctl. Pop. exposed">325.00</td>
+<td class="gt_row gt_right" headers="Southern  median Pop. exposed">537.5</td>
+<td class="gt_row gt_right" headers="Southern  75th pctl. Pop. exposed">827.75</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Southern</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">1.38888889</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">2.1182370</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.25</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">8</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">9</td>
+<td class="gt_row gt_left" headers="Southern  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Southern  mean Pop. exposed">12883.7538</td>
+<td class="gt_row gt_right" headers="Southern  SD Pop. exposed">21344.184</td>
+<td class="gt_row gt_right" headers="Southern  25th pctl. Pop. exposed">2047.50</td>
+<td class="gt_row gt_right" headers="Southern  median Pop. exposed">5328.5</td>
+<td class="gt_row gt_right" headers="Southern  75th pctl. Pop. exposed">12872.75</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="6" id="Alaska" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Alaska</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Alaska  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Alaska  mean Pop. exposed">1191.8333</td>
+<td class="gt_row gt_right" headers="Alaska  SD Pop. exposed">2190.128</td>
+<td class="gt_row gt_right" headers="Alaska  25th pctl. Pop. exposed">111.50</td>
+<td class="gt_row gt_right" headers="Alaska  median Pop. exposed">642.5</td>
+<td class="gt_row gt_right" headers="Alaska  75th pctl. Pop. exposed">1012.50</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Southern</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.90000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.3162278</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">9</td>
+<td class="gt_row gt_left" headers="Alaska  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Alaska  mean Pop. exposed">463.8611</td>
+<td class="gt_row gt_right" headers="Alaska  SD Pop. exposed">1117.215</td>
+<td class="gt_row gt_right" headers="Alaska  25th pctl. Pop. exposed">0.00</td>
+<td class="gt_row gt_right" headers="Alaska  median Pop. exposed">28.0</td>
+<td class="gt_row gt_right" headers="Alaska  75th pctl. Pop. exposed">207.00</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="6" id="Southern Rockies" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Southern Rockies</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Southern Rockies  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Southern Rockies  mean Pop. exposed">2752.1434</td>
+<td class="gt_row gt_right" headers="Southern Rockies  SD Pop. exposed">13127.692</td>
+<td class="gt_row gt_right" headers="Southern Rockies  25th pctl. Pop. exposed">114.00</td>
+<td class="gt_row gt_right" headers="Southern Rockies  median Pop. exposed">256.0</td>
+<td class="gt_row gt_right" headers="Southern Rockies  75th pctl. Pop. exposed">593.00</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Alaska</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">NaN</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">8</td>
+<td class="gt_row gt_left" headers="Southern Rockies  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Southern Rockies  mean Pop. exposed">7335.8172</td>
+<td class="gt_row gt_right" headers="Southern Rockies  SD Pop. exposed">21530.834</td>
+<td class="gt_row gt_right" headers="Southern Rockies  25th pctl. Pop. exposed">81.50</td>
+<td class="gt_row gt_right" headers="Southern Rockies  median Pop. exposed">796.0</td>
+<td class="gt_row gt_right" headers="Southern Rockies  75th pctl. Pop. exposed">4193.50</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="6" id="Southwestern" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Southwestern</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Southwestern  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Southwestern  mean Pop. exposed">5495.0829</td>
+<td class="gt_row gt_right" headers="Southwestern  SD Pop. exposed">26365.236</td>
+<td class="gt_row gt_right" headers="Southwestern  25th pctl. Pop. exposed">67.00</td>
+<td class="gt_row gt_right" headers="Southwestern  median Pop. exposed">138.0</td>
+<td class="gt_row gt_right" headers="Southwestern  75th pctl. Pop. exposed">351.00</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Alaska</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">8</td>
+<td class="gt_row gt_left" headers="Southwestern  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Southwestern  mean Pop. exposed">8403.9078</td>
+<td class="gt_row gt_right" headers="Southwestern  SD Pop. exposed">17340.884</td>
+<td class="gt_row gt_right" headers="Southwestern  25th pctl. Pop. exposed">167.00</td>
+<td class="gt_row gt_right" headers="Southwestern  median Pop. exposed">1124.0</td>
+<td class="gt_row gt_right" headers="Southwestern  75th pctl. Pop. exposed">8149.00</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="6" id="Northern Rockies" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Northern Rockies</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Northern Rockies  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Northern Rockies  mean Pop. exposed">542.4914</td>
+<td class="gt_row gt_right" headers="Northern Rockies  SD Pop. exposed">2421.211</td>
+<td class="gt_row gt_right" headers="Northern Rockies  25th pctl. Pop. exposed">64.25</td>
+<td class="gt_row gt_right" headers="Northern Rockies  median Pop. exposed">168.5</td>
+<td class="gt_row gt_right" headers="Northern Rockies  75th pctl. Pop. exposed">362.25</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Southern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.33333333</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.5773503</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">0.50</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">7</td>
+<td class="gt_row gt_left" headers="Northern Rockies  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Northern Rockies  mean Pop. exposed">2782.3017</td>
+<td class="gt_row gt_right" headers="Northern Rockies  SD Pop. exposed">8111.028</td>
+<td class="gt_row gt_right" headers="Northern Rockies  25th pctl. Pop. exposed">30.00</td>
+<td class="gt_row gt_right" headers="Northern Rockies  median Pop. exposed">297.0</td>
+<td class="gt_row gt_right" headers="Northern Rockies  75th pctl. Pop. exposed">1870.75</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="6" id="Intermountain" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Intermountain</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Intermountain  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Intermountain  mean Pop. exposed">5497.8994</td>
+<td class="gt_row gt_right" headers="Intermountain  SD Pop. exposed">32189.943</td>
+<td class="gt_row gt_right" headers="Intermountain  25th pctl. Pop. exposed">33.25</td>
+<td class="gt_row gt_right" headers="Intermountain  median Pop. exposed">94.0</td>
+<td class="gt_row gt_right" headers="Intermountain  75th pctl. Pop. exposed">314.00</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Southern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">2.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">2</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">2.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">2.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">2</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">7</td>
+<td class="gt_row gt_left" headers="Intermountain  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Intermountain  mean Pop. exposed">12245.3047</td>
+<td class="gt_row gt_right" headers="Intermountain  SD Pop. exposed">28641.489</td>
+<td class="gt_row gt_right" headers="Intermountain  25th pctl. Pop. exposed">35.25</td>
+<td class="gt_row gt_right" headers="Intermountain  median Pop. exposed">656.0</td>
+<td class="gt_row gt_right" headers="Intermountain  75th pctl. Pop. exposed">9398.50</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="6" id="Pacific Northwest" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Pacific Northwest</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Pacific Northwest  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  mean Pop. exposed">2133.6420</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  SD Pop. exposed">12040.217</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  25th pctl. Pop. exposed">155.00</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  median Pop. exposed">318.5</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  75th pctl. Pop. exposed">623.00</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Southwestern</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">NaN</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">6</td>
+<td class="gt_row gt_left" headers="Pacific Northwest  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  mean Pop. exposed">8497.2131</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  SD Pop. exposed">22433.027</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  25th pctl. Pop. exposed">312.25</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  median Pop. exposed">1477.5</td>
+<td class="gt_row gt_right" headers="Pacific Northwest  75th pctl. Pop. exposed">6699.00</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<th colspan="6" id="Eastern" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Eastern</th>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_left" headers="Eastern  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Eastern  mean Pop. exposed">2588.8576</td>
+<td class="gt_row gt_right" headers="Eastern  SD Pop. exposed">21887.126</td>
+<td class="gt_row gt_right" headers="Eastern  25th pctl. Pop. exposed">420.00</td>
+<td class="gt_row gt_right" headers="Eastern  median Pop. exposed">639.5</td>
+<td class="gt_row gt_right" headers="Eastern  75th pctl. Pop. exposed">898.50</td>
 </tr>
 <tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Southwestern</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">6</td>
+<td class="gt_row gt_left" headers="Eastern  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Eastern  mean Pop. exposed">12191.8777</td>
+<td class="gt_row gt_right" headers="Eastern  SD Pop. exposed">23969.993</td>
+<td class="gt_row gt_right" headers="Eastern  25th pctl. Pop. exposed">1362.25</td>
+<td class="gt_row gt_right" headers="Eastern  median Pop. exposed">4115.0</td>
+<td class="gt_row gt_right" headers="Eastern  75th pctl. Pop. exposed">11871.25</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="6" id="Hawaii" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Hawaii</th>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_left" headers="Hawaii  pop_wui">WUI</td>
+<td class="gt_row gt_right" headers="Hawaii  mean Pop. exposed">4031.2778</td>
+<td class="gt_row gt_right" headers="Hawaii  SD Pop. exposed">10480.112</td>
+<td class="gt_row gt_right" headers="Hawaii  25th pctl. Pop. exposed">431.50</td>
+<td class="gt_row gt_right" headers="Hawaii  median Pop. exposed">851.0</td>
+<td class="gt_row gt_right" headers="Hawaii  75th pctl. Pop. exposed">1961.00</td>
 </tr>
 <tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Northern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">NaN</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">5</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Northern Rockies</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">NaN</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">5</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Intermountain</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.33333333</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.5773503</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">0.50</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">4</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Intermountain</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">1.50000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.7071068</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">1.25</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">1.5</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.75</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">2</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">4</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Pacific Northwest</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">1.25000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.5000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.25</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">2</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">3</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Pacific Northwest</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.28571429</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.4879500</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">0.50</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">3</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Eastern</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">1.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.0000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">2</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Eastern</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">1.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.0000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">1.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">1</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">2</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Hawaii</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">98.00000000</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">98</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">98.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">98.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">98.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">98</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">1</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Hawaii</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">NaN</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">NA</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">1</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Nationwide</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">Non-WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">2.06818182</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">9.9803183</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">98</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">NA</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  usfs_region">Nationwide</td>
-<td class="gt_row gt_left" headers="wildfire_civil_fatalities  wui_binary">WUI</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.mean">0.35211268</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.sd">0.5371510</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p0">0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p25">0.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p50">0.0</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p75">1.00</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  numeric.p100">2</td>
-<td class="gt_row gt_right" headers="wildfire_civil_fatalities  plot_order">NA</td>
+<td class="gt_row gt_left" headers="Hawaii  pop_wui">non-WUI</td>
+<td class="gt_row gt_right" headers="Hawaii  mean Pop. exposed">49361.5000</td>
+<td class="gt_row gt_right" headers="Hawaii  SD Pop. exposed">56802.275</td>
+<td class="gt_row gt_right" headers="Hawaii  25th pctl. Pop. exposed">12723.75</td>
+<td class="gt_row gt_right" headers="Hawaii  median Pop. exposed">22157.0</td>
+<td class="gt_row gt_right" headers="Hawaii  75th pctl. Pop. exposed">73367.00</td>
 </tr>
 </tbody>
 </table>
@@ -1689,6 +1652,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
