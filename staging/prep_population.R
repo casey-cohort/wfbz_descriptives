@@ -498,7 +498,7 @@ if (!all(file_exists(census_parquets))) {
   walk(
     names(all_long_processed),
     ~ write_parquet(
-      all_long_processed[[.x]],
+      all_long_processed[[.x]] %>% filter(!(period == '2020')), # drop 2020 census in favor of ACS
       here('data/processed/nhgis/', paste0(.x, '.parquet'))
     )
   )
