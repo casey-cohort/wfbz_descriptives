@@ -140,9 +140,9 @@ p2 <- ggplot(xwfbz_numcat %>% filter(name_cat == 'FEMA Declarations (n)')) +
 p1 +
   p2 +
   plot_layout(ncol = 1) #+
-  #patchwork::plot_annotation(
-    #title = "Numeric & Categorical Variables Compared (log-scale)"
-  )#
+#patchwork::plot_annotation(
+#title = "Numeric & Categorical Variables Compared (log-scale)"
+#)#
 ggsave(here('figures/corr_numcat.pdf'), last_plot(), width = 16, height = 8)
 ```
 
