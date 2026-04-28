@@ -60,7 +60,7 @@ ggplot() +
   ) +
   scale_x_continuous(
     labels = scales::percent,
-    name = 'Events declared disaster',
+    name = 'Percent of events declared a disaster',
     expand = c(0, 0, 0, .17)
   ) +
   scale_y_discrete(name = '', limits = rev, expand = c(.01, .01)) +
@@ -216,7 +216,8 @@ theme_update(
   axis.ticks.y = element_blank(),
   axis.text.x = element_blank(),
   axis.text.y = element_blank(),
-  axis.line = element_blank()
+  axis.line = element_blank(),
+  plot.margin = margin(0, 0, 0, 0)
 )
 ```
 
@@ -232,12 +233,13 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(palette = 'Spectral', name = '')
+  scale_fill_distiller(palette = 'Spectral', name = '') +
+  coord_sf(expand = FALSE)
 ggsave(
   here('figures/map_events.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 5
 )
 ```
 
@@ -251,13 +253,14 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(palette = 'Spectral', name = '')
+  scale_fill_distiller(palette = 'Spectral', name = '') +
+  coord_sf(expand = FALSE)
 
 ggsave(
   here('figures/map_decs.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 5
 )
 ```
 
@@ -277,12 +280,13 @@ ggplot() +
     palette = 'Spectral',
     name = '',
     labels = scales::percent
-  )
+  ) +
+  coord_sf(expand = FALSE)
 ggsave(
   here('figures/maps_decs_per_event.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 5
 )
 ```
 
@@ -301,11 +305,12 @@ ggplot() +
     palette = 'Spectral',
     name = '',
     values = c(0, scales::breaks_log()(c(.0001, 1)))
-  )
+  ) +
+  coord_sf(expand = FALSE)
 ggsave(
   here('figures/maps_decs_per_event_log.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 5
 )
 ```

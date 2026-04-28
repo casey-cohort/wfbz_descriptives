@@ -150,33 +150,80 @@ ggsave(
 ## Race
 
 ```{r race_fig, fig.height = 16}
-#| fig-cap: "Share of fire-affected population that is Non-Hispanic White, by USFS region and year"
+race_groups <- c(
+  "NH White",
+  "NH Black",
+  "Hispanic (any)",
+  "NH AIAN, Asian, or Pacific Islander",
+  "NH Two or More Races",
+  "NH Other"
+)
+
+race_slugs <- c(
+  "NH White" = "nh_white",
+  "NH Black" = "nh_black",
+  "Hispanic (any)" = "hispanic",
+  "NH AIAN, Asian, or Pacific Islander" = "nh_aian_api",
+  "NH Two or More Races" = "nh_two_or_more_races",
+  "NH Other" = "nh_other"
+)
+
 race_by_region <- race_by_wf %>%
   inner_join(wfbz_region, by = 'wildfire_id') %>%
+  mutate(
+    race_group = case_when(
+      ethnicity == "Hispanic or Latino" ~ "Hispanic (any)",
+      str_detect(race, "Black or African American") ~ "NH Black",
+      str_detect(
+        race,
+        "American Indian|Asian|Pacific Islander|Native Hawaiian"
+      ) ~
+        "NH AIAN, Asian, or Pacific Islander",
+      str_detect(race, "Some Other Race") ~ "NH Other",
+      str_detect(race, "White") ~ "NH White",
+      str_detect(race, "Two or More Races") ~ "NH Two or More Races",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(race_group)) %>%
   group_by(usfs_region, wildfire_year, wildfire_id) %>%
-  summarize(
-    pct_nhw = sum(
-      count[
-        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
-      ],
-      na.rm = TRUE
-    ) /
-      sum(count, na.rm = TRUE),
-    .groups = 'drop'
+  mutate(total_count = sum(count, na.rm = TRUE)) %>%
+  group_by(
+    usfs_region,
+    wildfire_year,
+    wildfire_id,
+    race_group,
+    total_count
   ) %>%
-  group_by(wildfire_year, usfs_region) %>%
+  summarize(group_count = sum(count, na.rm = TRUE), .groups = 'drop') %>%
+  mutate(pct = group_count / total_count) %>%
+  group_by(wildfire_year, usfs_region, race_group) %>%
   summarize(
-    frac_p25 = quantile(pct_nhw, .25, na.rm = TRUE),
-    frac_median = median(pct_nhw, na.rm = TRUE),
-    frac_p75 = quantile(pct_nhw, .75, na.rm = TRUE),
+    frac_p25 = quantile(pct, .25, na.rm = TRUE),
+    frac_median = median(pct, na.rm = TRUE),
+    frac_p75 = quantile(pct, .75, na.rm = TRUE),
     .groups = 'drop'
-  ) %>%
-  left_join(region_pop_race, by = c('wildfire_year', 'usfs_region')) %>%
-  inner_join(REGION_ORDER, by = 'usfs_region') %>%
-  mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+  )
 
-plot_pop_var(race_by_region, "Share Non-Hispanic White")
-ggsave(here('figures/race_fig.pdf'), last_plot(), width = 7, height = 16)
+for (rg in race_groups) {
+  dat <- race_by_region %>%
+    filter(race_group == rg) %>%
+    left_join(
+      region_pop_race,
+      by = c('wildfire_year', 'usfs_region', 'race_group')
+    ) %>%
+    inner_join(REGION_ORDER, by = 'usfs_region') %>%
+    mutate(usfs_region = fct_reorder(usfs_region, plot_order))
+
+  p <- plot_pop_var(dat, paste0("Share ", rg))
+  print(p)
+  ggsave(
+    here(glue('figures/race_{race_slugs[[rg]]}_fig.pdf')),
+    p,
+    width = 7,
+    height = 16
+  )
+}
 ```
 
 ## Poverty

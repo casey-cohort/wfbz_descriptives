@@ -576,16 +576,45 @@ write_parquet(
   ),
   here('data/processed/nhgis/region_pop_vehicle.parquet')
 )
-write_parquet(
-  region_pop_by_year(
-    read_parquet(here('data/processed/nhgis/race.parquet')),
-    sum(
-      count[
-        ethnicity == "Not Hispanic or Latino" & race == "White (single race)"
-      ],
-      na.rm = TRUE
+# Multi-group race reference: tract-level frac per race_group, then
+# regional p25/median/p75 across tracts. Race buckets match the diverging
+# chart definitions in reports/pop_diverging.qmd.
+race_dat <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
+  mutate(
+    race_group = case_when(
+      ethnicity == "Hispanic or Latino" ~ "Hispanic (any)",
+      str_detect(race, "Black or African American") ~ "NH Black",
+      str_detect(
+        race,
+        "American Indian|Asian|Pacific Islander|Native Hawaiian"
+      ) ~
+        "NH AIAN, Asian, or Pacific Islander",
+      str_detect(race, "Some Other Race") ~ "NH Other",
+      str_detect(race, "White") ~ "NH White",
+      str_detect(race, "Two or More Races") ~ "NH Two or More Races",
+      TRUE ~ NA_character_
     )
-  ),
+  ) %>%
+  filter(!is.na(race_group))
+
+race_ypm <- year_to_period(race_dat)
+
+write_parquet(
+  race_dat %>%
+    inner_join(tract_region, by = 'GEOID') %>%
+    inner_join(race_ypm, by = 'period', relationship = 'many-to-many') %>%
+    group_by(wildfire_year, usfs_region, GEOID) %>%
+    mutate(tract_total = sum(count, na.rm = TRUE)) %>%
+    group_by(wildfire_year, usfs_region, GEOID, race_group, tract_total) %>%
+    summarize(group_count = sum(count, na.rm = TRUE), .groups = 'drop') %>%
+    mutate(frac_pop = group_count / tract_total) %>%
+    group_by(wildfire_year, usfs_region, race_group) %>%
+    summarize(
+      frac_pop_p25 = quantile(frac_pop, .25, na.rm = TRUE),
+      frac_pop_median = median(frac_pop, na.rm = TRUE),
+      frac_pop_p75 = quantile(frac_pop, .75, na.rm = TRUE),
+      .groups = 'drop'
+    ),
   here('data/processed/nhgis/region_pop_race.parquet')
 )
 write_parquet(
