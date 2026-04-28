@@ -1,11 +1,12 @@
-name: Sync figures to paper repo
+name: Sync outputs to paper repo
 
 on:
   push:
     branches: [main]
     paths:
       - 'figures/**'
-      - '.github/workflows/sync-figures.yml'
+      - 'tex/**'
+      - '.github/workflows/sync-outputs.yml'
   workflow_dispatch:
 
 jobs:
@@ -30,12 +31,19 @@ jobs:
           mkdir -p target/tables_figures
           cp -R source/figures/. target/tables_figures/
 
+
+      - name: Replace tex values
+        run: |
+          rm -rf target/vals.tex
+          cp source/tex/vals.tex. target/vals.tex
+
       - name: Commit and push
         working-directory: target
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add tables_figures
+          git add vals.tex
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else

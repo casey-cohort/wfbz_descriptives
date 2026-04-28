@@ -1,0 +1,356 @@
+---
+title: "Variables over Time"
+toc: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+{{< include _setup.qmd >}}
+
+```{r}
+pop_affected <- read_csv(here('data/processed/pop_affected.csv'))
+```
+
+```{r}
+# function to format all numeric columns with commas and handle decimals appropriately,
+# and to also include character variables
+texify <- function(var_name, var_value) {
+  # Convert var_name to valid LaTeX command name (no underscores)
+  latex_name <- gsub("_", "", var_name)
+
+  # handle numeric values
+  if (is.numeric(var_value) && length(var_value) == 1 && !is.na(var_value)) {
+    # check if the number is an integer (no decimal part)
+    is_integer_like <- (var_value %% 1 == 0)
+
+    if (is_integer_like) {
+      # for integers, just add commas without decimal places
+      formatted_value <- format(
+        var_value,
+        big.mark = ",",
+        scientific = FALSE,
+        nsmall = 0
+      )
+    } else {
+      # for decimals, round to two decimal places
+      rounded_value <- round(var_value, 2)
+      formatted_value <- format(
+        rounded_value,
+        big.mark = ",",
+        scientific = FALSE,
+        nsmall = 2
+      )
+    }
+
+    paste0("\\newcommand{\\", latex_name, "}{", trimws(formatted_value), "}")
+  } else if (
+    is.character(var_value) && length(var_value) == 1 && !is.na(var_value)
+  ) {
+    # handle character values
+    # Escape % for LaTeX
+    escaped_value <- gsub("%", "\\\\%", var_value)
+    # Use brackets [] for CIs instead of parentheses ()
+    escaped_value <- gsub("\\(([^)]+)\\)", "[\\1]", escaped_value)
+    paste0("\\newcommand{\\", latex_name, "}{", escaped_value, "}")
+  } else {
+    NULL
+  }
+}
+```
+
+```{r}
+### Abstract
+abstract <- list()
+abstract[['nWFBZ']] = nrow(wfbz) # nationwide spatial dataset of N WFBZ disasters
+abstract[['alaskaMeanPopExposed']] <- pop_affected %>%
+  filter(region == 'Alaska') %>%
+  summarize(exposed_10km = mean(exposed_10km)) %>%
+  pull(exposed_10km) %>%
+  scales::comma() # estimated number of people affected by WFBZ disasters annually varied widely across the US, ranging from 3,300 people exposed in Alaska
+abstract[['californiaMeanPopExposed']] <- pop_affected %>%
+  filter(region == 'California') %>%
+  summarize(exposed_10km = mean(exposed_10km)) %>%
+  pull(exposed_10km) %>%
+  scales::comma() # california: number of people affected by WFBZ disasters in CA is 2,182,606
+abstract[['hawaiiPctOfDisasters']] <- mean(wfbz$wildfire_states == 'HI') %>%
+  scales::percent(accuracy = .1) # Hawaii: 0.3\% of all WFBZ disasters
+abstract[['hawaiiPctOfFatalities']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(tot_fatal = sum(wildfire_max_civil_fatalities, na.rm = TRUE)) %>%
+  filter(wildfire_states == 'HI') %>%
+  summarize(
+    pct = sum(wildfire_max_civil_fatalities / tot_fatal, na.rm = TRUE)
+  ) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # Hawaii accounted for 18.6\% of fatalities
+abstract[['californiaPctFEMA']] <- wfbz %>%
+  st_drop_geometry() %>%
+  filter(grepl('CA', wildfire_states)) %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # california: 26.2\% of its fires received declarations
+abstract[['hawaiiPctFEMA']] <- wfbz %>%
+  st_drop_geometry() %>%
+  filter(grepl('HI', wildfire_states)) %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # Hawaii: 83\% of its fires received declarations
+abstract[['washingtonPctFEMA']] <- wfbz %>%
+  st_drop_geometry() %>%
+  filter(grepl('WA', wildfire_states)) %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # Washington: 49\% of its fires received declarations
+abstract[['nationalMeanPopExposed']] <- pop_affected %>%
+  summarize(exposed_10km = mean(exposed_10km)) %>%
+  pull(exposed_10km) %>%
+  scales::comma() # an estimated 551,909 people were exposed annually at the national level
+
+### results
+results <- list()
+
+results[['alaskaMeanFireSize']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  filter(usfs_region == 'Alaska') %>%
+  summarize(mean_size = mean(wildfire_area, na.rm = TRUE)) %>%
+  pull(mean_size) # Fires in Alaska were the largest on average (mean: 144.3 km\textsuperscript{2}
+
+results[['regionsLargeFireSize']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  group_by(usfs_region) %>%
+  summarize(mean_size = mean(wildfire_area, na.rm = TRUE)) %>%
+  filter(mean_size > 90) %>%
+  arrange(desc(mean_size)) %>%
+  pull(usfs_region) %>%
+  knitr::combine_words() # five regions that had mean fire sizes exceeding 90km2 (should be a string: "Intermountain, Pacific Northwest, Northern Rockies, California, and Southwestern")
+
+results[['nationalMeanPopExposed']] <- pop_affected %>%
+  summarize(exposed_10km = mean(exposed_10km)) %>%
+  pull(exposed_10km) %>%
+  scales::comma() # annually 551,909 people were exposed to WFBZ disasters nationwide
+
+results[['wuiPctRange']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  group_by(usfs_region) %>%
+  summarize(
+    wui_pct = sum(
+      str_detect(wildfire_wui, '(intermix|interface)'),
+      na.rm = TRUE
+    ) /
+      n()
+  ) %>%
+  summarize(
+    rng = paste0(
+      scales::percent(min(wui_pct), accuracy = .1),
+      ' to ',
+      scales::percent(max(wui_pct), accuracy = .1)
+    )
+  ) %>%
+  pull(rng) # proportion of fires occurring in the WUI ranged from 40.6\% to 83.3\% across regions
+
+results[['nationalWuiPct']] <- wfbz %>%
+  st_drop_geometry() %>%
+  summarize(
+    wui_pct = sum(
+      str_detect(wildfire_wui, '(intermix|interface)'),
+      na.rm = TRUE
+    ) /
+      n()
+  ) %>%
+  pull(wui_pct) %>%
+  scales::percent(accuracy = .1) # national mean proportion of fires in the wui
+
+results[['hawaiiFatalityRate']] <- wfbz_crit %>%
+  filter(usfs_region == 'Hawaii') %>%
+  summarize(rate = sum(`Fatalities per 100K`, na.rm = TRUE)) %>%
+  pull(rate) # Fatality rates were highest in Hawaii (6.7 per 100,000 people in that region)
+
+results[['californiaFatalityRate']] <- wfbz_crit %>%
+  filter(usfs_region == 'California') %>%
+  summarize(rate = sum(`Fatalities per 100K`, na.rm = TRUE)) %>%
+  pull(rate) # fatality rates in California (0.58 per 100,000 people in that region)
+
+results[['hawaiiRegionDecRate']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  filter(usfs_region == 'Hawaii') %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1)
+results[['pnwDecRate']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  filter(usfs_region == 'Pacific Northwest') %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1)
+results[['southDecRate']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  filter(usfs_region == 'Southern') %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1)
+results[['southNumDisasters']] <- sum(wfbz_region == 'Southern')
+results[['southPctOfDisasters']] <- (sum(wfbz_region == 'Southern') /
+  length(wfbz_region)) %>%
+  scales::percent(accuracy = 1) # Hawaii had the highest declaration rate (83.3\%), followed by the Pacific Northwest (48.4\%), while the South had the lowest (6.2\%) despite containing the largest share of WFBZ disasters nationally (n = 3,014, 51\% of total WFBZ disasters).
+
+results[[
+  'disproportionateStates'
+]] <- "California, Florida, Mississippi, Oklahoma, and South Carolina" # Several states accounted for a disproportionate share of events, including California, Florida, Mississippi, Oklahoma, and South Carolina (this should be the string of these states)
+
+results[['californiaAnnualBurnedArea']] <- wfbz_crit %>%
+  filter(usfs_region == 'California') %>%
+  summarize(mean_area = mean(`Burned Area`, na.rm = TRUE)) %>%
+  pull(mean_area) # California consistently had the largest total burned area (annual avg for CA)
+
+results[['southAnnualEvents']] <- wfbz_crit %>%
+  filter(usfs_region == 'Southern') %>%
+  summarize(mean_n = mean(Events, na.rm = TRUE)) %>%
+  pull(mean_n) # South consistently had the largest number of annual WFBZ disasters (annual avg for the south)
+
+results[['californiaPctOfFatalities']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(tot = sum(wildfire_max_civil_fatalities, na.rm = TRUE)) %>%
+  filter(grepl('CA', wildfire_states)) %>%
+  summarize(
+    pct = sum(wildfire_max_civil_fatalities / tot, na.rm = TRUE)
+  ) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # California accounted for 43.2\% of fatalities
+
+results[['californiaPctOfStructures']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(tot = sum(wildfire_struct_destroyed, na.rm = TRUE)) %>%
+  filter(grepl('CA', wildfire_states)) %>%
+  summarize(
+    pct = sum(wildfire_struct_destroyed / tot, na.rm = TRUE)
+  ) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # California accounted for 69.8\% of structures destroyed nationwide
+
+results[['californiaPctOfFEMA']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(tot = sum(wildfire_fema_dec, na.rm = TRUE)) %>%
+  filter(grepl('CA', wildfire_states)) %>%
+  summarize(pct = sum(wildfire_fema_dec / tot, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # California accounted for 23.4\% of FEMA declarations
+
+results[['southPctOfFatalities']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  mutate(tot = sum(wildfire_max_civil_fatalities, na.rm = TRUE)) %>%
+  filter(usfs_region == 'Southern') %>%
+  summarize(
+    pct = sum(wildfire_max_civil_fatalities / tot, na.rm = TRUE)
+  ) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # The south accounted for 15.0\% of fatalities
+
+results[['southPctOfStructures']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  mutate(tot = sum(wildfire_struct_destroyed, na.rm = TRUE)) %>%
+  filter(usfs_region == 'Southern') %>%
+  summarize(
+    pct = sum(wildfire_struct_destroyed / tot, na.rm = TRUE)
+  ) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # The south accounted for 13.5\% of structures destroyed nationwide
+
+results[['southPctOfFEMA']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region) %>%
+  mutate(tot = sum(wildfire_fema_dec, na.rm = TRUE)) %>%
+  filter(usfs_region == 'Southern') %>%
+  summarize(pct = sum(wildfire_fema_dec / tot, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # The South accounted for 20.5\% of FEMA declarations
+
+results[[
+  'fiveDeadliestFires'
+]] <- "the Yarnell Hill Fire (AZ, 2013), Tubbs Fire (CA, 2017), Camp Fire (CA, 2018), North Complex Fire (CA, 2020), and Lahaina Fire (HI, 2023)" # Generally, structural losses and fatalities were heavily concentrated in five events: the Yarnell Hill Fire (AZ, 2013), Tubbs Fire (CA, 2017), Camp Fire (CA, 2018), North Complex Fire (CA, 2020), and Lahaina Fire (HI, 2023) -- should be a string of these 5 fires and their state/date
+
+# (already computed in abstract as hawaiiPctOfFatalities)
+# hawaii accounted for 18.6\% of fatalities
+
+results[['hawaiiNumDisasters']] <- sum(grepl('HI', wfbz$wildfire_states)) # fema declarations: Hawaii -- 83\% of 18 disasters
+results[['washingtonNumDisasters']] <- sum(grepl('WA', wfbz$wildfire_states)) # fema declarations: washington 49\% of 341 disasters
+results[['californiaNumDisasters']] <- sum(grepl('CA', wfbz$wildfire_states)) # fema declarations: 26.2\% of California's 816 WFBZ disasters received declarations
+
+results[['femaDecPctInWUI']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(
+    in_wui = if_else(
+      is.na(wildfire_wui),
+      FALSE,
+      str_detect(wildfire_wui, '(intermix|interface)')
+    )
+  ) %>%
+  filter(wildfire_fema_dec) %>%
+  summarize(pct = mean(in_wui)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) #  82.5\% of WFBZ disasters that received a FEMA declaration occurred in the WUI
+
+# PLACEHOLDER: comment text is ambiguous -- says "received a fema declaration
+# occurred outside the wui", but a literal reading contradicts the prior
+# 82.5\% in-WUI value. Likely intended contrast: \% of NON-FEMA-declared
+# fires in the WUI (so the two values describe FEMA vs. non-FEMA in-WUI rates).
+# Computing that interpretation; user should verify.
+results[['nonFemaDecPctInWUI']] <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(
+    in_wui = if_else(
+      is.na(wildfire_wui),
+      FALSE,
+      str_detect(wildfire_wui, '(intermix|interface)')
+    )
+  ) %>%
+  filter(!wildfire_fema_dec) %>%
+  summarize(pct = mean(in_wui)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = 1) # compared to 58\% of wfbz disasters that received a fema declaration occurred outside the wui
+
+### discussion
+discussion <- list()
+
+discussion[['caSouthPctExposed']] <- pop_affected %>%
+  group_by(region) %>%
+  summarize(total_exposed = sum(exposed_10km)) %>%
+  mutate(pct = total_exposed / sum(total_exposed)) %>%
+  filter(region %in% c('California', 'Southern')) %>%
+  summarize(combined = sum(pct)) %>%
+  pull(combined) %>%
+  scales::percent(accuracy = .1) # California and the South together accounted for nearly 80\% total people exposed annually nationwide
+```
+
+
+```{r}
+f <- here('tex/vars.tex')
+write_lines('% VALUES FOR MANUSCRIPT %', f)
+write_lines('% ABSTRACT %', f, append = TRUE)
+write_lines(
+  map(names(abstract), \(.x) texify(.x, abstract[[.x]])),
+  f,
+  append = TRUE
+)
+write_lines('% RESULTS %', f, append = TRUE)
+write_lines(
+  map(names(results), \(.x) texify(.x, results[[.x]])),
+  f,
+  append = TRUE
+)
+write_lines('% DISCUSSION %', f, append = TRUE)
+write_lines(
+  map(names(discussion), \(.x) texify(.x, discussion[[.x]])),
+  f,
+  append = TRUE
+)
+```
