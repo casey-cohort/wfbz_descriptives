@@ -11,6 +11,9 @@ execute:
 
 ```{r}
 pop_affected <- read_csv(here('data/processed/pop_affected.csv'))
+wfbz <- wfbz %>%
+  st_drop_geometry() %>%
+  mutate(usfs_region = wfbz_region)
 ```
 
 ```{r}
@@ -77,7 +80,6 @@ abstract[['californiaMeanPopExposed']] <- pop_affected %>%
 abstract[['hawaiiPctOfDisasters']] <- mean(wfbz$wildfire_states == 'HI') %>%
   scales::percent(accuracy = .1) # Hawaii: 0.3\% of all WFBZ disasters
 abstract[['hawaiiPctOfFatalities']] <- wfbz %>%
-  st_drop_geometry() %>%
   mutate(tot_fatal = sum(wildfire_max_civil_fatalities, na.rm = TRUE)) %>%
   filter(wildfire_states == 'HI') %>%
   summarize(
@@ -86,19 +88,16 @@ abstract[['hawaiiPctOfFatalities']] <- wfbz %>%
   pull(pct) %>%
   scales::percent(accuracy = .1) # Hawaii accounted for 18.6\% of fatalities
 abstract[['californiaPctFEMA']] <- wfbz %>%
-  st_drop_geometry() %>%
   filter(grepl('CA', wildfire_states)) %>%
   summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
   pull(pct) %>%
   scales::percent(accuracy = .1) # california: 26.2\% of its fires received declarations
 abstract[['hawaiiPctFEMA']] <- wfbz %>%
-  st_drop_geometry() %>%
   filter(grepl('HI', wildfire_states)) %>%
   summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
   pull(pct) %>%
   scales::percent(accuracy = .1) # Hawaii: 83\% of its fires received declarations
 abstract[['washingtonPctFEMA']] <- wfbz %>%
-  st_drop_geometry() %>%
   filter(grepl('WA', wildfire_states)) %>%
   summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
   pull(pct) %>%
@@ -112,15 +111,22 @@ abstract[['nationalMeanPopExposed']] <- pop_affected %>%
 results <- list()
 
 results[['alaskaMeanFireSize']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   filter(usfs_region == 'Alaska') %>%
   summarize(mean_size = mean(wildfire_area, na.rm = TRUE)) %>%
   pull(mean_size) # Fires in Alaska were the largest on average (mean: 144.3 km\textsuperscript{2}
 
+
+results[['nRegionsLargeFireSize']] <- wfbz %>%
+  filter(usfs_region != 'Alaska') %>%
+  group_by(usfs_region) %>%
+  summarize(mean_size = mean(wildfire_area, na.rm = TRUE)) %>%
+  filter(mean_size > 90) %>%
+  arrange(desc(mean_size)) %>%
+  pull(usfs_region) %>%
+  length() %>%
+  xfun::numbers_to_words() # five regions that had mean fire sizes exceeding 90km2 (should be a string: "Intermountain, Pacific Northwest, Northern Rockies, California, and Southwestern")
+
 results[['regionsLargeFireSize']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   group_by(usfs_region) %>%
   summarize(mean_size = mean(wildfire_area, na.rm = TRUE)) %>%
   filter(mean_size > 90) %>%
@@ -134,8 +140,6 @@ results[['nationalMeanPopExposed']] <- pop_affected %>%
   scales::comma() # annually 551,909 people were exposed to WFBZ disasters nationwide
 
 results[['wuiPctRange']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   group_by(usfs_region) %>%
   summarize(
     wui_pct = sum(
@@ -154,7 +158,6 @@ results[['wuiPctRange']] <- wfbz %>%
   pull(rng) # proportion of fires occurring in the WUI ranged from 40.6\% to 83.3\% across regions
 
 results[['nationalWuiPct']] <- wfbz %>%
-  st_drop_geometry() %>%
   summarize(
     wui_pct = sum(
       str_detect(wildfire_wui, '(intermix|interface)'),
@@ -176,29 +179,23 @@ results[['californiaFatalityRate']] <- wfbz_crit %>%
   pull(rate) # fatality rates in California (0.58 per 100,000 people in that region)
 
 results[['hawaiiRegionDecRate']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   filter(usfs_region == 'Hawaii') %>%
   summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
   pull(pct) %>%
   scales::percent(accuracy = .1)
 results[['pnwDecRate']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   filter(usfs_region == 'Pacific Northwest') %>%
   summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
   pull(pct) %>%
   scales::percent(accuracy = .1)
 results[['southDecRate']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   filter(usfs_region == 'Southern') %>%
   summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
   pull(pct) %>%
   scales::percent(accuracy = .1)
-results[['southNumDisasters']] <- sum(wfbz_region == 'Southern')
-results[['southPctOfDisasters']] <- (sum(wfbz_region == 'Southern') /
-  length(wfbz_region)) %>%
+results[['southNumDisasters']] <- sum(wfbz$usfs_region == 'Southern')
+results[['southPctOfDisasters']] <- (sum(wfbz$usfs_region == 'Southern') /
+  length(wfbz$usfs_region)) %>%
   scales::percent(accuracy = 1) # Hawaii had the highest declaration rate (83.3\%), followed by the Pacific Northwest (48.4\%), while the South had the lowest (6.2\%) despite containing the largest share of WFBZ disasters nationally (n = 3,014, 51\% of total WFBZ disasters).
 
 results[[
@@ -216,7 +213,6 @@ results[['southAnnualEvents']] <- wfbz_crit %>%
   pull(mean_n) # South consistently had the largest number of annual WFBZ disasters (annual avg for the south)
 
 results[['californiaPctOfFatalities']] <- wfbz %>%
-  st_drop_geometry() %>%
   mutate(tot = sum(wildfire_max_civil_fatalities, na.rm = TRUE)) %>%
   filter(grepl('CA', wildfire_states)) %>%
   summarize(
@@ -226,7 +222,6 @@ results[['californiaPctOfFatalities']] <- wfbz %>%
   scales::percent(accuracy = .1) # California accounted for 43.2\% of fatalities
 
 results[['californiaPctOfStructures']] <- wfbz %>%
-  st_drop_geometry() %>%
   mutate(tot = sum(wildfire_struct_destroyed, na.rm = TRUE)) %>%
   filter(grepl('CA', wildfire_states)) %>%
   summarize(
@@ -236,7 +231,6 @@ results[['californiaPctOfStructures']] <- wfbz %>%
   scales::percent(accuracy = .1) # California accounted for 69.8\% of structures destroyed nationwide
 
 results[['californiaPctOfFEMA']] <- wfbz %>%
-  st_drop_geometry() %>%
   mutate(tot = sum(wildfire_fema_dec, na.rm = TRUE)) %>%
   filter(grepl('CA', wildfire_states)) %>%
   summarize(pct = sum(wildfire_fema_dec / tot, na.rm = TRUE)) %>%
@@ -244,8 +238,6 @@ results[['californiaPctOfFEMA']] <- wfbz %>%
   scales::percent(accuracy = .1) # California accounted for 23.4\% of FEMA declarations
 
 results[['southPctOfFatalities']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   mutate(tot = sum(wildfire_max_civil_fatalities, na.rm = TRUE)) %>%
   filter(usfs_region == 'Southern') %>%
   summarize(
@@ -255,8 +247,6 @@ results[['southPctOfFatalities']] <- wfbz %>%
   scales::percent(accuracy = .1) # The south accounted for 15.0\% of fatalities
 
 results[['southPctOfStructures']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   mutate(tot = sum(wildfire_struct_destroyed, na.rm = TRUE)) %>%
   filter(usfs_region == 'Southern') %>%
   summarize(
@@ -266,8 +256,6 @@ results[['southPctOfStructures']] <- wfbz %>%
   scales::percent(accuracy = .1) # The south accounted for 13.5\% of structures destroyed nationwide
 
 results[['southPctOfFEMA']] <- wfbz %>%
-  st_drop_geometry() %>%
-  mutate(usfs_region = wfbz_region) %>%
   mutate(tot = sum(wildfire_fema_dec, na.rm = TRUE)) %>%
   filter(usfs_region == 'Southern') %>%
   summarize(pct = sum(wildfire_fema_dec / tot, na.rm = TRUE)) %>%
@@ -282,11 +270,10 @@ results[[
 # hawaii accounted for 18.6\% of fatalities
 
 results[['hawaiiNumDisasters']] <- sum(grepl('HI', wfbz$wildfire_states)) # fema declarations: Hawaii -- 83\% of 18 disasters
-results[['washingtonNumDisasters']] <- sum(grepl('WA', wfbz$wildfire_states)) # fema declarations: washington 49\% of 341 disasters
+results[['pnwNumDisasters']] <- sum(wfbz$usfs_region == 'Pacific Northwest') # fema declarations: PNW 49\% of 341 disasters
 results[['californiaNumDisasters']] <- sum(grepl('CA', wfbz$wildfire_states)) # fema declarations: 26.2\% of California's 816 WFBZ disasters received declarations
 
 results[['femaDecPctInWUI']] <- wfbz %>%
-  st_drop_geometry() %>%
   mutate(
     in_wui = if_else(
       is.na(wildfire_wui),
@@ -305,7 +292,6 @@ results[['femaDecPctInWUI']] <- wfbz %>%
 # fires in the WUI (so the two values describe FEMA vs. non-FEMA in-WUI rates).
 # Computing that interpretation; user should verify.
 results[['nonFemaDecPctInWUI']] <- wfbz %>%
-  st_drop_geometry() %>%
   mutate(
     in_wui = if_else(
       is.na(wildfire_wui),
@@ -326,14 +312,14 @@ discussion[['caSouthPctExposed']] <- pop_affected %>%
   summarize(total_exposed = sum(exposed_10km)) %>%
   mutate(pct = total_exposed / sum(total_exposed)) %>%
   filter(region %in% c('California', 'Southern')) %>%
-  summarize(combined = sum(pct)) %>%
+  summarize(combined = .05 * ceiling(sum(pct) / .05)) %>%
   pull(combined) %>%
-  scales::percent(accuracy = .1) # California and the South together accounted for nearly 80\% total people exposed annually nationwide
+  scales::percent(accuracy = 1) # California and the South together accounted for nearly 80\% total people exposed annually nationwide
 ```
 
 
 ```{r}
-f <- here('tex/vars.tex')
+f <- here('tex/vals.tex')
 write_lines('% VALUES FOR MANUSCRIPT %', f)
 write_lines('% ABSTRACT %', f, append = TRUE)
 write_lines(
