@@ -61,6 +61,10 @@ texify <- function(var_name, var_value) {
     NULL
   }
 }
+
+more_than <- function(x, by) {
+  floor(x / by) * by
+}
 ```
 
 ```{r}
@@ -72,11 +76,12 @@ abstract[['alaskaMeanPopExposed']] <- pop_affected %>%
   summarize(exposed_10km = mean(exposed_10km)) %>%
   pull(exposed_10km) %>%
   scales::comma() # estimated number of people affected by WFBZ disasters annually varied widely across the US, ranging from 3,300 people exposed in Alaska
-abstract[['californiaMeanPopExposed']] <- pop_affected %>%
+abstract[['californiaMeanPopExposedText']] <- pop_affected %>%
   filter(region == 'California') %>%
   summarize(exposed_10km = mean(exposed_10km)) %>%
   pull(exposed_10km) %>%
-  scales::comma() # california: number of people affected by WFBZ disasters in CA is 2,182,606
+  more_than(by = 1e6) %>%
+  xfun::numbers_to_words()
 abstract[['hawaiiPctOfDisasters']] <- mean(wfbz$wildfire_states == 'HI') %>%
   scales::percent(accuracy = .1) # Hawaii: 0.3\% of all WFBZ disasters
 abstract[['hawaiiPctOfFatalities']] <- wfbz %>%
@@ -138,6 +143,12 @@ results[['nationalMeanPopExposed']] <- pop_affected %>%
   summarize(exposed_10km = mean(exposed_10km)) %>%
   pull(exposed_10km) %>%
   scales::comma() # annually 551,909 people were exposed to WFBZ disasters nationwide
+
+abstract[['californiaMeanPopExposedText']] <- pop_affected %>%
+  filter(region == 'California') %>%
+  summarize(exposed_10km = mean(exposed_10km)) %>%
+  pull(exposed_10km) %>%
+  scales::comma()
 
 results[['wuiPctRange']] <- wfbz %>%
   group_by(usfs_region) %>%
