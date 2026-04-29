@@ -435,6 +435,57 @@ diverge_regional <- bind_rows(
   mutate(usfs_region = fct_reorder(usfs_region, plot_order))
 ```
 
+```{r diverge_bootstrap}
+# 95% percentile CIs on `diff = frac - frac_pop` from a fire-id bootstrap.
+# The iterates are produced offline by `staging/prep_diverge_bootstrap.R`
+# (parallelized via furrr); we just join the percentile CIs onto the
+# point-estimate tables here so the plots can draw error bars.
+boot_path <- here('data/processed/diverge_bootstrap.parquet')
+if (!file.exists(boot_path)) {
+  stop(
+    "Bootstrap iterates not found at ",
+    boot_path,
+    ". Run `Rscript staging/prep_diverge_bootstrap.R` first ",
+    "(set WFBZ_BOOT_B to control B; default 100)."
+  )
+}
+boot_results <- read_parquet(boot_path)
+
+ci_national <- boot_results %>%
+  filter(scope == 'national') %>%
+  group_by(stat) %>%
+  summarize(
+    ci_low = quantile(diff, 0.025, na.rm = TRUE),
+    ci_high = quantile(diff, 0.975, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+ci_regional <- boot_results %>%
+  filter(scope == 'regional') %>%
+  group_by(usfs_region, stat) %>%
+  summarize(
+    ci_low = quantile(diff, 0.025, na.rm = TRUE),
+    ci_high = quantile(diff, 0.975, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+diverge_national <- diverge_national %>%
+  mutate(stat_chr = as.character(stat)) %>%
+  left_join(ci_national, by = c('stat_chr' = 'stat')) %>%
+  select(-stat_chr)
+
+diverge_regional <- diverge_regional %>%
+  mutate(
+    stat_chr = as.character(stat),
+    region_chr = as.character(usfs_region)
+  ) %>%
+  left_join(
+    ci_regional,
+    by = c('region_chr' = 'usfs_region', 'stat_chr' = 'stat')
+  ) %>%
+  select(-stat_chr, -region_chr)
+```
+
 ### Overall
 
 ```{r diverge_overall_fig, fig.height = 2}
@@ -462,10 +513,16 @@ plotme <- function(dat) {
       color = "grey25",
       linewidth = .1
     ) +
+    geom_errorbarh(
+      aes(xmin = ci_low, xmax = ci_high),
+      height = 0.3,
+      linewidth = 0.3,
+      color = 'grey25'
+    ) +
     geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
     geom_text(
       aes(
-        x = 0,
+        x = if_else(diff < 0, pmax(0, ci_high), pmin(0, ci_low)),
         label = stat,
         hjust = (.6 * diff / abs(diff)) + .5,
       ),
@@ -536,10 +593,16 @@ plotme <- function(dat) {
     aes(x = diff, y = usfs_region, fill = usfs_region)
   ) +
     geom_col(width = 1, color = "grey25", linewidth = .1) +
+    geom_errorbarh(
+      aes(xmin = ci_low, xmax = ci_high),
+      height = 0.5,
+      linewidth = 0.3,
+      color = 'grey25'
+    ) +
     geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
     geom_text(
       aes(
-        x = 0,
+        x = if_else(diff < 0, pmax(0, ci_high), pmin(0, ci_low)),
         label = usfs_region,
         hjust = (.6 * diff / abs(diff)) + .5,
       ),
@@ -590,62 +653,4 @@ p_ses
 
 ```{r, fig.height = 6, fig.width = 8}
 p_race
-```
-
-```{r diverge_race_fig, fig.height = 3}
-#| fig-cap: "Race/ethnicity composition: fire-affected minus high-wildfire-risk population share, pooled 2000-2024"
-#ggplot(diverge_race, aes(x = diff, y = race_group)) +
-#  geom_col(
-#    fill = khroma::color('light', reverse = FALSE)(1),
-#    color = "grey25",
-#    linewidth = .1
-#  ) +
-#  geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
-#  scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
-#  xlab("Fire-affected minus high-risk reference (percentage points)") +
-#  ylab(NULL) +
-#  div_theme +
-#  theme(
-#    panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
-#  )
-#ggsave(
-#  here('figures/diverge_race_fig.pdf'),
-#  last_plot(),
-#  width = 2.3,
-#  height = 1
-#)
-```
-
-
-## Debug
-
-```{r}
-#race_high_risk <- read_parquet(here('data/processed/nhgis/race.parquet')) %>%
-#  most_recent_period() %>%
-#  inner_join(high_risk_tracts, by = 'GEOID') %>%
-#  mutate(
-#    race_group = paste0(
-#      "NH ",
-#      if_else(ethnicity == "Hispanic or Latino", "Hispanic (any)", race)
-#    )
-#  ) %>%
-#  collapse_race() %>%
-#  inner_join(tracts(year = 2020, state = 'CA'), .)
-#
-#
-#race_fire <- read_parquet(here(
-#  'data/processed/nhgis/race_by_wf.parquet'
-#)) %>%
-#  most_recent_period() %>%
-#  inner_join(high_risk_tracts, by = 'GEOID') %>%
-#  inner_join(tracts(year = 2020, state = 'CA'), .)
-#
-#race <- bind_rows(
-#  fire_affected = race_fire,
-#  high_risk = race_high_risk,
-#  .id = 'type'
-#)
-#
-#ggplot(data = race) +
-#  geom_sf(fill = )
 ```
