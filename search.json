@@ -11,70 +11,7 @@
     "href": "reports/pop_diverging.html",
     "title": "Diverging Demographic Charts",
     "section": "",
-    "text": "Difference in fire-affected vs. high-wildfire-risk population shares, pooled 2000-2024"
-  },
-  {
-    "objectID": "reports/pop_diverging.html#debug",
-    "href": "reports/pop_diverging.html#debug",
-    "title": "Diverging Demographic Charts",
-    "section": "Debug",
-    "text": "Debug"
-  },
-  {
-    "objectID": "reports/main_correlations.html",
-    "href": "reports/main_correlations.html",
-    "title": "Correlations",
-    "section": "",
-    "text": "Numeric Values Compared\n\n\n\n\n\n\n\n\n\n\n\nNumeric & Categorical Values Compared\n\n\n\n\n\n\n\n\n\n\n\nCategorical Values Compared"
-  },
-  {
-    "objectID": "reports/main_geography.html#reference",
-    "href": "reports/main_geography.html#reference",
-    "title": "Fire Season & Geography",
-    "section": "Reference",
-    "text": "Reference\n\nRegions Mapped"
-  },
-  {
-    "objectID": "reports/pop_demographics.html",
-    "href": "reports/pop_demographics.html",
-    "title": "Demographic Time Series",
-    "section": "",
-    "text": "In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts. The colored ribbon ranges from the 25th to the 75th percentile for that metric.\nThe same is show for “at risk” census tracts (the 90th percentile of tracts nationally by WHP) in grey, with the dashed line showing the median."
-  },
-  {
-    "objectID": "reports/pop_demographics.html#vehicle-availability",
-    "href": "reports/pop_demographics.html#vehicle-availability",
-    "title": "Demographic Time Series",
-    "section": "Vehicle Availability",
-    "text": "Vehicle Availability\n\n\n\n\n\nShare of fire-affected households with no vehicle access, by USFS region and year"
-  },
-  {
-    "objectID": "reports/pop_demographics.html#race",
-    "href": "reports/pop_demographics.html#race",
-    "title": "Demographic Time Series",
-    "section": "Race",
-    "text": "Race\n\n\n\n\n\nShare of fire-affected population that is Non-Hispanic White, by USFS region and year"
-  },
-  {
-    "objectID": "reports/pop_demographics.html#poverty",
-    "href": "reports/pop_demographics.html#poverty",
-    "title": "Demographic Time Series",
-    "section": "Poverty",
-    "text": "Poverty\n\n\n\n\n\nPopulation below 100% of poverty line near wildfire burn zones, by USFS region and year"
-  },
-  {
-    "objectID": "reports/pop_demographics.html#housing-cost-burden",
-    "href": "reports/pop_demographics.html#housing-cost-burden",
-    "title": "Demographic Time Series",
-    "section": "Housing Cost Burden",
-    "text": "Housing Cost Burden\n\n\n\n\n\nCost-burdened households (&gt;=50% income on housing) near wildfire burn zones, by USFS region and year"
-  },
-  {
-    "objectID": "reports/main_timeseries.html#share-of-wui-fires-over-time",
-    "href": "reports/main_timeseries.html#share-of-wui-fires-over-time",
-    "title": "Variables over Time",
-    "section": "Share of WUI Fires over Time",
-    "text": "Share of WUI Fires over Time"
+    "text": "Overall\n\n\n\n\n\nDifference in fire-affected vs. high-wildfire-risk population shares, pooled 2000-2024\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBy Region\n\n\n\n\n\nDifference in fire-affected vs. high-wildfire-risk population shares by USFS region, pooled 2000-2024"
   },
   {
     "objectID": "reports/wui_tables.html",
@@ -96,6 +33,62 @@
     "title": "WUI Tables",
     "section": "Population Affected",
     "text": "Population Affected\nAll community-intersecting fires regardless of WFBZ’s WUI designation.\n\n\n\n\n\n\n\n\npop_wui\nmean Pop. exposed\nSD Pop. exposed\n25th pctl. Pop. exposed\nmedian Pop. exposed\n75th pctl. Pop. exposed\n\n\n\n\nNationwide\n\n\nWUI\n7428.7591\n46391.003\n222.00\n478.5\n834.75\n\n\nnon-WUI\n16059.2871\n38346.667\n991.25\n4173.5\n12756.50\n\n\nCalifornia\n\n\nWUI\n36226.4253\n112157.516\n217.25\n513.0\n6908.75\n\n\nnon-WUI\n43975.4361\n81406.020\n1212.75\n7956.0\n47590.25\n\n\nSouthern\n\n\nWUI\n2574.1226\n15160.546\n325.00\n537.5\n827.75\n\n\nnon-WUI\n12883.7538\n21344.184\n2047.50\n5328.5\n12872.75\n\n\nAlaska\n\n\nWUI\n1191.8333\n2190.128\n111.50\n642.5\n1012.50\n\n\nnon-WUI\n463.8611\n1117.215\n0.00\n28.0\n207.00\n\n\nSouthern Rockies\n\n\nWUI\n2752.1434\n13127.692\n114.00\n256.0\n593.00\n\n\nnon-WUI\n7335.8172\n21530.834\n81.50\n796.0\n4193.50\n\n\nSouthwestern\n\n\nWUI\n5495.0829\n26365.236\n67.00\n138.0\n351.00\n\n\nnon-WUI\n8403.9078\n17340.884\n167.00\n1124.0\n8149.00\n\n\nNorthern Rockies\n\n\nWUI\n542.4914\n2421.211\n64.25\n168.5\n362.25\n\n\nnon-WUI\n2782.3017\n8111.028\n30.00\n297.0\n1870.75\n\n\nIntermountain\n\n\nWUI\n5497.8994\n32189.943\n33.25\n94.0\n314.00\n\n\nnon-WUI\n12245.3047\n28641.489\n35.25\n656.0\n9398.50\n\n\nPacific Northwest\n\n\nWUI\n2133.6420\n12040.217\n155.00\n318.5\n623.00\n\n\nnon-WUI\n8497.2131\n22433.027\n312.25\n1477.5\n6699.00\n\n\nEastern\n\n\nWUI\n2588.8576\n21887.126\n420.00\n639.5\n898.50\n\n\nnon-WUI\n12191.8777\n23969.993\n1362.25\n4115.0\n11871.25\n\n\nHawaii\n\n\nWUI\n4031.2778\n10480.112\n431.50\n851.0\n1961.00\n\n\nnon-WUI\n49361.5000\n56802.275\n12723.75\n22157.0\n73367.00"
+  },
+  {
+    "objectID": "reports/main_timeseries.html#share-of-wui-fires-over-time",
+    "href": "reports/main_timeseries.html#share-of-wui-fires-over-time",
+    "title": "Variables over Time",
+    "section": "Share of WUI Fires over Time",
+    "text": "Share of WUI Fires over Time"
+  },
+  {
+    "objectID": "reports/pop_demographics.html",
+    "href": "reports/pop_demographics.html",
+    "title": "Demographic Time Series",
+    "section": "",
+    "text": "In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts. The colored ribbon ranges from the 25th to the 75th percentile for that metric.\nThe same is show for “at risk” census tracts (the 90th percentile of tracts nationally by WHP) in grey, with the dashed line showing the median."
+  },
+  {
+    "objectID": "reports/pop_demographics.html#vehicle-availability",
+    "href": "reports/pop_demographics.html#vehicle-availability",
+    "title": "Demographic Time Series",
+    "section": "Vehicle Availability",
+    "text": "Vehicle Availability\n\n\n\n\n\nShare of fire-affected households with no vehicle access, by USFS region and year"
+  },
+  {
+    "objectID": "reports/pop_demographics.html#race",
+    "href": "reports/pop_demographics.html#race",
+    "title": "Demographic Time Series",
+    "section": "Race",
+    "text": "Race"
+  },
+  {
+    "objectID": "reports/pop_demographics.html#poverty",
+    "href": "reports/pop_demographics.html#poverty",
+    "title": "Demographic Time Series",
+    "section": "Poverty",
+    "text": "Poverty\n\n\n\n\n\nPopulation below 100% of poverty line near wildfire burn zones, by USFS region and year"
+  },
+  {
+    "objectID": "reports/pop_demographics.html#housing-cost-burden",
+    "href": "reports/pop_demographics.html#housing-cost-burden",
+    "title": "Demographic Time Series",
+    "section": "Housing Cost Burden",
+    "text": "Housing Cost Burden\n\n\n\n\n\nCost-burdened households (&gt;=50% income on housing) near wildfire burn zones, by USFS region and year"
+  },
+  {
+    "objectID": "reports/main_geography.html#reference",
+    "href": "reports/main_geography.html#reference",
+    "title": "Fire Season & Geography",
+    "section": "Reference",
+    "text": "Reference\n\nRegions Mapped"
+  },
+  {
+    "objectID": "reports/main_correlations.html",
+    "href": "reports/main_correlations.html",
+    "title": "Correlations",
+    "section": "",
+    "text": "Numeric Values Compared\n\n\n\n\n\n\n\n\n\n\n\nNumeric & Categorical Values Compared\n\n\n\n\n\n\n\n\n\n\n\nCategorical Values Compared"
   },
   {
     "objectID": "reports/fema.html",
