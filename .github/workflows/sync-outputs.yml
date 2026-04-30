@@ -34,8 +34,10 @@ jobs:
 
       - name: Replace tex values
         run: |
-          rm -rf target/vals.tex
+          rm -rf target/vals.tex target/t1.tex target/t2.tex
           cp source/tex/vals.tex target/vals.tex
+          cp source/tex/t1.tex target/t1.tex
+          cp source/tex/t2.tex target/t2.tex
 
       - name: Commit and push
         working-directory: target
