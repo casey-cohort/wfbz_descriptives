@@ -6,12 +6,82 @@ execute:
   warning: false
   message: false
 ---
-
+{{< include _setup.qmd >}}
 {{< include _pop_setup.qmd >}}
 
 
+```{r}
+hexgrid <- st_make_grid(states_pop, square = FALSE, n = c(500, 500)) %>%
+  st_as_sf() %>%
+  mutate(hexid = row_number()) %>%
+  st_filter(states_pop)
 
-```{r pop_over_time, fig.height = 8, fig.width = 8}
+
+wfbz_hex <- hexgrid %>%
+  st_join(
+    wfbz %>%
+      mutate(
+        usfs_region = wfbz_region,
+        usfs_region_area = wfbz_region_area,
+        usfs_region_pop = wfbz_region_pop
+      ) %>%
+      inner_join(
+        read_csv(here('data/processed/pop_affected_per_fire.csv')),
+        by = c(wildfire_id = "ID_hazard")
+      ),
+    left = FALSE
+  ) %>%
+  filter(wildfire_community_intersect) %>%
+  group_by(hexid, geometry = x) %>%
+  summarize(
+    `Median pop.\n exposed` = median(`exposed_10km`, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+wfbz_by_region <- wfbz %>%
+  mutate(
+    usfs_region = wfbz_region,
+    usfs_region_area = wfbz_region_area,
+    usfs_region_pop = wfbz_region_pop
+  ) %>%
+  st_drop_geometry() %>%
+  inner_join(
+    read_csv(here('data/processed/pop_affected_per_fire.csv')),
+    by = c(wildfire_id = "ID_hazard")
+  ) %>%
+  filter(wildfire_community_intersect) %>%
+  group_by(usfs_region, wildfire_year) %>%
+  summarize(
+    `Median pop. exposed` = median(exposed_10km, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  left_join(REGION_ORDER, by = "usfs_region")
+
+mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
+  ggplot() +
+    geom_sf(
+      data = shift_geometry(dat),
+      aes(fill = get(var)),
+      color = NA
+    ) +
+    geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+    khroma::scale_fill_iridescent(
+      name = if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
+      labels = flab
+    ) +
+    coord_sf(expand = FALSE) +
+    theme(
+      axis.ticks.x = element_blank(),
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.line = element_blank(),
+      plot.margin = margin(0, 0, 0, 0)
+    )
+}
+```
+
+```{r pop_over_time, fig.height = 12, fig.width = 8}
 pop <- read_csv(here('data/processed/pop_affected.csv')) %>%
   rename(
     wildfire_year = year,
@@ -83,15 +153,15 @@ p_abs <- ggplot(data = pop) +
     expand = expansion(add = c(0, 0))
   ) +
   #    coord_cartesian(xlim = c(2000, 2025)) +
-  scale_y_continuous(labels = scales::comma, expand = c(0, 0)) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = expansion(mult = c(0, 0))
+  ) +
   xlab(NULL) +
   ylab('Population Affected') +
   pop_theme +
   theme(
-    panel.grid.major.y = element_line(color = 'grey75'),
-    panel.grid.minor.y = element_line(color = 'grey90'),
     legend.position = 'right' #,
-    #plot.margin = unit(c(1, 5, 1, 5), "cm"),
   )
 
 names(region_colors) <- sort(as.character(pop_labels$label_rel))
@@ -121,13 +191,33 @@ p_rel <- ggplot(data = pop) +
   ylab(glue("Population Affected (Share of Total)")) +
   pop_theme +
   theme(
-    panel.grid.major.y = element_line(color = 'grey75'),
-    panel.grid.minor.y = element_line(color = 'grey90'),
     legend.position = 'right' #,
-    #plot.margin = unit(c(1, 5, 1, 5), "cm"),
   )
 
-p <- p_abs + plot_spacer() + p_rel + plot_layout(ncol = 1, heights = c(5, 1, 5))
+p <- p_abs +
+  plot_spacer() +
+  p_rel +
+  plot_spacer() +
+  mapme(wfbz_hex, 'Median pop.\n exposed') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
 p
-ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 8)
+ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 12)
+```
+
+### Median by fire
+
+```{r pop_by_fire_over_time, fig.height = 12, fig.width = 8}
+p <- plotme(dat = wfbz_by_region, 'Median pop. exposed') +
+  plot_spacer() +
+  plotme(dat = wfbz_by_region, 'Median pop. exposed', rel = TRUE) +
+  plot_spacer() +
+  mapme(wfbz_hex, 'Median pop.\n exposed') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+p
+ggsave(
+  here('figures/pop_by_fire_over_time.pdf'),
+  last_plot(),
+  width = 8,
+  height = 12
+)
 ```

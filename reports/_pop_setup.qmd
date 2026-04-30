@@ -1,5 +1,5 @@
 
-```{r packages}
+```{r pop_packages}
 library(here)
 library(tidyverse)
 library(sf)
@@ -16,7 +16,7 @@ set.seed(708)
 dir.create(here('figures'), showWarnings = FALSE)
 ```
 
-```{r region_setup}
+```{r pop_region_setup}
 REGION_ORDER <- tibble(
   usfs_region = c(
     "California",
