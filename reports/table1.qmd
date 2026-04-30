@@ -104,16 +104,16 @@ tbl_summaries <- wfbz_by_region_agg %>%
 tbl_counts <- wfbz_by_region_agg %>%
   group_by(agg, usfs_region, usfs_region_area, usfs_region_pop) %>%
   summarize(
-    `FMAG Declared (% of total in region)` = sum(
+    `FMAG Declared (% in region)` = sum(
       wildfire_fema_dec,
       na.rm = TRUE
     ),
-    `Fatalities per 100K (total)` = 100000 *
+    `Fatalities per 100K\n(total)` = 100000 *
       sum(wildfire_max_civil_fatalities, na.rm = TRUE) /
       first(usfs_region_pop),
-    `Fire Size km², mean (SD)` = mean(wildfire_area, na.rm = TRUE),
+    `Fire Size km²\nmean (SD)` = mean(wildfire_area, na.rm = TRUE),
     `Fire Size (sd)` = sd(wildfire_area, na.rm = TRUE),
-    `WUI (% of total in region)` = sum(
+    `WUI\n(% in region)` = sum(
       str_detect(wildfire_wui, '(interface|intermix)'),
       na.rm = TRUE
     ),
@@ -135,10 +135,10 @@ tbl_counts <- wfbz_by_region_agg %>%
       name == 'Number' ~ glue(
         '{format(as.integer(value), big.mark = \',\')}'
       ),
-      name == 'Fatalities per 100K (total)' ~ glue(
+      name == 'Fatalities per 100K\n(total)' ~ glue(
         '{format(value, digits = 2)}'
       ),
-      name == 'Fire Size km², mean (SD)' ~ glue(
+      name == 'Fire Size km²\nmean (SD)' ~ glue(
         '{sprintf("%.1f", value)} ({sprintf("%.1f", `Fire Size (sd)`)})'
       ),
       name == 'Mean Projected Cost' ~ glue(
@@ -178,10 +178,10 @@ _Therefore, the counts do not have a percentage provided._
 t1 <- tbl_counts %>%
   filter(agg == "Community-Impacting Fires") %>%
   select(-agg) %>%
-  pivot_longer(cols = -name, names_to = "variable", values_to = "value") %>%
+  pivot_longer(cols = -name, names_to = "Region", values_to = "value") %>%
   pivot_wider(names_from = name, values_from = value) %>%
   gt() %>%
-  tab_options()
+  tab_options(table.font.size = 8)
 
 t1 %>%
   as_latex() %>%
@@ -196,10 +196,10 @@ t1
 t2 <- tbl_summaries %>%
   filter(agg == "Community-Impacting Fires") %>%
   select(-agg) %>%
-  pivot_longer(cols = -name, names_to = "variable", values_to = "value") %>%
-  pivot_wider(names_from = name, values_from = value) %>%
+  pivot_longer(cols = -name, names_to = "Region", values_to = "value") %>%
+  pivot_wider(names_from = name, values_from = value, id_cols = ) %>%
   gt() %>%
-  tab_options()
+  tab_options(table.font.size = 8)
 
 #write_lines(as.character(as_latex(t1)), file = 'figures/t1.tex')
 t2 %>%
