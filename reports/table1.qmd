@@ -177,15 +177,16 @@ _Therefore, the counts do not have a percentage provided._
 ```{r tbl_crit_counts}
 t1 <- tbl_counts %>%
   filter(agg == "Community-Impacting Fires") %>%
-  gt(rowname_col = 'name') %>%
-  tab_options(table.width = px(1800)) %>%
-  cols_hide(agg)
+  select(-agg) %>%
+  pivot_longer(cols = -name, names_to = "variable", values_to = "value") %>%
+  pivot_wider(names_from = name, values_from = value) %>%
+  gt() %>%
+  tab_options()
 
 t1 %>%
   as_latex() %>%
   as.character() %>%
   writeLines(here("tex/t1.tex"))
-
 
 t1
 ```
@@ -194,8 +195,11 @@ t1
 ```{r tbl_crit_summ}
 t2 <- tbl_summaries %>%
   filter(agg == "Community-Impacting Fires") %>%
-  gt(rowname_col = 'name') %>%
-  cols_hide(agg)
+  select(-agg) %>%
+  pivot_longer(cols = -name, names_to = "variable", values_to = "value") %>%
+  pivot_wider(names_from = name, values_from = value) %>%
+  gt() %>%
+  tab_options()
 
 #write_lines(as.character(as_latex(t1)), file = 'figures/t1.tex')
 t2 %>%
