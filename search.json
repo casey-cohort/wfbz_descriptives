@@ -95,6 +95,6 @@
     "href": "reports/fema.html",
     "title": "FEMA Declaration Summaries",
     "section": "",
-    "text": "Fema Declaration Likelihood by State\n\n\n\n\n\n\n\n\n\n\n\nVariables vs. FEMA Declarations\n\n\n\n\n\n\n\n\n\nNote: to show y axis label at each plot will require custom coding – need to jitter y axis values or else create each plot without facet\n\n\nGeographic Distribution (all years)\nEvents\n\n\n\n\n\n\n\n\n\nFEMA Declarations\n\n\n\n\n\n\n\n\n\nDeclarations per Event\nHow to disentangle that FEMA Declarations makes an event?\n\n\n\n\n\n\n\n\n\nDeclarations per Event (Scale Shifted)"
+    "text": "Fema Declaration Likelihood by State\n\n\n\n\n\n\n\n\n\n\n\nVariables vs. FEMA Declarations\n\n\n\n\n\n\n\n\n\nNote: to show y axis label at each plot will require custom coding – need to jitter y axis values or else create each plot without facet\n\n\nGeographic Distribution (all years)\nEvents\n\n\n\n\n\n\n\n\n\nFEMA Declarations\n\n\n\n\n\n\n\n\n\nDeclarations per Event\nHow to disentangle that FEMA Declarations makes an event?"
   }
 ]
