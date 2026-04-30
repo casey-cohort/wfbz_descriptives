@@ -186,7 +186,13 @@ t1 <- tbl_counts %>%
 t1 %>%
   as_latex() %>%
   as.character() %>%
-  writeLines(here("tex/t1.tex"))
+  gsub(
+    '\\end{table}',
+    '\\caption{Counts of wildfire burn zone disasters, structures destroyed, and civilian fatalities by modified US Forest Service region, 2000--2024. Percentages represent each region\'s share of the national total.}\n\\label{tab:fire_characteristics}\n\\end{table}',
+    x = .,
+    fixed = TRUE
+  ) %>%
+  writeLines(here("figures/t1.tex"))
 
 t1
 ```
@@ -205,7 +211,13 @@ t2 <- tbl_summaries %>%
 t2 %>%
   as_latex() %>%
   as.character() %>%
-  writeLines(here("tex/t2.tex"))
+  gsub(
+    '\\end{table}',
+    '\\caption{Disaster characteristics of wildfire burn zone disasters by modified US Forest Service region, 2000--2024. Percentages for FMAG declarations and WUI represent the proportion of fires within each region meeting that criterion.}\n\\label{tab:population_exposure}\n\\end{table}',
+    x = .,
+    fixed = TRUE
+  ) %>%
+  writeLines(here("figures/t2.tex"))
 
 t2
 ```
