@@ -215,7 +215,7 @@ plotme <- function(
     region_label <- paste0(
       as.character(region_summary$usfs_region),
       ' (',
-      format(100 * region_summary$pcttot, digits = 1),
+      trim(format(100 * region_summary$pcttot, digits = 1)),
       '%)'
     )
   } else {

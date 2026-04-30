@@ -276,8 +276,7 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(
-    palette = 'Spectral',
+  khroma::scale_fill_iridescent(
     name = '',
     labels = scales::percent
   ) +
@@ -290,27 +289,26 @@ ggsave(
 )
 ```
 
-Declarations per Event (Scale Shifted)
+<!--Declarations per Event (Scale Shifted)-->
 
 ```{r}
 #| include: true
-ggplot() +
-  geom_sf(
-    data = shift_geometry(hex_summary),
-    aes(fill = `FEMA Declarations` / Events),
-    color = NA
-  ) +
-  geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(
-    palette = 'Spectral',
-    name = '',
-    values = c(0, scales::breaks_log()(c(.0001, 1)))
-  ) +
-  coord_sf(expand = FALSE)
-ggsave(
-  here('figures/maps_decs_per_event_log.pdf'),
-  last_plot(),
-  width = 8,
-  height = 5
-)
+#ggplot() +
+#  geom_sf(
+#    data = shift_geometry(hex_summary),
+#    aes(fill = `FEMA Declarations` / Events),
+#    color = NA
+#  ) +
+#  geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+#  khroma::scale_fill_iridescent(
+#    name = '',
+#    values = c(0, scales::breaks_log()(c(.0001, 1)))
+#  ) +
+#  coord_sf(expand = FALSE)
+#ggsave(
+#  here('figures/maps_decs_per_event_log.pdf'),
+#  last_plot(),
+#  width = 8,
+#  height = 5
+#)
 ```

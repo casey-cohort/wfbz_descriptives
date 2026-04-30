@@ -9,18 +9,81 @@ execute:
 
 {{< include _setup.qmd >}}
 
+```{r map_setup}
+hexgrid <- st_make_grid(states_pop, square = FALSE, n = c(500, 500)) %>%
+  st_as_sf() %>%
+  mutate(hexid = row_number()) %>%
+  st_filter(states_pop)
+
+
+wfbz_hex <- hexgrid %>%
+  st_join(
+    wfbz %>%
+      mutate(
+        usfs_region = wfbz_region,
+        usfs_region_area = wfbz_region_area,
+        usfs_region_pop = wfbz_region_pop
+      ),
+    left = FALSE
+  ) %>%
+  filter(wildfire_community_intersect) %>%
+  group_by(hexid, geometry = x) %>%
+  summarize(
+    `Events` = n(),
+    `Fatalities` = sum(wildfire_max_civil_fatalities, na.rm = TRUE),
+    `Fatalities per 100K` = 100000 *
+      sum(wildfire_max_civil_fatalities / usfs_region_pop, na.rm = TRUE),
+    `Structures Destroyed` = sum(wildfire_struct_destroyed, na.rm = TRUE),
+    `FEMA Declarations (n)` = sum(wildfire_fema_dec, na.rm = TRUE),
+    `Burned Area` = sum(wildfire_area, na.rm = TRUE),
+    `Burned Area Percent` = 100 *
+      sum(wildfire_area / usfs_region_area, na.rm = TRUE),
+    `WUI` = sum(str_detect(wildfire_wui, '(intermix|interface)'), na.rm = TRUE),
+    `WUI Percent` = 100 *
+      sum(str_detect(wildfire_wui, '(interface|intermix)'), na.rm = TRUE) /
+      n(),
+    `Mean Fire Size` = mean(wildfire_area, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
+  ggplot() +
+    geom_sf(
+      data = shift_geometry(dat),
+      aes(fill = get(var)),
+      color = NA
+    ) +
+    geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
+    khroma::scale_fill_iridescent(
+      name = if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
+      labels = flab
+    ) +
+    coord_sf(expand = FALSE) +
+    theme(
+      axis.ticks.x = element_blank(),
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.line = element_blank(),
+      plot.margin = margin(0, 0, 0, 0)
+    )
+}
+```
+
 ### Number of Fire Disasters per Region over Time
 
-```{r events_over_time, fig.height = 8, fig.width = 8}
+```{r events_over_time, fig.height = 12, fig.width = 8}
 plotme(wfbz_crit, 'Events', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'Events', rel = TRUE) +
-  plot_layout(ncol = 1, heights = c(5, 1, 5), guides = 'collect')
+  plot_spacer() +
+  mapme(wfbz_hex, 'Events') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
 ggsave(
   here('figures/events_over_time.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 12
 )
 ```
 
@@ -30,7 +93,7 @@ ggsave(
 The five deadliest fires in our data set are labeled.
 
 
-```{r fatalities_over_time, fig.height = 8, fig.width = 8}
+```{r fatalities_over_time, fig.height = 12, fig.width = 8}
 plotme(wfbz_crit, 'Fatalities', rel = FALSE) +
   annotate(
     "text",
@@ -79,12 +142,14 @@ plotme(wfbz_crit, 'Fatalities', rel = FALSE) +
   ) +
   plot_spacer() +
   plotme(wfbz_crit, 'Fatalities', rel = TRUE) +
-  plot_layout(ncol = 1, heights = c(5, 1, 5))
+  plot_spacer() +
+  mapme(wfbz_hex, 'Fatalities') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
 ggsave(
   here('figures/fatalities_over_time.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 12
 )
 ```
 
@@ -93,7 +158,7 @@ ggsave(
 
 The five fires in our data set with the most destroyed structures are labeled.
 
-```{r structures_over_time, fig.height = 8, fig.width = 8}
+```{r structures_over_time, fig.height = 12, fig.width = 8}
 plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
   annotate(
     "text",
@@ -142,28 +207,32 @@ plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
   ) +
   plot_spacer() +
   plotme(wfbz_crit, 'Structures Destroyed', rel = TRUE) +
-  plot_layout(ncol = 1, heights = c(5, 1, 5))
+  plot_spacer() +
+  mapme(wfbz_hex, 'Structures Destroyed') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
 ggsave(
   here('figures/structures_over_time.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 12
 )
 ```
 
 
 ### Number of FEMA Declarations per Region over Time
 
-```{r fema_over_time, fig.height = 8, fig.width = 8}
+```{r fema_over_time, fig.height = 12, fig.width = 8}
 plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'FEMA Declarations (n)', rel = TRUE) +
-  plot_layout(ncol = 1, heights = c(5, 1, 5))
+  plot_spacer() +
+  mapme(wfbz_hex, 'FEMA Declarations (n)') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
 ggsave(
   here('figures/fema_over_time.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 12
 )
 ```
 
@@ -171,7 +240,7 @@ ggsave(
 
 _i.e. the total area of all wildfire footprints per region/year (even if a fire affected the same spot twice in the year)_
 
-```{r burned_area_over_time, fig.height = 8, fig.width = 8}
+```{r burned_area_over_time, fig.height = 12, fig.width = 8}
 plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
@@ -179,12 +248,14 @@ plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   ) +
   plot_spacer() +
   plotme(wfbz_crit, 'Burned Area', rel = TRUE) +
-  plot_layout(ncol = 1, heights = c(5, 1, 5))
+  plot_spacer() +
+  mapme(wfbz_hex, 'Burned Area', unit = 'km²') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
 ggsave(
   here('figures/burned_area_over_time.pdf'),
   last_plot(),
   width = 8,
-  height = 8
+  height = 12
 )
 ```
 
@@ -193,30 +264,42 @@ ggsave(
 _i.e. the mean area of the wildfire footprints in a region/year_
 
 
-```{r fire_size_over_time, fig.height = 4, fig.width = 8}
+```{r fire_size_over_time, fig.height = 8, fig.width = 8}
 plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
   scale_y_continuous(
     expand = expansion(mult = c(0, 0)),
     labels = scales::comma
   ) +
-  plot_layout(ncol = 1)
+  plot_spacer() +
+  mapme(wfbz_hex, 'Mean Fire Size', unit = 'km²') +
+  plot_layout(ncol = 1, heights = c(5, 1, 5))
 ggsave(
   here('figures/fire_size_over_time.pdf'),
   last_plot(),
   width = 8,
-  height = 4
+  height = 8
 )
 ```
 
 ## Share of WUI Fires over Time
 
-```{r wui_over_time, fig.height = 12, fig.width = 14}
+```{r wui_over_time, fig.height = 10, fig.width = 14}
 plotme(wfbz_crit, 'WUI', stack = FALSE) +
   xlab('')
 ggsave(
   here('figures/wui_over_time.pdf'),
   last_plot(),
   width = 14,
-  height = 12
+  height = 6
+)
+```
+
+```{r wui_over_time_map, fig.height = 4, fig.width = 8}
+mapme(wfbz_hex, 'WUI Percent', flab = \(x) scales::percent(x / 100))
+ggsave(
+  here('figures/wui_over_time_map.pdf'),
+  last_plot(),
+  width = 14,
+  height = 6
 )
 ```

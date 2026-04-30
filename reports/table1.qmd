@@ -55,7 +55,8 @@ tbl_summaries <- wfbz_by_region_agg %>%
         wildfire_civil_injuries,
         wildfire_total_injuries,
         wildfire_civil_evacuation,
-        wildfire_total_evacuation
+        wildfire_total_evacuation,
+        wildfire_fema_dec
       ),
       ~ sum(.x, na.rm = TRUE) / 2,
       .names = '{.col}_total' # div by 2 since we have both nationwide and regions included
@@ -68,10 +69,11 @@ tbl_summaries <- wfbz_by_region_agg %>%
         ct,
         wildfire_struct_destroyed,
         # wildfire_struct_threatened,
-        wildfire_max_civil_fatalities #,
+        wildfire_max_civil_fatalities,
         # wildfire_total_fatalities,
         #wildfire_civil_injuries,
-        #wildfire_total_injuries
+        #wildfire_total_injuries,
+        wildfire_fema_dec
       ),
       ~ format_tot_percent(
         sum(.x, na.rm = TRUE),
@@ -84,12 +86,13 @@ tbl_summaries <- wfbz_by_region_agg %>%
     `Number` = ct,
     `Structures destroyed` = wildfire_struct_destroyed,
     #`Structures threatened` = wildfire_struct_threatened,
-    `Civilian fatalities` = wildfire_max_civil_fatalities
+    `Civilian fatalities` = wildfire_max_civil_fatalities,
     #`Total fatalities` = wildfire_total_fatalities,
     #`Civilian injuries` = wildfire_civil_injuries,
     #`Total injuries` = wildfire_total_injuries #,
     #`Civilian evacuations` = wildfire_civil_evacuation,
-    #`Total evacuations` = wildfire_total_evacuation
+    #`Total evacuations` = wildfire_total_evacuation,
+    `FMAG Declarations` = wildfire_fema_dec
   ) %>%
   select(-usfs_region_area, -usfs_region_pop) %>%
   pivot_longer(c(-agg, -usfs_region)) %>%
@@ -166,29 +169,39 @@ pop_affected_row <- read_csv(here('data/processed/pop_affected.csv')) %>%
 tbl_counts <- bind_rows(tbl_counts, pop_affected_row)
 ```
 
-### Community-Impacting Fires
-
 
 _Note: percents represent percentage of fires that met this criteria within the region._
 
 _Therefore, the counts do not have a percentage provided._
 
 ```{r tbl_crit_counts}
-t1 <- bind_rows(tbl_counts, tbl_summaries) %>%
+t1 <- tbl_counts %>%
   filter(agg == "Community-Impacting Fires") %>%
   gt(rowname_col = 'name') %>%
-  tab_row_group(
-    label = 'Counts, N (% of national)',
-    rows = 6:8
-  ) %>%
-  row_group_order(c('Counts, N (% of national)', NA)) %>%
   tab_options(table.width = px(1800)) %>%
-  cols_hide(agg) %>%
-  tab_stub_indent(
-    rows = 6:8,
-    indent = 4
-  )
+  cols_hide(agg)
+
+t1 %>%
+  as_latex() %>%
+  as.character() %>%
+  writeLines(here("tex/t1.tex"))
+
+
+t1
+```
+
+
+```{r tbl_crit_summ}
+t2 <- tbl_summaries %>%
+  filter(agg == "Community-Impacting Fires") %>%
+  gt(rowname_col = 'name') %>%
+  cols_hide(agg)
 
 #write_lines(as.character(as_latex(t1)), file = 'figures/t1.tex')
-t1
+t2 %>%
+  as_latex() %>%
+  as.character() %>%
+  writeLines(here("tex/t2.tex"))
+
+t2
 ```
