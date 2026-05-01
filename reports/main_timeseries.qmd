@@ -285,12 +285,16 @@ ggsave(
 
 ```{r wui_over_time, fig.height = 10, fig.width = 14}
 plotme(wfbz_crit, 'WUI', stack = FALSE) +
-  xlab('')
+  xlab('') +
+  theme(
+    margins = margin(10, 10, 10, 10, unit = 'pt'),
+    panel.spacing = unit(10, "pt")
+  )
 ggsave(
   here('figures/wui_over_time.pdf'),
   last_plot(),
-  width = 14,
-  height = 6
+  width = 10,
+  height = 16
 )
 ```
 

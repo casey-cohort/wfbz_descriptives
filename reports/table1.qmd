@@ -83,7 +83,7 @@ tbl_summaries <- wfbz_by_region_agg %>%
     .groups = 'drop'
   ) %>%
   rename(
-    `Number` = ct,
+    `Events` = ct,
     `Structures destroyed` = wildfire_struct_destroyed,
     #`Structures threatened` = wildfire_struct_threatened,
     `Civilian fatalities` = wildfire_max_civil_fatalities,
@@ -111,7 +111,7 @@ tbl_counts <- wfbz_by_region_agg %>%
     `Fatalities per 100K\n(total)` = 100000 *
       sum(wildfire_max_civil_fatalities, na.rm = TRUE) /
       first(usfs_region_pop),
-    `Fire Size km²\nmean (SD)` = mean(wildfire_area, na.rm = TRUE),
+    `Fire Size km²,\nmean (SD)` = mean(wildfire_area, na.rm = TRUE),
     `Fire Size (sd)` = sd(wildfire_area, na.rm = TRUE),
     `WUI\n(% in region)` = sum(
       str_detect(wildfire_wui, '(interface|intermix)'),
@@ -132,13 +132,13 @@ tbl_counts <- wfbz_by_region_agg %>%
   pivot_longer(c(-agg, -usfs_region, -N, -`Fire Size (sd)`)) %>%
   mutate(
     value = case_when(
-      name == 'Number' ~ glue(
+      name == 'Events' ~ glue(
         '{format(as.integer(value), big.mark = \',\')}'
       ),
       name == 'Fatalities per 100K\n(total)' ~ glue(
         '{format(value, digits = 2)}'
       ),
-      name == 'Fire Size km²\nmean (SD)' ~ glue(
+      name == 'Fire Size km²,\nmean (SD)' ~ glue(
         '{sprintf("%.1f", value)} ({sprintf("%.1f", `Fire Size (sd)`)})'
       ),
       name == 'Mean Projected Cost' ~ glue(
@@ -204,6 +204,7 @@ t2 <- tbl_summaries %>%
   select(-agg) %>%
   pivot_longer(cols = -name, names_to = "Region", values_to = "value") %>%
   pivot_wider(names_from = name, values_from = value, id_cols = ) %>%
+  rename_with(.cols = -Region, .fn = ~ paste0(.x, ', n(%)')) %>%
   gt() %>%
   tab_options(table.font.size = 8)
 
