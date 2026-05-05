@@ -1,0 +1,213 @@
+---
+title: "WHP Diagnostics"
+toc: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r load_data}
+library(sf)
+library(tidyverse)
+library(here)
+library(tigris)
+library(arrow)
+tract_sf <- bind_rows(
+  read_sf(here('data/processed/tract_WHP_AK.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '02'),
+  read_sf(here('data/processed/tract_WHP_HI.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '15'),
+  read_sf(here('data/processed/tract_WHP_CONUS.geojson')) %>%
+    filter(!(substr(GEOID, 1, 2) %in% c('02', '15')))
+) %>%
+  filter(census_year == 2020) %>%
+  mutate(
+    high_risk = whp_mean >= quantile(whp_mean, 0.9, na.rm = TRUE),
+    high_risk_75 = whp_mean >= 75 #quantile(whp_mean, 0.67, na.rm = TRUE)
+  ) %>%
+  left_join(
+    read_parquet(here('data/processed/nhgis/population.parquet')) %>%
+      filter(period == '2019-2023')
+  )
+```
+
+```{r}
+county_sf <- tract_sf %>%
+  group_by(county = substr(GEOID, 1, 5)) %>%
+  summarize(
+    whp_mean = mean(whp_mean, na.rm = TRUE),
+    whp_max = max(whp_mean, na.rm = TRUE),
+    pct_high_risk = mean(high_risk),
+    pct_high_risk_75 = mean(high_risk_75),
+    geometry = st_union(geometry)
+  )
+```
+
+```{r}
+wfbz <- read_sf(here('data/raw/wfbz_disasters_2000-2025.geojson'))
+```
+
+### WHP Descriptives
+
+(by tract)
+
+```{r}
+summary(tract_sf$whp_mean)
+```
+
+```{r}
+ggplot(tract_sf) + geom_density(aes(whp_mean)) + scale_x_log10()
+```
+
+### WHP Risk cutoff
+
+```{r}
+quantile(tract_sf$whp_mean, 0.90, na.rm = TRUE)
+```
+
+```{r}
+#quantile(tract_sf$whp_mean, 0.67, na.rm = TRUE)
+75
+```
+
+
+### pop included
+
+top decile
+
+```{r}
+sum(tract_sf$high_risk * tract_sf$pop, na.rm = T) /
+  sum(tract_sf$pop, na.rm = T)
+```
+
+mean value at thrshold
+
+```{r}
+sum(tract_sf$high_risk_75 * tract_sf$pop, na.rm = T) /
+  sum(tract_sf$pop, na.rm = T)
+```
+
+
+## WHP Distribution
+
+### County
+
+#### Mean tract-WHP
+
+natural scale
+
+```{r}
+ggplot(shift_geometry(county_sf)) +
+  geom_sf(aes(fill = whp_mean), color = NA, linewidth = 0) +
+  scale_fill_fermenter(
+    palette = 'Spectral',
+    direction = -1,
+    breaks = ~ quantile(.x, seq(.1, .9, by = .1))
+  ) +
+  theme_void()
+```
+
+
+#### Max tract-WHP
+
+(log transformed)
+
+```{r}
+ggplot(shift_geometry(county_sf)) +
+  geom_sf(aes(fill = whp_max), color = NA, linewidth = 0) +
+  scale_fill_fermenter(
+    palette = 'Spectral',
+    direction = -1,
+    transform = 'log',
+    labels = scales::comma,
+    n.breaks = 8
+  ) +
+  theme_void()
+```
+
+### High risk
+
+top decile
+
+```{r}
+ggplot(shift_geometry(county_sf)) +
+  geom_sf(aes(fill = pct_high_risk), color = NA, linewidth = 0) +
+  scale_fill_fermenter(
+    palette = 'Spectral',
+    direction = -1,
+    labels = scales::percent,
+    breaks = ~ quantile(.x, seq(.1, .9, by = .1))
+  ) +
+  theme_void()
+```
+
+mean value at thrshold
+
+```{r}
+ggplot(shift_geometry(county_sf)) +
+  geom_sf(aes(fill = pct_high_risk_75), color = NA, linewidth = 0) +
+  scale_fill_fermenter(
+    palette = 'Spectral',
+    direction = -1,
+    labels = scales::percent,
+    breaks = ~ quantile(.x, seq(.1, .9, by = .1))
+  ) +
+  theme_void()
+```
+
+## WFBZs vs Risk
+
+```{r}
+wfbz_whp <- wfbz %>%
+  st_join(st_transform(tract_sf, st_crs(wfbz))) %>%
+  st_drop_geometry() %>%
+  group_by(wildfire_id) %>%
+  summarize(
+    whp_min = min(whp_mean, na.rm = TRUE),
+    whp_mean = mean(whp_mean, na.rm = TRUE),
+    whp_max = max(whp_mean, na.rm = TRUE),
+    any_high_risk = any(high_risk, na.rm = TRUE),
+    pct_high_risk = mean(high_risk, na.rm = TRUE),
+    any_high_risk_75 = any(high_risk_75, na.rm = TRUE),
+    pct_high_risk_75 = mean(high_risk_75, na.rm = TRUE)
+  )
+```
+
+### Fires where _any_ tract that burned was high risk:
+
+Top decile
+
+```{r}
+table(wfbz_whp$any_high_risk)
+```
+
+mean value at thrshold
+```{r}
+table(wfbz_whp$any_high_risk_75)
+```
+
+### Percent of burned tracts that were high risk (by fire)
+
+Top decile
+
+```{r}
+summary(wfbz_whp$pct_high_risk)
+```
+
+pct at 100%
+
+```{r}
+mean(wfbz_whp$pct_high_risk == 1, na.rm = T)
+```
+
+mean value at thrshold
+
+```{r}
+summary(wfbz_whp$pct_high_risk_75)
+```
+
+pct at 100%
+```{r}
+mean(wfbz_whp$pct_high_risk_75 == 1, na.rm = T)
+```

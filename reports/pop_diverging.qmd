@@ -38,7 +38,7 @@ tract_sf <- bind_rows(
 )
 
 # Join tract-level population (most recent period per GEOID, ACS-preferred at
-# ties). Used only for pop > 0 filter before the whp quantile cut.
+# ties). Used only for pop > 0 filter before the whp_mean cutoff.
 tract_pop <- read_parquet(here('data/processed/nhgis/population.parquet')) %>%
   group_by(GEOID) %>%
   filter(start_year == max(start_year)) %>%
@@ -66,9 +66,10 @@ wfbz_region <- wfbz %>%
 
 ```{r high_risk_tracts}
 # Assign USFS regions to tracts (by nearest-feature on tract geometry), then
-# identify high-risk tracts per vintage: top 10% of whp_mean within each
-# (usfs_region, census_year) group. Keeping census_year lets us build a
-# reference set that matches each fire's contemporaneous tract vintage.
+# identify high-risk tracts as those whose mean WHP exceeds 75 — the national
+# 67th percentile of WHP raster cells (see README, "WHP high-risk cutoff").
+# Keeping census_year lets us build a reference set that matches each fire's
+# contemporaneous tract vintage.
 tract_risk <- tract_sf %>%
   filter(!is.na(whp_mean), !is.na(pop), pop > 0) %>%
   mutate(
@@ -80,9 +81,7 @@ tract_risk <- tract_sf %>%
   st_drop_geometry()
 
 high_risk_tracts <- tract_risk %>%
-  group_by(usfs_region, census_year) %>%
-  filter(whp_mean >= quantile(whp_mean, 0.9, na.rm = TRUE)) %>%
-  ungroup() %>%
+  filter(whp_mean > 75) %>%
   distinct(GEOID, census_year, usfs_region)
 
 # Fire counts per (census_year, period) bin — used to weight the reference

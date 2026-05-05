@@ -12,8 +12,7 @@ execute:
 In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts.
 The colored ribbon ranges from the 25th to the 75th percentile for that metric.
 
-The same is show for "at risk" census tracts (the 90th percentile of tracts nationally by WHP) in grey, with the dashed
-line showing the median.
+The same is shown for "at risk" census tracts (those whose mean WHP exceeds 75 — the national 67th percentile of WHP raster cells) in grey, with the dashed line showing the median.
 
 ```{r load_data}
 # Fire-tract census joins (built by staging/prep_spatial_join.R)

@@ -1,7 +1,7 @@
 """prep_whp.py — Python port of prep_whp.R
 
 Downloads USFS Wildfire Hazard Potential (WHP) rasters and computes per-tract
-zonal statistics (mean and max WHP) using popexposure / exactextract.
+mean WHP via popexposure / exactextract.
 
 Prerequisites
 -------------
@@ -59,8 +59,10 @@ def load_tracts() -> gpd.GeoDataFrame:
             f"{TRACTS_GEOJSON} not found. Run staging/prep_tracts.R from the project root first."
         )
     gdf = gpd.read_file(TRACTS_GEOJSON)
-    # popexposure requires a column whose name contains "ID"
-    gdf["ID_admin_unit"] = gdf["GEOID"].astype(str)
+    # popexposure requires a column whose name contains "ID". GEOID alone is not
+    # unique because tiger_tracts.geojson holds multiple census-year vintages
+    # of the same tract; (census_year, GEOID) is the natural unique key.
+    gdf["ID_admin_unit"] = gdf["census_year"].astype(str) + "_" + gdf["GEOID"].astype(str)
     return gdf
 
 

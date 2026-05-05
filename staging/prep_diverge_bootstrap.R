@@ -88,9 +88,7 @@ tract_risk <- tract_sf %>%
   st_drop_geometry()
 
 high_risk_tracts <- tract_risk %>%
-  group_by(usfs_region, census_year) %>%
-  filter(whp_mean >= quantile(whp_mean, 0.9, na.rm = TRUE)) %>%
-  ungroup() %>%
+  filter(whp_mean > 75) %>%
   distinct(GEOID, census_year, usfs_region)
 
 # -- Per-fire summands

@@ -43,6 +43,14 @@ python staging/abstract.py
 
 `staging/prep_population.R` requires an IPUMS API key set as `IPUMS_API_KEY` in your `.Renviron`.
 
+## WHP high-risk cutoff
+
+The "high wildfire risk" reference population in `pop_diverging.qmd`, `prep_diverge_bootstrap.R`, and the regional reference parquets built by `prep_population.R` is drawn from census tracts whose mean USFS Wildfire Hazard Potential (WHP) exceeds **75**.
+
+That cutoff is the national 67th percentile of the underlying WHP raster, computed across the three USFS WHP rasters (CONUS, Alaska, Hawaii) using all valid (non-nodata) cells. Computation method: stream each raster in windowed reads with `rasterio.block_windows`, accumulate a `numpy.bincount` histogram across all cells (WHP rasters are non-negative integers, so this is exact and constant-memory), then take `searchsorted(cumulative_counts, 0.67 * total)`. The same procedure on the same data gives 269 for the 85th percentile.
+
+The cutoff is applied to the per-tract `whp_mean` column written by `staging/prep_whp.py` (zonal mean of the WHP raster within each tract via `popexposure`).
+
 ## Census period assignment
 
 Each wildfire is linked to census demographic data via a two-step spatial/temporal match:

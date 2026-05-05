@@ -510,8 +510,12 @@ if (!all(file_exists(census_parquets))) {
 }
 
 # ── Regional population reference fractions ───────────────────────────────────
-# Requires regions.geojson (built by quarto render on main.qmd) and
-# tiger_tracts.rds (built by prep_tracts.R).
+# Reference is "high wildfire risk" tracts (whp_mean > 75; see README "WHP
+# high-risk cutoff") within each USFS region. Geometry is fixed at the 2020
+# tract vintage; demographic data still varies by census period.
+# Requires regions.geojson (built by quarto render on main.qmd),
+# tiger_tracts.geojson (built by prep_tracts.R), and tract_WHP_*.geojson
+# (built by prep_whp.py).
 
 if (!file.exists(here('data/processed/regions.geojson'))) {
   stop("data/processed/regions.geojson not found. Render main.qmd first.")
@@ -519,11 +523,34 @@ if (!file.exists(here('data/processed/regions.geojson'))) {
 if (!file.exists(here('data/processed/tiger_tracts.geojson'))) {
   stop("Run staging/prep_tracts.R first.")
 }
+whp_files <- here(c(
+  'data/processed/tract_WHP_AK.geojson',
+  'data/processed/tract_WHP_HI.geojson',
+  'data/processed/tract_WHP_CONUS.geojson'
+))
+if (!all(file.exists(whp_files))) {
+  stop("Run staging/prep_whp.py first to build tract_WHP_*.geojson.")
+}
 
 regions_sf <- read_sf(here('data/processed/regions.geojson'))
 
+# 2020-vintage GEOIDs of tracts whose mean WHP exceeds the national p67 cutoff.
+# Each WHP raster only has values for its own region (NaN elsewhere), so we
+# pull AK/HI/CONUS rows from the corresponding files.
+high_risk_geoids <- bind_rows(
+  read_sf(here('data/processed/tract_WHP_AK.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '02'),
+  read_sf(here('data/processed/tract_WHP_HI.geojson')) %>%
+    filter(substr(GEOID, 1, 2) == '15'),
+  read_sf(here('data/processed/tract_WHP_CONUS.geojson')) %>%
+    filter(!(substr(GEOID, 1, 2) %in% c('02', '15')))
+) %>%
+  st_drop_geometry() %>%
+  filter(census_year == 2020, !is.na(whp_mean), whp_mean > 75) %>%
+  pull(GEOID)
+
 tract_region <- read_sf(here('data/processed/tiger_tracts.geojson')) %>%
-  filter(census_year == 2020) %>%
+  filter(census_year == 2020, GEOID %in% high_risk_geoids) %>%
   st_transform(st_crs(regions_sf)) %>%
   mutate(
     usfs_region = regions_sf$usfs_region[st_nearest_feature(
