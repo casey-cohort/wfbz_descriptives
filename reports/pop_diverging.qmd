@@ -644,7 +644,7 @@ plotme <- function(dat) {
     xlab("Fire-affected minus high-risk reference (percentage points)") +
     ylab(NULL) +
     labs(
-      caption = '<– Less fire affected                                                                                                                                                            More fire affected –>'
+      caption = '<-- Less fire affected                                                                                                                                                            More fire affected -->'
     ) +
     div_theme +
     theme(
