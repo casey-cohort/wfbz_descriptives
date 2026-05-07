@@ -53,7 +53,7 @@
     "href": "reports/pop_demographics.html",
     "title": "Demographic Time Series",
     "section": "",
-    "text": "In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts. The colored ribbon ranges from the 25th to the 75th percentile for that metric.\nThe same is show for “at risk” census tracts (the 90th percentile of tracts nationally by WHP) in grey, with the dashed line showing the median."
+    "text": "In each plot, the colored, solid line represents the median value for the metric across wildfire-affected census tracts. The colored ribbon ranges from the 25th to the 75th percentile for that metric.\nThe same is shown for “at risk” census tracts (those whose mean WHP exceeds 75 — the national 67th percentile of WHP raster cells) in grey, with the dashed line showing the median."
   },
   {
     "objectID": "reports/pop_demographics.html#vehicle-availability",
@@ -103,5 +103,26 @@
     "title": "FEMA Declaration Summaries",
     "section": "",
     "text": "Fema Declaration Likelihood by State\n\n\n\n\n\n\n\n\n\n\n\nVariables vs. FEMA Declarations\n\n\n\n\n\n\n\n\n\nNote: to show y axis label at each plot will require custom coding – need to jitter y axis values or else create each plot without facet\n\n\nGeographic Distribution (all years)\nEvents\n\n\n\n\n\n\n\n\n\nFEMA Declarations\n\n\n\n\n\n\n\n\n\nDeclarations per Event\nHow to disentangle that FEMA Declarations makes an event?"
+  },
+  {
+    "objectID": "reports/whp_diagnostics.html",
+    "href": "reports/whp_diagnostics.html",
+    "title": "WHP Diagnostics",
+    "section": "",
+    "text": "(by tract)\n\n\n    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's \n    0.00     1.90    14.63    96.84    70.01 25623.66      940"
+  },
+  {
+    "objectID": "reports/whp_diagnostics.html#whp-distribution",
+    "href": "reports/whp_diagnostics.html#whp-distribution",
+    "title": "WHP Diagnostics",
+    "section": "WHP Distribution",
+    "text": "WHP Distribution\n\nCounty\n\nMean tract-WHP\nnatural scale\n\n\n\n\n\n\n\n\n\n\n\nMax tract-WHP\n(log transformed)\n\n\n\n\n\n\n\n\n\n\n\n\nHigh risk\ntop decile\n\n\n\n\n\n\n\n\n\nmean value at thrshold"
+  },
+  {
+    "objectID": "reports/whp_diagnostics.html#wfbzs-vs-risk",
+    "href": "reports/whp_diagnostics.html#wfbzs-vs-risk",
+    "title": "WHP Diagnostics",
+    "section": "WFBZs vs Risk",
+    "text": "WFBZs vs Risk\n\nFires where any tract that burned was high risk:\nTop decile\n\n\n\nFALSE  TRUE \n 2942  3828 \n\n\nmean value at thrshold\n\n\n\nFALSE  TRUE \n 1594  5176 \n\n\n\n\nPercent of burned tracts that were high risk (by fire)\nTop decile\n\n\n   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's \n 0.0000  0.0000  1.0000  0.5916  1.0000  1.0000     542 \n\n\npct at 100%\n\n\n[1] 0.5637444\n\n\nmean value at thrshold\n\n\n   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's \n 0.0000  1.0000  1.0000  0.8174  1.0000  1.0000     542 \n\n\npct at 100%\n\n\n[1] 0.7999358"
   }
 ]

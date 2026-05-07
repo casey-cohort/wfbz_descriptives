@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Diverging Demographic Charts – WFBZ Descriptives</title>
+<title>WHP Diagnostics – WFBZ Descriptives</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -118,7 +118,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Demographic Time Series</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../reports/pop_diverging.html" aria-current="page"> 
+    <a class="nav-link" href="../reports/pop_diverging.html"> 
 <span class="menu-text">Demographic Diverging Charts</span></a>
   </li>  
   <li class="nav-item">
@@ -141,8 +141,19 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overall" id="toc-overall" class="nav-link active" data-scroll-target="#overall">Overall</a></li>
-  <li><a href="#by-region" id="toc-by-region" class="nav-link" data-scroll-target="#by-region">By Region</a></li>
+  <li><a href="#whp-descriptives" id="toc-whp-descriptives" class="nav-link active" data-scroll-target="#whp-descriptives">WHP Descriptives</a></li>
+  <li><a href="#whp-risk-cutoff" id="toc-whp-risk-cutoff" class="nav-link" data-scroll-target="#whp-risk-cutoff">WHP Risk cutoff</a></li>
+  <li><a href="#pop-included" id="toc-pop-included" class="nav-link" data-scroll-target="#pop-included">pop included</a></li>
+  <li><a href="#whp-distribution" id="toc-whp-distribution" class="nav-link" data-scroll-target="#whp-distribution">WHP Distribution</a>
+  <ul class="collapse">
+  <li><a href="#county" id="toc-county" class="nav-link" data-scroll-target="#county">County</a></li>
+  <li><a href="#high-risk" id="toc-high-risk" class="nav-link" data-scroll-target="#high-risk">High risk</a></li>
+  </ul></li>
+  <li><a href="#wfbzs-vs-risk" id="toc-wfbzs-vs-risk" class="nav-link" data-scroll-target="#wfbzs-vs-risk">WFBZs vs Risk</a>
+  <ul class="collapse">
+  <li><a href="#fires-where-any-tract-that-burned-was-high-risk" id="toc-fires-where-any-tract-that-burned-was-high-risk" class="nav-link" data-scroll-target="#fires-where-any-tract-that-burned-was-high-risk">Fires where <em>any</em> tract that burned was high risk:</a></li>
+  <li><a href="#percent-of-burned-tracts-that-were-high-risk-by-fire" id="toc-percent-of-burned-tracts-that-were-high-risk-by-fire" class="nav-link" data-scroll-target="#percent-of-burned-tracts-that-were-high-risk-by-fire">Percent of burned tracts that were high risk (by fire)</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -151,7 +162,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Diverging Demographic Charts</h1>
+<h1 class="title">WHP Diagnostics</h1>
 </div>
 
 
@@ -168,51 +179,161 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overall" class="level3">
-<h3 class="anchored" data-anchor-id="overall">Overall</h3>
+<section id="whp-descriptives" class="level3">
+<h3 class="anchored" data-anchor-id="whp-descriptives">WHP Descriptives</h3>
+<p>(by tract)</p>
 <div class="cell">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="pop_diverging_files/figure-html/diverge_overall_fig-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Difference in fire-affected vs.&nbsp;high-wildfire-risk population shares, pooled 2000-2024</figcaption>
-</figure>
-</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+    0.00     1.90    14.63    96.84    70.01 25623.66      940 </code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="pop_diverging_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="whp_diagnostics_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="by-region" class="level3">
-<h3 class="anchored" data-anchor-id="by-region">By Region</h3>
+<section id="whp-risk-cutoff" class="level3">
+<h3 class="anchored" data-anchor-id="whp-risk-cutoff">WHP Risk cutoff</h3>
 <div class="cell">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="pop_diverging_files/figure-html/diverge_regional_fig-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption>Difference in fire-affected vs.&nbsp;high-wildfire-risk population shares by USFS region, pooled 2000-2024</figcaption>
-</figure>
+<div class="cell-output cell-output-stdout">
+<pre><code>     90% 
+177.6869 </code></pre>
 </div>
 </div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 75</code></pre>
 </div>
+</div>
+</section>
+<section id="pop-included" class="level3">
+<h3 class="anchored" data-anchor-id="pop-included">pop included</h3>
+<p>top decile</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.09957214</code></pre>
+</div>
+</div>
+<p>mean value at thrshold</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2380765</code></pre>
+</div>
+</div>
+</section>
+<section id="whp-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="whp-distribution">WHP Distribution</h2>
+<section id="county" class="level3">
+<h3 class="anchored" data-anchor-id="county">County</h3>
+<section id="mean-tract-whp" class="level4">
+<h4 class="anchored" data-anchor-id="mean-tract-whp">Mean tract-WHP</h4>
+<p>natural scale</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="pop_diverging_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="whp_diagnostics_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+</section>
+<section id="max-tract-whp" class="level4">
+<h4 class="anchored" data-anchor-id="max-tract-whp">Max tract-WHP</h4>
+<p>(log transformed)</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="whp_diagnostics_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="high-risk" class="level3">
+<h3 class="anchored" data-anchor-id="high-risk">High risk</h3>
+<p>top decile</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="whp_diagnostics_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>mean value at thrshold</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="whp_diagnostics_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="wfbzs-vs-risk" class="level2">
+<h2 class="anchored" data-anchor-id="wfbzs-vs-risk">WFBZs vs Risk</h2>
+<section id="fires-where-any-tract-that-burned-was-high-risk" class="level3">
+<h3 class="anchored" data-anchor-id="fires-where-any-tract-that-burned-was-high-risk">Fires where <em>any</em> tract that burned was high risk:</h3>
+<p>Top decile</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+FALSE  TRUE 
+ 2942  3828 </code></pre>
+</div>
+</div>
+<p>mean value at thrshold</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+FALSE  TRUE 
+ 1594  5176 </code></pre>
+</div>
+</div>
+</section>
+<section id="percent-of-burned-tracts-that-were-high-risk-by-fire" class="level3">
+<h3 class="anchored" data-anchor-id="percent-of-burned-tracts-that-were-high-risk-by-fire">Percent of burned tracts that were high risk (by fire)</h3>
+<p>Top decile</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+ 0.0000  0.0000  1.0000  0.5916  1.0000  1.0000     542 </code></pre>
+</div>
+</div>
+<p>pct at 100%</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5637444</code></pre>
+</div>
+</div>
+<p>mean value at thrshold</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+ 0.0000  1.0000  1.0000  0.8174  1.0000  1.0000     542 </code></pre>
+</div>
+</div>
+<p>pct at 100%</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.7999358</code></pre>
+</div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
