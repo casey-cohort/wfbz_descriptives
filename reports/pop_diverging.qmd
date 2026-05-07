@@ -589,49 +589,57 @@ dat <- diverge_regional %>%
 plotme <- function(dat) {
   ggplot(
     dat %>%
+      bind_rows(tibble(stat = unique(.$stat))) %>%
       mutate(
-        usfs_region = fct_relabel(fct_rev(usfs_region), .fun = \(.x) {
-          str_replace(.x, ' ', '\n')
-        })
-      ),
-    aes(x = diff, y = stat, fill = usfs_region)
+        usfs_region = fct_na_value_to_level(usfs_region),
+        usfs_region = fct_relevel(usfs_region, "Overall", after = 999),
+        stat = fct_rev(stat)
+      ), # dumb magick to make space in plot
+    aes(x = diff, y = usfs_region, fill = usfs_region)
   ) +
-    geom_rect(
-      data = dat %>% filter(usfs_region == 'Overall') %>% slice_head(n = 1), #hack to color overall background blue
-      aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
-      fill = 'lightblue',
-      color = 'darkblue',
-      alpha = 0.25,
-      inherit.aes = FALSE
+    annotate(
+      geom = 'col',
+      width = 1.5,
+      linewidth = 0,
+      fill = "grey95",
+      color = NA,
+      #'#000',
+      x = Inf,
+      y = 'Overall'
+    ) +
+    annotate(
+      geom = 'col',
+      width = 1.5,
+      linewidth = 0,
+      fill = "grey95",
+      color = NA,
+      #'#000',
+      x = -Inf,
+      y = 'Overall'
     ) +
     geom_col(width = 1, color = "grey25", linewidth = .1) +
     geom_errorbarh(
       aes(xmin = ci_low, xmax = ci_high),
-      width = 0.5,
+      width = 0, #0.5,
       linewidth = 0.3,
       color = 'grey25'
     ) +
     geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
     geom_text(
       aes(
-        x = pmin(0, ci_low), #if_else(diff < 0, pmax(0, ci_high), pmin(0, ci_low)),
-        label = str_replace(stat, '\n', ' '),
-        hjust = 1.1 #(.6 * diff / abs(diff)) + .5,
+        x = if_else(diff < 0, pmax(0, ci_high), pmin(0, ci_low)),
+        label = usfs_region,
+        hjust = (.6 * diff / abs(diff)) + .5,
+        fontface = if_else(usfs_region == 'Overall', 'bold', 'plain')
       ),
       size = 2
     ) +
-    scale_fill_manual(values = c('Overall' = '#fffedf', rev(region_colors))) +
+    scale_fill_manual(values = c('Overall' = '#757575', rev(region_colors))) +
     scale_x_continuous(
       labels = scales::percent_format(accuracy = 1),
-      n.breaks = 8,
-      expand = expansion(add = c(.02, .01))
+      n.breaks = 8
     ) +
-    facet_wrap(
-      ~usfs_region,
-      ncol = 1,
-      scale = 'fixed',
-      strip.position = 'left'
-    ) +
+    facet_wrap(~stat, ncol = 1, scale = 'fixed', strip.position = 'left') +
     xlab("Fire-affected minus high-risk reference (percentage points)") +
     ylab(NULL) +
     div_theme +
@@ -640,12 +648,18 @@ plotme <- function(dat) {
         angle = 0,
         hjust = .5,
         size = 8,
-        lineheight = 1
+        lineheight = .75
+      ),
+      strip.background = element_part_rect(
+        side = "r",
+        color = "grey50",
+        linewidth = .5,
+        fill = NA
       ),
       #  axis.text.y = element_text(angle = 45, hjust = 1),
       axis.text.y = element_blank(),
-      panel.spacing.y = unit(0, 'pt'),
-      panel.border = element_rect(color = "grey25", fill = NA, linewidth = .25)
+      panel.spacing.y = unit(4, 'pt'),
+      panel.border = element_blank() #element_rect(color = "grey25", fill = NA, linewidth = .25)
     )
 }
 
@@ -663,7 +677,7 @@ ggsave(
   here('figures/diverge_regional_race_ethn.pdf'),
   p_race,
   width = 8,
-  height = 8
+  height = 9
 )
 
 p_ses
