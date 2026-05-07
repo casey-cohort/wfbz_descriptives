@@ -637,11 +637,15 @@ plotme <- function(dat) {
     scale_fill_manual(values = c('Overall' = '#757575', rev(region_colors))) +
     scale_x_continuous(
       labels = scales::percent_format(accuracy = 1),
-      n.breaks = 8
+      n.breaks = 8,
+      expand = expansion(add = .01)
     ) +
     facet_wrap(~stat, ncol = 1, scale = 'fixed', strip.position = 'left') +
     xlab("Fire-affected minus high-risk reference (percentage points)") +
     ylab(NULL) +
+    labs(
+      caption = '<– Less fire affected                                                                                                                                                            More fire affected –>'
+    ) +
     div_theme +
     theme(
       strip.text.y = element_text(
@@ -659,7 +663,8 @@ plotme <- function(dat) {
       #  axis.text.y = element_text(angle = 45, hjust = 1),
       axis.text.y = element_blank(),
       panel.spacing.y = unit(4, 'pt'),
-      panel.border = element_blank() #element_rect(color = "grey25", fill = NA, linewidth = .25)
+      panel.border = element_blank(), #element_rect(color = "grey25", fill = NA, linewidth = .25)
+      plot.caption = element_text(vjust = 10, hjust = .5, size = rel(.75))
     )
 }
 
