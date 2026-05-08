@@ -46,7 +46,20 @@ wfbz_hex <- hexgrid %>%
     .groups = 'drop'
   )
 
-mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
+mapme <- function(
+  dat,
+  var,
+  flab = \(.x) scales::comma(.x, accuracy = 1),
+  unit = NULL,
+  breaks,
+  logscale = TRUE
+) {
+  if (logscale == TRUE) {
+    values <- scales::rescale(scales::pseudo_log_trans()$transform(breaks))
+  } else {
+    values <- scales::rescale(breaks)
+  }
+
   ggplot() +
     geom_sf(
       data = shift_geometry(dat),
@@ -54,9 +67,18 @@ mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
       color = NA
     ) +
     geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-    khroma::scale_fill_iridescent(
+    scale_fill_stepsn(
+      colors = khroma::color('incandescent')(5),
       name = if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
-      labels = flab
+      labels = flab,
+      n.breaks = 5,
+      breaks = breaks,
+      values = values,
+      transform = if_else(
+        logscale == TRUE,
+        'pseudo_log',
+        'identity'
+      )
     ) +
     coord_sf(expand = FALSE) +
     theme(
@@ -65,7 +87,13 @@ mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
       axis.text.x = element_blank(),
       axis.text.y = element_blank(),
       axis.line = element_blank(),
-      plot.margin = margin(0, 0, 0, 0)
+      plot.margin = margin(0, 0, 0, 0),
+      legend.margin = margin(0, 0, 0, l = 75),
+      #legend.position = 'bottom',
+      legend.position = "left",
+      legend.justification = "top",
+      legend.text = element_text(hjust = 0, vjust = -.5),
+      panel.spacing = unit(0, "lines")
     )
 }
 ```
@@ -77,8 +105,15 @@ plotme(wfbz_crit, 'Events', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'Events', rel = TRUE) +
   plot_spacer() +
-  mapme(wfbz_hex, 'Events') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'Events',
+      breaks = exp(pretty(log(range(wfbz_hex$Events, na.rm = TRUE)), n = 5))
+    ),
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, .5, 6), widths = c(3, 3, 3, 3, 4))
 ggsave(
   here('figures/events_over_time.pdf'),
   last_plot(),
@@ -143,8 +178,23 @@ plotme(wfbz_crit, 'Fatalities', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'Fatalities', rel = TRUE) +
   plot_spacer() +
-  mapme(wfbz_hex, 'Fatalities') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'Fatalities',
+      flab = ~ scales::comma(.x, accuracy = .001),
+      breaks = c(
+        0,
+        scales::breaks_log(n = 5, base = 10)(c(
+          0.001,
+          max(wfbz_hex$`Fatalities per 100K`, na.rm = TRUE)
+        ))
+      ),
+    ),
+
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, .5, 6), widths = c(3, 3, 3, 3, 4))
 ggsave(
   here('figures/fatalities_over_time.pdf'),
   last_plot(),
@@ -208,8 +258,21 @@ plotme(wfbz_crit, 'Structures Destroyed', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'Structures Destroyed', rel = TRUE) +
   plot_spacer() +
-  mapme(wfbz_hex, 'Structures Destroyed') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'Structures Destroyed',
+      breaks = c(
+        0,
+        scales::breaks_log(n = 6, base = 10)(c(
+          1,
+          max(wfbz_hex$`Structures Destroyed`, na.rm = TRUE)
+        ))
+      )
+    ),
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, .5, 6), widths = c(3, 3, 3, 3, 4))
 ggsave(
   here('figures/structures_over_time.pdf'),
   last_plot(),
@@ -226,8 +289,18 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
   plot_spacer() +
   plotme(wfbz_crit, 'FEMA Declarations (n)', rel = TRUE) +
   plot_spacer() +
-  mapme(wfbz_hex, 'FEMA Declarations (n)') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'FEMA Declarations (n)',
+      breaks = pretty(
+        range(wfbz_crit$`FEMA Declarations (n)`, na.rm = TRUE),
+        n = 5
+      )
+    ),
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, .5, 6), widths = c(3, 3, 3, 3, 4))
 ggsave(
   here('figures/fema_over_time.pdf'),
   last_plot(),
@@ -249,8 +322,22 @@ plotme(wfbz_crit, 'Burned Area', rel = FALSE, unit = 'km²') +
   plot_spacer() +
   plotme(wfbz_crit, 'Burned Area', rel = TRUE) +
   plot_spacer() +
-  mapme(wfbz_hex, 'Burned Area', unit = 'km²') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'Burned Area',
+      unit = 'km²',
+      breaks = c(
+        0,
+        scales::breaks_log(n = 6, base = 10)(c(
+          1,
+          max(wfbz_hex$`Burned Area`, na.rm = TRUE)
+        ))
+      )
+    ),
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, .5, 6), widths = c(3, 3, 3, 3, 4))
 ggsave(
   here('figures/burned_area_over_time.pdf'),
   last_plot(),
@@ -271,8 +358,22 @@ plotme(wfbz_crit, 'Mean Fire Size', rel = FALSE, unit = 'km²') +
     labels = scales::comma
   ) +
   plot_spacer() +
-  mapme(wfbz_hex, 'Mean Fire Size', unit = 'km²') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'Mean Fire Size',
+      unit = 'km²',
+      breaks = c(
+        0,
+        scales::breaks_log(n = 6, base = 10)(c(
+          1,
+          max(wfbz_hex$`Mean Fire Size`, na.rm = TRUE)
+        ))
+      )
+    ),
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, .5, 6), widths = c(3, 3, 4))
 ggsave(
   here('figures/fire_size_over_time.pdf'),
   last_plot(),
@@ -299,7 +400,13 @@ ggsave(
 ```
 
 ```{r wui_over_time_map, fig.height = 4, fig.width = 8}
-mapme(wfbz_hex, 'WUI Percent', flab = \(x) scales::percent(x / 100))
+mapme(
+  wfbz_hex,
+  'WUI Percent',
+  breaks = seq(0, 100, by = 20),
+  flab = ~ paste0(round(.x), '%'),
+  logscale = FALSE
+)
 ggsave(
   here('figures/wui_over_time_map.pdf'),
   last_plot(),

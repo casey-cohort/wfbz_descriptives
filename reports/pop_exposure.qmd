@@ -57,7 +57,21 @@ wfbz_by_region <- wfbz %>%
   ) %>%
   left_join(REGION_ORDER, by = "usfs_region")
 
-mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
+
+mapme <- function(
+  dat,
+  var,
+  flab = \(.x) scales::comma(.x, accuracy = 1),
+  unit = NULL,
+  breaks,
+  logscale = TRUE
+) {
+  if (logscale == TRUE) {
+    values <- scales::rescale(scales::pseudo_log_trans()$transform(breaks))
+  } else {
+    values <- scales::rescale(breaks)
+  }
+
   ggplot() +
     geom_sf(
       data = shift_geometry(dat),
@@ -65,9 +79,18 @@ mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
       color = NA
     ) +
     geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-    khroma::scale_fill_iridescent(
+    scale_fill_stepsn(
+      colors = khroma::color('incandescent')(5),
       name = if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
-      labels = flab
+      labels = flab,
+      n.breaks = 5,
+      breaks = breaks,
+      values = values,
+      transform = if_else(
+        logscale == TRUE,
+        'pseudo_log',
+        'identity'
+      )
     ) +
     coord_sf(expand = FALSE) +
     theme(
@@ -76,7 +99,13 @@ mapme <- function(dat, var, flab = scales::comma, unit = NULL) {
       axis.text.x = element_blank(),
       axis.text.y = element_blank(),
       axis.line = element_blank(),
-      plot.margin = margin(0, 0, 0, 0)
+      plot.margin = margin(0, 0, 0, 0),
+      legend.margin = margin(0, 0, 0, l = 75),
+      #legend.position = 'bottom',
+      legend.position = "left",
+      legend.justification = "top",
+      legend.text = element_text(hjust = 0, vjust = -.5),
+      panel.spacing = unit(0, "lines")
     )
 }
 ```
@@ -197,11 +226,9 @@ p_rel <- ggplot(data = pop) +
 p <- p_abs +
   plot_spacer() +
   p_rel +
-  plot_spacer() +
-  mapme(wfbz_hex, 'Median pop.\n exposed') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  plot_layout(ncol = 1, heights = c(5, 1, 5), widths = c(3, 3, 3))
 p
-ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 12)
+ggsave(here('figures/pop_over_time.pdf'), last_plot(), width = 8, height = 8)
 ```
 
 ### Median by fire
@@ -211,8 +238,21 @@ p <- plotme(dat = wfbz_by_region, 'Median pop. exposed') +
   plot_spacer() +
   plotme(dat = wfbz_by_region, 'Median pop. exposed', rel = TRUE) +
   plot_spacer() +
-  mapme(wfbz_hex, 'Median pop.\n exposed') +
-  plot_layout(ncol = 1, heights = c(5, 1, 5, 1, 5))
+  free(
+    mapme(
+      wfbz_hex,
+      'Median pop.\n exposed',
+      breaks = c(
+        0,
+        scales::breaks_log(n = 6, base = 10)(c(
+          1,
+          max(wfbz_hex$`Median pop.\n exposed`, na.rm = TRUE)
+        ))
+      )
+    ),
+    type = 'panel'
+  ) +
+  plot_layout(ncol = 1, heights = c(5, 1, 5, .5, 6), widths = c(3, 3, 3, 3, 4))
 p
 ggsave(
   here('figures/pop_by_fire_over_time.pdf'),
