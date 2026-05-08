@@ -69,7 +69,10 @@ mapme <- function(
     geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
     scale_fill_stepsn(
       colors = khroma::color('incandescent')(5),
-      name = if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
+      name = str_wrap(
+        if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
+        width = 12
+      ),
       labels = flab,
       n.breaks = 5,
       breaks = breaks,
@@ -293,10 +296,13 @@ plotme(wfbz_crit, 'FEMA Declarations (n)', rel = FALSE) +
     mapme(
       wfbz_hex,
       'FEMA Declarations (n)',
-      breaks = pretty(
-        range(wfbz_crit$`FEMA Declarations (n)`, na.rm = TRUE),
-        n = 5
-      )
+      breaks = c(
+        0,
+        scales::breaks_log(n = 6, base = 10)(c(
+          1,
+          max(wfbz_hex$`FEMA Declarations (n)`, na.rm = TRUE)
+        ))
+      ),
     ),
     type = 'panel'
   ) +
