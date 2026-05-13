@@ -80,7 +80,7 @@ mapme <- function(
     ) +
     geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
     scale_fill_stepsn(
-      colors = khroma::color('incandescent')(5),
+      colors = grey.colors(5, start = 0.95, end = 0.15),
       name = str_wrap(
         if_else(is.null(unit), var, paste0(var, '(', unit, ')')),
         width = 12
