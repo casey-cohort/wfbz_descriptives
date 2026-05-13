@@ -12,7 +12,7 @@ execute:
 ### Fema Declaration Likelihood by State
 
 ```{r, fig.height = 9, fig.width = 9}
-ggplot() +
+p_rank <- ggplot() +
   geom_vline(
     xintercept = mean(by_state$`FEMA Declaration Percent`),
     color = 'grey25',
@@ -30,11 +30,14 @@ ggplot() +
   ) +
   geom_col(
     data = by_state,
-    aes(y = state_name, x = `FEMA Declaration Percent`),
-    fill = khroma::color('light', reverse = FALSE)(1),
+    aes(
+      y = state_name,
+      x = `FEMA Declaration Percent`,
+      fill = `FEMA Declaration Percent`
+    ),
     color = NA #'white',
   ) +
-  geom_text(
+  geom_label(
     data = by_state,
     aes(
       y = state_name,
@@ -56,22 +59,31 @@ ggplot() +
       ),
     ),
     color = 'grey10',
-    hjust = -.1
+    hjust = -.1,
+    size = 3
   ) +
   scale_x_continuous(
     labels = scales::percent,
     name = 'Percent of events declared a disaster',
-    expand = c(0, 0, 0, .17)
+    expand = c(0, 0, 0, .125)
   ) +
-  scale_y_discrete(name = '', limits = rev, expand = c(.01, .01)) +
+  #scale_fill_distiller(palette = 'Spectral', name = '') +
+  khroma::scale_fill_iridescent(
+    name = '',
+    labels = scales::percent
+  ) +
+  scale_y_discrete(name = '', limits = rev, expand = c(.025, .025)) +
+  coord_cartesian(clip = 'off') +
   theme(
-    panel.margin = unit(0, 'cm'),
+    legend.position = 'bottom',
+    legend.title = element_blank(),
+    #legend.text = element_text(size = 8),
     axis.ticks = element_blank(),
     axis.text.y = element_text(hjust = 1),
     panel.grid.major.x = element_line(linewidth = .25, color = 'grey25'),
     panel.grid.minor.x = element_line(linewidth = .25, color = 'grey75')
   )
-
+p_rank
 ggsave(
   here('figures/fema_decs_ranked_by_state.pdf'),
   last_plot(),
@@ -233,7 +245,11 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(palette = 'Spectral', name = '') +
+  #scale_fill_distiller(palette = 'Spectral', name = '') +
+  khroma::scale_fill_iridescent(
+    name = '',
+    labels = scales::percent
+  ) +
   coord_sf(expand = FALSE)
 ggsave(
   here('figures/map_events.pdf'),
@@ -253,7 +269,11 @@ ggplot() +
     color = NA
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
-  scale_fill_distiller(palette = 'Spectral', name = '') +
+  #scale_fill_distiller(palette = 'Spectral', name = '') +
+  khroma::scale_fill_iridescent(
+    name = '',
+    labels = scales::percent
+  ) +
   coord_sf(expand = FALSE)
 
 ggsave(
@@ -269,7 +289,7 @@ Declarations per Event
 *How to disentangle that FEMA Declarations makes an event?*
 
 ```{r}
-ggplot() +
+p_map <- ggplot() +
   geom_sf(
     data = shift_geometry(hex_summary),
     aes(fill = `FEMA Declarations` / Events),
@@ -277,15 +297,50 @@ ggplot() +
   ) +
   geom_sf(data = shift_geometry(states_pop), fill = NA, color = 'grey25') +
   khroma::scale_fill_iridescent(
-    name = '',
+    name = 'Percent of events\ndeclared a disaster',
     labels = scales::percent
   ) +
-  coord_sf(expand = FALSE)
+  coord_sf(expand = FALSE) +
+  theme(
+    legend.position = 'bottom',
+    legend.title = element_blank()
+  )
+
+p_map
 ggsave(
   here('figures/maps_decs_per_event.pdf'),
   last_plot(),
   width = 8,
   height = 5
+)
+```
+
+```{r}
+(p_rank +
+  theme(
+    legend.position = 'none',
+    axis.title = element_blank(),
+    axis.text.y = element_text(size = 8),
+  )) +
+  plot_spacer() +
+  free(
+    p_map +
+      theme(
+        legend.title = element_text(),
+        legend.position = 'bottom',
+        legend.text = element_text(angle = 90, hjust = 1),
+      ),
+    side = 'lr'
+  ) +
+  plot_layout(
+    ncol = 1,
+    heights = c(4, .25, 3)
+  )
+ggsave(
+  here('figures/fema_rank_map.pdf'),
+  last_plot(),
+  width = 10,
+  height = 14
 )
 ```
 
