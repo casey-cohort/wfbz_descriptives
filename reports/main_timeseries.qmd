@@ -395,7 +395,8 @@ plotme(wfbz_crit, 'WUI', stack = FALSE) +
   xlab('') +
   theme(
     margins = margin(10, 10, 10, 10, unit = 'pt'),
-    panel.spacing = unit(10, "pt")
+    panel.spacing = unit(10, "pt"),
+    panel.grid.minor.x = element_blank()
   )
 ggsave(
   here('figures/wui_over_time.pdf'),
