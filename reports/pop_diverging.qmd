@@ -590,31 +590,43 @@ plotme <- function(dat) {
   ggplot(
     dat %>%
       bind_rows(tibble(stat = unique(.$stat))) %>%
-      mutate(
-        usfs_region = fct_na_value_to_level(usfs_region),
-        usfs_region = fct_relevel(usfs_region, "Overall", after = 999),
-        stat = fct_rev(stat)
-      ), # dumb magick to make space in plot
+      mutate(stat = fct_rev(stat)), # dumb magick to make space in plot
     aes(x = diff, y = usfs_region, fill = usfs_region)
   ) +
-    annotate(
-      geom = 'col',
-      width = 1.5,
+    geom_hline(
+      aes(yintercept = usfs_region, color = usfs_region),
+      alpha = .25,
+      linewidth = 0.75,
+      na.rm = TRUE
+    ) +
+    geom_rect(
+      width = 1,
       linewidth = 0,
-      fill = "grey95",
+      fill = "white",
       color = NA,
-      #'#000',
-      x = Inf,
-      y = 'Overall'
+      xmin = -Inf,
+      xmax = min(dat$ci_low),
+      height = 1,
+      aes(y = usfs_region)
     ) +
     annotate(
       geom = 'col',
-      width = 1.5,
+      width = 1,
       linewidth = 0,
       fill = "grey95",
       color = NA,
       #'#000',
       x = -Inf,
+      y = 'Overall'
+    ) +
+    annotate(
+      geom = 'col',
+      width = 1,
+      linewidth = 0,
+      fill = "grey95",
+      color = NA,
+      #'#000',
+      x = Inf,
       y = 'Overall'
     ) +
     geom_col(width = 1, color = "grey25", linewidth = .1) +
@@ -627,19 +639,32 @@ plotme <- function(dat) {
     geom_vline(xintercept = 0, color = 'grey25', linewidth = 0.4) +
     geom_text(
       aes(
-        x = pmin(0, ci_low),
-        label = usfs_region,
-        fontface = if_else(usfs_region == 'Overall', 'bold', 'plain')
+        x = min(dat$ci_low), #pmin(0, ci_low),
+        label = if_else(is.na(usfs_region), '', usfs_region)
       ),
       hjust = 1,
       nudge_x = -0.002,
       size = 3
     ) +
     scale_fill_manual(values = c('Overall' = '#757575', rev(region_colors))) +
+    scale_color_manual(
+      values = c('Overall' = '#757575', rev(region_colors)),
+      na.value = NA
+    ) +
     scale_x_continuous(
       labels = scales::percent_format(accuracy = 1),
       n.breaks = 8,
       expand = expansion(mult = c(.15, .03))
+    ) +
+    # ggplot's discrete scale force-moves NA to the end of the axis
+    # regardless of factor-level order, so set the order explicitly here.
+    # Bottom-to-top: regions, NA spacer, Overall on top.
+    scale_y_discrete(
+      limits = c(
+        setdiff(levels(dat$usfs_region), "Overall"),
+        NA,
+        "Overall"
+      )
     ) +
     facet_wrap(~stat, ncol = 1, scale = 'fixed', strip.position = 'left') +
     xlab("Fire-affected minus high-risk reference (percentage points)") +
