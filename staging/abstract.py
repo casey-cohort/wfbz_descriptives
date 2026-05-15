@@ -1,14 +1,15 @@
 """abstract.py — Compute population exposure and generate abstract text.
 
 Reads the WFBZ geojson + GHS population rasters, estimates 10km-buffered
-population exposure, writes six CSVs (unioned by year+region and per-fire by
-year, each against the full/WUI-masked/non-WUI-masked pop raster), and prints
-the abstract with computed statistics.
+population exposure, writes nine CSVs (by year+region, per-fire by year, and
+by year+hex-cell, each against the full/WUI-masked/non-WUI-masked pop
+raster), and prints the abstract with computed statistics.
 
 Prerequisites
 -------------
 - data/raw/wfbz_disasters_2000-2025.geojson
 - data/processed/regions.geojson (render main.qmd first)
+- data/processed/hexgrid.geojson (built by prep_hexgrid.R)
 - data/raw/ghs_pop/{2000,2005,2010,2015,2020}/*.tif (built by prep_population.R)
 - data/raw/wui/*.tif (built by prep_wui.R)
 """
@@ -43,13 +44,25 @@ def raster_year(yr):
 
 wfbz_all = gpd.read_file(ROOT / "data/raw/wfbz_disasters_2000-2025.geojson")
 wfbz_all = wfbz_all[wfbz_all["wildfire_community_intersect"] == 1]
+# study period ends 2024; match the `wildfire_year < 2025` filter used in the
+# report qmds so derived CSVs and abstract counts exclude partial 2025 data
+wfbz_all = wfbz_all[wfbz_all["wildfire_year"] < 2025]
 usfs_regions = gpd.read_file(ROOT / "data/processed/regions.geojson")
 
 wfbz = wfbz_all[~wfbz_all.geometry.is_empty].copy()
-wfbz = gpd.sjoin(wfbz, usfs_regions, how="left")
-
 wfbz["ID_hazard"] = wfbz["wildfire_id"]
 wfbz["buffer_dist_10km"] = 10_000
+
+# Hex assignment uses the shared grid (staging/prep_hexgrid.R) so the cells
+# match the R time-series maps exactly. Inner join + 'intersects' predicate
+# mirrors the qmds' st_join(hexgrid, wfbz, left = FALSE): a fire spanning N
+# cells contributes to each, same as the region sjoin below.
+hexgrid = gpd.read_file(ROOT / "data/processed/hexgrid.geojson").to_crs(wfbz.crs)
+wfbz_hex = gpd.sjoin(
+    wfbz, hexgrid[["hexid", "geometry"]], how="inner", predicate="intersects"
+).drop(columns="index_right")
+
+wfbz = gpd.sjoin(wfbz, usfs_regions, how="left")
 
 wfbz_by_yr_region = {
     group_name: group_data
@@ -58,6 +71,10 @@ wfbz_by_yr_region = {
 wfbz_by_yr = {
     group_name: group_data
     for group_name, group_data in wfbz.groupby("wildfire_year")
+}
+wfbz_by_yr_hex = {
+    group_name: group_data
+    for group_name, group_data in wfbz_hex.groupby(["wildfire_year", "hexid"])
 }
 
 pop_raw_paths = {
@@ -208,7 +225,22 @@ def exposed_per_fire_by_yr(estimators, out_name):
     return df
 
 
-# ── Run all six outputs ──────────────────────────────────────────────────────
+def exposed_by_yr_hex(estimators, out_name):
+    results = dict()
+    for (yr, hexid), grp in wfbz_by_yr_hex.items():
+        results[(yr, hexid)] = estimators[raster_year(yr)].est_exposed_pop(
+            hazard_data=grp, hazard_specific=False
+        )
+    df = pd.concat(results.values(), ignore_index=True)
+    df["year"] = [k[0] for k in results.keys()]
+    df["hexid"] = [k[1] for k in results.keys()]
+    out_path = ROOT / "data/processed" / out_name
+    df.to_csv(out_path, index=False)
+    print(f"\nWrote data/processed/{out_name} ({len(df)} rows)")
+    return df
+
+
+# ── Run all nine outputs ─────────────────────────────────────────────────────
 
 pop_impacted_all = exposed_by_yr_region(pop_full, "pop_affected.csv")
 exposed_by_yr_region(pop_wui, "pop_affected_wui.csv")
@@ -216,6 +248,9 @@ exposed_by_yr_region(pop_non_wui, "pop_affected_non_wui.csv")
 exposed_per_fire_by_yr(pop_full, "pop_affected_per_fire.csv")
 exposed_per_fire_by_yr(pop_wui, "pop_affected_per_fire_wui.csv")
 exposed_per_fire_by_yr(pop_non_wui, "pop_affected_per_fire_non_wui.csv")
+exposed_by_yr_hex(pop_full, "pop_affected_hex.csv")
+exposed_by_yr_hex(pop_wui, "pop_affected_hex_wui.csv")
+exposed_by_yr_hex(pop_non_wui, "pop_affected_hex_non_wui.csv")
 
 # ── Abstract text ─────────────────────────────────────────────────────────────
 

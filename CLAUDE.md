@@ -27,6 +27,13 @@ pip install popexposure
 
 The `_quarto.yml` specifies `jupyter: wfbz` as the Python kernel for notebooks.
 
+**Build pipeline (Makefile):**
+```
+make            # fast path: cheap staging -> quarto render
+make help       # list all targets
+```
+`make` assumes the manually-downloaded raw data, external rasters, and committed `tiger_states.geojson`/`regions.geojson` are present, then runs the cheap deterministic staging (`prep_hexgrid`, `prep_spatial_join`, `prep_diverge_bootstrap`, `abstract`) and renders. Expensive download/API staging is opt-in: `make tracts | whp | population | wui`. Python targets require the `wfbz` conda env active. Individual steps: `make hexgrid | spatial-join | bootstrap | abstract | render`.
+
 ## Data Setup
 
 The primary dataset must be manually downloaded from https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DWILBW and unzipped to `data/raw/`. The setup code in `reports/_setup.qmd` checks for this file and will throw an error if it's missing.
@@ -54,7 +61,8 @@ Other data (Census geometry, USFS region shapefiles) is downloaded automatically
 - `staging/prep_whp.py` — downloads USFS Wildfire Hazard Potential rasters, computes per-tract zonal stats
 - `staging/prep_population.R` — pulls NHGIS Census data via IPUMS API, builds demographic parquets
 - `staging/prep_spatial_join.R` — runs expensive 10km spatial join of fires to tracts, writes `*_by_wf.parquet` files
-- `staging/abstract.py` — computes population exposure via `popexposure`, writes `pop_affected.csv` and abstract text
+- `staging/prep_hexgrid.R` — builds the shared 500×500 hex grid (`data/processed/hexgrid.geojson`) used by the R time-series maps **and** `abstract.py`, so the cells/`hexid`s match across languages; reads cached `data/raw/tiger_states.geojson`
+- `staging/abstract.py` — computes population exposure via `popexposure`; writes nine `pop_affected*.csv` (by year+region, per-fire, and by year+hex-cell, each against full/WUI/non-WUI rasters) plus `abstract.txt`
 
 ### Key data objects (created in `_setup.qmd`)
 - `wfbz` — raw spatial dataset filtered to non-empty geometries, excluding flood events

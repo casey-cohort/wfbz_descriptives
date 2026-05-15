@@ -65,6 +65,12 @@ texify <- function(var_name, var_value) {
 more_than <- function(x, by) {
   floor(x / by) * by
 }
+
+# round UP to the nearest `by` -- for "nearly X" phrasing (true value sits
+# just below the stated round number)
+nearly <- function(x, by) {
+  ceiling(x / by) * by
+}
 ```
 
 ```{r}
@@ -111,6 +117,15 @@ abstract[['nationalMeanPopExposed']] <- pop_affected %>%
   summarize(exposed_10km = mean(exposed_10km)) %>%
   pull(exposed_10km) %>%
   scales::comma() # an estimated 551,909 people were exposed annually at the national level
+abstract[['totalPopExposed']] <- pop_affected %>%
+  summarize(exposed_10km = sum(exposed_10km, na.rm = TRUE)) %>%
+  pull(exposed_10km) %>%
+  scales::comma() # exact count behind: "Nearly [totalPopExposedText] US residents were exposed to WFBZ disasters from 2000-2025"
+abstract[['totalPopExposedText']] <- pop_affected %>%
+  summarize(exposed_10km = sum(exposed_10km, na.rm = TRUE)) %>%
+  pull(exposed_10km) %>%
+  nearly(by = 5e6) %>%
+  xfun::numbers_to_words() # "Nearly <X> US residents were exposed to WFBZ disasters from 2000-2025" (rounded up to nearest 5M for the "nearly" phrasing)
 
 ### results
 results <- list()
@@ -272,6 +287,15 @@ results[['southPctOfFEMA']] <- wfbz %>%
   summarize(pct = sum(wildfire_fema_dec / tot, na.rm = TRUE)) %>%
   pull(pct) %>%
   scales::percent(accuracy = .1) # The South accounted for 20.5\% of FEMA declarations
+
+results[['nationalFemaDecRate']] <- wfbz %>%
+  summarize(pct = mean(wildfire_fema_dec, na.rm = TRUE)) %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1) # Nationally, 15.5\% of WFBZ disasters received a FEMA FMAG declaration
+# Manuscript sentence "[California's] share of civilian fatalities (43.5\%) and
+# structures destroyed (69.8\%), despite having a lower share of FMAG
+# declarations (23.4\%)" is already covered by results$californiaPctOfFatalities
+# / californiaPctOfStructures / californiaPctOfFEMA above.
 
 results[[
   'fiveDeadliestFires'

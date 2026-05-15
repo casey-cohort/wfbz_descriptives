@@ -10,10 +10,9 @@ execute:
 {{< include _setup.qmd >}}
 
 ```{r map_setup}
-hexgrid <- st_make_grid(states_pop, square = FALSE, n = c(500, 500)) %>%
-  st_as_sf() %>%
-  mutate(hexid = row_number()) %>%
-  st_filter(states_pop)
+# shared grid built by staging/prep_hexgrid.R (kept in sync with abstract.py)
+hexgrid <- read_sf(here('data/processed/hexgrid.geojson')) %>%
+  rename(x = geometry)
 
 
 wfbz_hex <- hexgrid %>%

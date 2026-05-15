@@ -18,8 +18,8 @@ pop_affected_annual <- bind_rows(
   select(-ID_hazard) %>%
   rename(wildfire_year = year)
 pop_affected_per_fire <- bind_rows(
-  'WUI' = read_csv(here('data/processed/pop_affected_per_fire_non_wui.csv')),
-  'non-WUI' = read_csv(here('data/processed/pop_affected_per_fire_wui.csv')),
+  'WUI' = read_csv(here('data/processed/pop_affected_per_fire_wui.csv')),
+  'non-WUI' = read_csv(here('data/processed/pop_affected_per_fire_non_wui.csv')),
   .id = 'pop_wui'
 ) %>%
   mutate(ID_hazard = as.integer(ID_hazard)) %>%

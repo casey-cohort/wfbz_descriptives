@@ -153,8 +153,18 @@ tbl_counts <- wfbz_by_region_agg %>%
   relocate(Nationwide) %>%
   relocate(name)
 
-pop_affected_row <- read_csv(here('data/processed/pop_affected.csv')) %>%
-  bind_rows(., mutate(., region = 'Nationwide')) %>%
+# year <= 2024 guard: idempotent once abstract.py is re-run, but protects
+# the table if the cached CSV still carries partial 2025 data
+pa <- read_csv(here('data/processed/pop_affected.csv')) %>%
+  filter(year <= 2024)
+
+# Nationwide is the within-year national total (sum across regions), then
+# mean/SD over years -- NOT the grand mean of per-region-year cells.
+pop_affected_row <- pa %>%
+  group_by(year) %>%
+  summarize(exposed_10km = sum(exposed_10km), .groups = 'drop') %>%
+  mutate(region = 'Nationwide') %>%
+  bind_rows(pa, .) %>%
   group_by(usfs_region = region) %>%
   summarize(
     value = glue(
