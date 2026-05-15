@@ -634,7 +634,7 @@ mean (SD)">44.9 (189.6)</td>
 (% in region)">3,652 (61.8%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.159</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">551,909 (1,049,594)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">4,921,855 (2,360,064)</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Region">Alaska</td>
@@ -654,7 +654,7 @@ mean (SD)">94.6 (320.6)</td>
 (% in region)">584 (71.6%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.577</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">2,182,606 (1,712,762)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">2,174,148 (1,747,526)</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Region">Eastern</td>
@@ -664,7 +664,7 @@ mean (SD)">2.8 (21.0)</td>
 (% in region)">371 (57.4%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.034</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">386,120 (331,967)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">385,942 (339,106)</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Region">Hawaii</td>
@@ -684,7 +684,7 @@ mean (SD)">109.4 (253.5)</td>
 (% in region)">155 (47.0%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.240</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">207,921 (224,649)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">215,154 (226,170)</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Region">Northern Rockies</td>
@@ -694,7 +694,7 @@ mean (SD)">92.2 (187.2)</td>
 (% in region)">91 (40.6%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.179</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">29,655 (31,541)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">30,756 (31,725)</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Region">Pacific Northwest</td>
@@ -704,7 +704,7 @@ mean (SD)">129.0 (251.4)</td>
 (% in region)">217 (63.6%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.078</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">138,568 (202,655)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">141,326 (206,336)</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Region">Southern</td>
@@ -714,7 +714,7 @@ mean (SD)">12.4 (109.7)</td>
 (% in region)">1,948 (64.6%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.066</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">1,668,933 (1,257,520)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">1,678,798 (1,282,424)</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="Region">Southern Rockies</td>
@@ -724,7 +724,7 @@ mean (SD)">61.9 (128.0)</td>
 (% in region)">145 (52.9%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.216</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">172,095 (328,366)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">174,297 (335,240)</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="Region">Southwestern</td>
@@ -734,7 +734,7 @@ mean (SD)">119.4 (310.0)</td>
 (% in region)">125 (59.0%)</td>
 <td class="gt_row gt_center" headers="Fatalities per 100K
 (total)">0.227</td>
-<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">107,885 (139,959)</td>
+<td class="gt_row gt_center" headers="Population Affected Annually, mean (SD)">111,596 (141,707)</td>
 </tr>
 </tbody>
 </table>
@@ -1365,7 +1365,7 @@ mean (SD)">119.4 (310.0)</td>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/casey-cohort\.github\.io\/wfbz_descriptives\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
