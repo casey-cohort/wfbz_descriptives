@@ -211,11 +211,11 @@ t2 %>%
   ) %>%
   gsub(
     '\\end{table}',
-    '\\caption{Counts of wildfire burn zone disasters, structures destroyed, and civilian fatalities by modified US Forest Service region, 2000--2024. Percentages represent each region\'s share of the national total.}\n\\label{tab:fire_characteristics}\n\\end{table}',
+    '\\caption{Counts of wildfire burn zone disasters, structures destroyed, and civilian fatalities by modified US Forest Service region, 2000--2024. Percentages represent each region\'s share of the national total.}\n\\label{tab:fire_description}\n\\end{table}',
     x = .,
     fixed = TRUE
   ) %>%
-  writeLines(here("figures/t2.tex"))
+  writeLines(here("figures/table-fire_description.tex"))
 
 t2
 ```
@@ -243,11 +243,11 @@ t1 %>%
   ) %>%
   gsub(
     '\\end{table}',
-    '\\caption{Disaster characteristics of wildfire burn zone disasters by modified US Forest Service region, 2000--2024. Percentages for FMAG declarations and WUI represent the proportion of fires within each region meeting that criterion.}\n\\label{tab:population_exposure}\n\\end{table}',
+    '\\caption{Disaster characteristics of wildfire burn zone disasters by modified US Forest Service region, 2000--2024. Percentages for FMAG declarations and WUI represent the proportion of fires within each region meeting that criterion.}\n\\label{tab:wfbz_criteria}\n\\end{table}',
     x = .,
     fixed = TRUE
   ) %>%
-  writeLines(here("figures/t1.tex"))
+  writeLines(here("figures/table-wfbz_criteria.tex"))
 
 t1
 ```
