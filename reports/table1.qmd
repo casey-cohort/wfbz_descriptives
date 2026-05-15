@@ -204,6 +204,12 @@ t2 %>%
   as_latex() %>%
   as.character() %>%
   gsub(
+    '\\begin{table}',
+    '\\begin{table}[H]',
+    x = .,
+    fixed = TRUE
+  ) %>%
+  gsub(
     '\\end{table}',
     '\\caption{Counts of wildfire burn zone disasters, structures destroyed, and civilian fatalities by modified US Forest Service region, 2000--2024. Percentages represent each region\'s share of the national total.}\n\\label{tab:fire_characteristics}\n\\end{table}',
     x = .,
