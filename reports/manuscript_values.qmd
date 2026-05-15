@@ -114,9 +114,11 @@ abstract[['washingtonPctFEMA']] <- wfbz %>%
   pull(pct) %>%
   scales::percent(accuracy = .1) # Washington: 49\% of its fires received declarations
 abstract[['nationalMeanPopExposed']] <- pop_affected %>%
+  group_by(year) %>%
+  summarize(exposed_10km = sum(exposed_10km), .groups = 'drop') %>%
   summarize(exposed_10km = mean(exposed_10km)) %>%
   pull(exposed_10km) %>%
-  scales::comma() # an estimated 551,909 people were exposed annually at the national level
+  scales::comma() # ~4,921,855 people exposed annually at the national level (national annual total, not the mean of region-year cells)
 abstract[['totalPopExposed']] <- pop_affected %>%
   summarize(exposed_10km = sum(exposed_10km, na.rm = TRUE)) %>%
   pull(exposed_10km) %>%
@@ -153,11 +155,6 @@ results[['regionsLargeFireSize']] <- wfbz %>%
   arrange(desc(mean_size)) %>%
   pull(usfs_region) %>%
   knitr::combine_words() # five regions that had mean fire sizes exceeding 90km2 (should be a string: "Intermountain, Pacific Northwest, Northern Rockies, California, and Southwestern")
-
-results[['nationalMeanPopExposed']] <- pop_affected %>%
-  summarize(exposed_10km = mean(exposed_10km)) %>%
-  pull(exposed_10km) %>%
-  scales::comma() # annually 551,909 people were exposed to WFBZ disasters nationwide
 
 abstract[['californiaMeanPopExposedText']] <- pop_affected %>%
   filter(region == 'California') %>%
