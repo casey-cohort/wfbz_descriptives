@@ -254,6 +254,21 @@ results[['southCarolinaPctOfDisasters']] <- mean(grepl(
 )) %>%
   scales::percent(accuracy = .1)
 
+# Per-region share of total population exposed (10km), summed across the
+# study period. Matches the denominator used in discussion$caSouthPctExposed.
+pop_region_share <- pop_affected %>%
+  group_by(region) %>%
+  summarize(total_exposed = sum(exposed_10km), .groups = 'drop') %>%
+  mutate(pct = total_exposed / sum(total_exposed))
+results[['californiaPctOfPopExposed']] <- pop_region_share %>%
+  filter(region == 'California') %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1)
+results[['southPctOfPopExposed']] <- pop_region_share %>%
+  filter(region == 'Southern') %>%
+  pull(pct) %>%
+  scales::percent(accuracy = .1)
+
 results[['californiaAnnualBurnedArea']] <- wfbz_crit %>%
   filter(usfs_region == 'California') %>%
   summarize(mean_area = mean(`Burned Area`, na.rm = TRUE)) %>%
