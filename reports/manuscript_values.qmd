@@ -225,6 +225,35 @@ results[[
   'disproportionateStates'
 ]] <- "California, Florida, Mississippi, Oklahoma, and South Carolina" # Several states accounted for a disproportionate share of events, including California, Florida, Mississippi, Oklahoma, and South Carolina (this should be the string of these states)
 
+# Per-state share of WFBZ events for the disproportionate-states sentence.
+# grepl matches multi-state fires too (wildfire_states is pipe-separated
+# USPS codes), so a fire spanning two states counts toward both.
+results[['californiaPctOfDisasters']] <- mean(grepl(
+  'CA',
+  wfbz$wildfire_states
+)) %>%
+  scales::percent(accuracy = .1)
+results[['floridaPctOfDisasters']] <- mean(grepl(
+  'FL',
+  wfbz$wildfire_states
+)) %>%
+  scales::percent(accuracy = .1)
+results[['mississippiPctOfDisasters']] <- mean(grepl(
+  'MS',
+  wfbz$wildfire_states
+)) %>%
+  scales::percent(accuracy = .1)
+results[['oklahomaPctOfDisasters']] <- mean(grepl(
+  'OK',
+  wfbz$wildfire_states
+)) %>%
+  scales::percent(accuracy = .1)
+results[['southCarolinaPctOfDisasters']] <- mean(grepl(
+  'SC',
+  wfbz$wildfire_states
+)) %>%
+  scales::percent(accuracy = .1)
+
 results[['californiaAnnualBurnedArea']] <- wfbz_crit %>%
   filter(usfs_region == 'California') %>%
   summarize(mean_area = mean(`Burned Area`, na.rm = TRUE)) %>%
