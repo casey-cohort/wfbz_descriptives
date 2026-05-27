@@ -7,6 +7,8 @@ execute:
   message: false
 ---
 
+{{< include _setup.qmd >}}
+
 ```{r load_data}
 library(sf)
 library(tidyverse)
@@ -154,6 +156,56 @@ ggplot(shift_geometry(county_sf)) +
     breaks = ~ quantile(.x, seq(.1, .9, by = .1))
   ) +
   theme_void()
+```
+
+
+binary
+
+```{r}
+dat <- shift_geometry(tract_sf) %>%
+  filter(substr(GEOID, 1, 2) != '72') %>%
+  filter(!is.na(high_risk_75)) %>%
+  group_by(high_risk_75) %>%
+  summarize(geometry = st_union(geometry))
+p <- ggplot(data = dat) +
+  geom_sf(
+    aes(fill = high_risk_75),
+    color = NA
+  ) +
+  scale_fill_manual(
+    name = 'Wildfire Hazard\nPotential',
+    labels = c("WHP < 75", "WHP >= 75"),
+    values = c('grey90', 'black'),
+    na.value = NA,
+    na.translate = FALSE
+  ) +
+  scale_x_continuous(
+    limits = c(st_bbox(dat)[['xmin']], st_bbox(dat)[['xmax']])
+  ) +
+  scale_y_continuous(
+    limits = c(st_bbox(dat)[['ymin']], st_bbox(dat)[['ymax']])
+  ) +
+  theme(
+    axis.ticks.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.line = element_blank(),
+    plot.margin = margin(0, 0, 0, 0),
+    legend.margin = margin(0, 0, 0, 0),
+    #legend.position = 'bottom',
+    #legend.position = "left",
+    legend.position = c(.1, .95),
+    legend.justification = "top",
+    #legend.text = element_text(hjust = 0, vjust = -.5),
+    panel.spacing = unit(0, "lines")
+  )
+ggsave(
+  here('figures/at_risk_binary.pdf'),
+  p,
+  width = 12,
+  height = 8
+)
 ```
 
 ## WFBZs vs Risk
