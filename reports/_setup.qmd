@@ -124,19 +124,14 @@ REGION_ORDER <- tibble(
   plot_order = 10:1
 )
 # Palette
-# 10-color ramp, dark -> light. It's sequential by construction, so the order is
-# deliberately broken up: regions adjacent in `plot_order` (and therefore
-# adjacent in stacked bars) are pushed far apart on the ramp. Hardcoded rather
-# than sampled so renders are reproducible and match _pop_setup.qmd exactly.
+# 10-color ramp, dark -> light. Applied in order against the alphabetical
+# names() bind below. Hardcoded rather than sampled so renders are reproducible
+# and match _pop_setup.qmd exactly.
 wfbz_ramp <- c(
   "#4A3A3B", "#6C3D38", "#8F4036", "#A64E4C", "#B8606A",
   "#CB7D82", "#DEA393", "#ECC5A8", "#EEDAC6", "#F0F0E4"
 )
-# Ramp index per region in *alphabetical* order, to match the names() bind below:
-# Alaska 3, California 1, Eastern 9, Hawaii 6, Intermountain 7,
-# Northern Rockies 2, Pacific Northwest 4, Southern 8, Southern Rockies 10,
-# Southwestern 5
-region_colors <- wfbz_ramp[c(3, 1, 9, 6, 7, 2, 4, 8, 10, 5)]
+region_colors <- wfbz_ramp
 attr(region_colors, "missing") <- NA
 names(region_colors) <- sort(REGION_ORDER$usfs_region)
 

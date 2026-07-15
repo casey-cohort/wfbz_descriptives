@@ -38,7 +38,7 @@ wfbz_ramp <- c(
   "#4A3A3B", "#6C3D38", "#8F4036", "#A64E4C", "#B8606A",
   "#CB7D82", "#DEA393", "#ECC5A8", "#EEDAC6", "#F0F0E4"
 )
-region_colors <- wfbz_ramp[c(3, 1, 9, 6, 7, 2, 4, 8, 10, 5)]
+region_colors <- wfbz_ramp
 attr(region_colors, "missing") <- NA
 names(region_colors) <- sort(REGION_ORDER$usfs_region)
 
