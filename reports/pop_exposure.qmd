@@ -162,7 +162,12 @@ pop_labels <- pop %>%
 
 pop <- pop %>% left_join(pop_labels)
 
-names(region_colors) <- sort(as.character(pop_labels$label_abs))
+# Re-key onto the decorated labels by region name, so each region keeps its
+# ramp color regardless of how `pop_labels` happens to be ordered.
+region_colors_abs <- setNames(
+  region_colors[as.character(pop_labels$usfs_region)],
+  as.character(pop_labels$label_abs)
+)
 
 p_abs <- ggplot(data = pop) +
   geom_col(
@@ -177,7 +182,7 @@ p_abs <- ggplot(data = pop) +
   ) +
   scale_fill_manual(
     name = "Region (Overall Annual Mean)",
-    values = region_colors
+    values = region_colors_abs
   ) +
   scale_x_continuous(
     breaks = seq(2000, 2024, by = 2),
@@ -195,7 +200,10 @@ p_abs <- ggplot(data = pop) +
     legend.position = 'right' #,
   )
 
-names(region_colors) <- sort(as.character(pop_labels$label_rel))
+region_colors_rel <- setNames(
+  region_colors[as.character(pop_labels$usfs_region)],
+  as.character(pop_labels$label_rel)
+)
 
 p_rel <- ggplot(data = pop) +
   geom_col(
@@ -209,7 +217,7 @@ p_rel <- ggplot(data = pop) +
     color = 'grey25',
     position = position_fill()
   ) +
-  scale_fill_manual(name = "Region (Overall Share)", values = region_colors) +
+  scale_fill_manual(name = "Region (Overall Share)", values = region_colors_rel) +
   scale_x_continuous(
     breaks = seq(2000, 2024, by = 2),
     expand = expansion(add = c(0, 0))

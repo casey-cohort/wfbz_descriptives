@@ -124,16 +124,21 @@ REGION_ORDER <- tibble(
   plot_order = 10:1
 )
 # Palette
-# 10-color ramp, dark -> light. Applied in order against the alphabetical
-# names() bind below. Hardcoded rather than sampled so renders are reproducible
-# and match _pop_setup.qmd exactly.
+# 10-color ramp, dark -> light. Hardcoded rather than sampled so renders are
+# reproducible and match _pop_setup.qmd exactly.
 wfbz_ramp <- c(
   "#4A3A3B", "#6C3D38", "#8F4036", "#A64E4C", "#B8606A",
   "#CB7D82", "#DEA393", "#ECC5A8", "#EEDAC6", "#F0F0E4"
 )
-region_colors <- wfbz_ramp
-attr(region_colors, "missing") <- NA
-names(region_colors) <- sort(REGION_ORDER$usfs_region)
+# Bind the ramp to regions by ascending `plot_order`, so it reads in order along
+# the stack: Hawaii (plot_order 1) takes the dark end, California (10) the light
+# end. Flip to arrange(desc(plot_order)) to reverse. Do NOT bind with
+# sort(usfs_region) -- alphabetical order has no relation to plot_order and
+# scrambles the ramp.
+region_colors <- setNames(
+  wfbz_ramp,
+  REGION_ORDER %>% arrange(plot_order) %>% pull(usfs_region)
+)
 
 
 if (!file.exists(here('data/processed/regions.geojson'))) {
@@ -237,8 +242,11 @@ plotme <- function(
     )
   }
 
-  # Reassign colors to regions now that they have been updated
-  names(region_colors) <- sort(region_label)
+  # Re-key the palette onto the decorated labels. Index by region name so each
+  # region keeps its own color, then rename positionally -- `region_order` and
+  # `region_label` are parallel. (Sorting the labels instead would re-scramble
+  # the ramp, and breaks outright when `dat` is missing a region.)
+  region_colors <- setNames(region_colors[region_order], region_label)
 
   dat$usfs_region <- factor(
     dat$usfs_region,

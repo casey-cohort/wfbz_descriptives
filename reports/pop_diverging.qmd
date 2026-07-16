@@ -646,9 +646,9 @@ plotme <- function(dat) {
       nudge_x = -0.002,
       size = 3
     ) +
-    scale_fill_manual(values = c('Overall' = '#757575', rev(region_colors))) +
+    scale_fill_manual(values = c('Overall' = '#757575', region_colors)) +
     scale_color_manual(
-      values = c('Overall' = '#757575', rev(region_colors)),
+      values = c('Overall' = '#757575', region_colors),
       na.value = NA
     ) +
     scale_x_continuous(

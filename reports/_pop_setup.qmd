@@ -33,14 +33,16 @@ REGION_ORDER <- tibble(
   ),
   plot_order = 10:1
 )
-# Keep in sync with the palette in _setup.qmd.
+# Keep in sync with the palette in _setup.qmd. (pop_exposure.qmd includes both
+# files, and this definition wins, so any divergence silently changes figures.)
 wfbz_ramp <- c(
   "#4A3A3B", "#6C3D38", "#8F4036", "#A64E4C", "#B8606A",
   "#CB7D82", "#DEA393", "#ECC5A8", "#EEDAC6", "#F0F0E4"
 )
-region_colors <- wfbz_ramp
-attr(region_colors, "missing") <- NA
-names(region_colors) <- sort(REGION_ORDER$usfs_region)
+region_colors <- setNames(
+  wfbz_ramp,
+  REGION_ORDER %>% arrange(plot_order) %>% pull(usfs_region)
+)
 
 pop_theme <- theme_minimal(base_family = "Arial") +
   theme(
