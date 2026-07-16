@@ -145,8 +145,10 @@ regions_cart <- regions %>%
   st_cast('POLYGON') %>%
   tigris::shift_geometry()
 
-region_order <- REGION_ORDER$usfs_region
-region_label <- REGION_ORDER$usfs_region
+# Order the factor by ascending plot_order so the legend matches the column
+# plots (plotme orders regions the same way).
+region_order <- REGION_ORDER %>% arrange(plot_order) %>% pull(usfs_region)
+region_label <- region_order
 
 regions_cart$usfs_region <- factor(
   regions_cart$usfs_region,

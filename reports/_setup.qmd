@@ -130,14 +130,14 @@ wfbz_ramp <- c(
   "#4A3A3B", "#6C3D38", "#8F4036", "#A64E4C", "#B8606A",
   "#CB7D82", "#DEA393", "#ECC5A8", "#EEDAC6", "#F0F0E4"
 )
-# Bind the ramp to regions by ascending `plot_order`, so it reads in order along
-# the stack: Hawaii (plot_order 1) takes the dark end, California (10) the light
-# end. Flip to arrange(desc(plot_order)) to reverse. Do NOT bind with
+# Bind the ramp to regions by descending `plot_order`, so it reads in order along
+# the stack: Hawaii (plot_order 1) takes the light end, California (10) the dark
+# end. Flip to arrange(plot_order) to reverse. Do NOT bind with
 # sort(usfs_region) -- alphabetical order has no relation to plot_order and
 # scrambles the ramp.
 region_colors <- setNames(
   wfbz_ramp,
-  REGION_ORDER %>% arrange(plot_order) %>% pull(usfs_region)
+  REGION_ORDER %>% arrange(desc(plot_order)) %>% pull(usfs_region)
 )
 
 
